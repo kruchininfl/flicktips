@@ -1,0 +1,29 @@
+{
+  "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type":"package",
+      "package": {
+        "name": "pixelead/TMDb-PHP-API",
+        "version":"master",
+        "source": {
+          "url": "https://github.com/pixelead0/tmdb_v3-PHP-API-.git",
+          "type": "git",
+          "reference":"master"
+        }
+      }
+    }
+  ],
+  "require": {
+    "silex/silex": "~2.0@dev",
+    "symfony/security": "~2.7,<3.0",
+    "gigablah/silex-oauth": "~2.0@dev",
+    "csanquer/pdo-service-provider": "~1.1@dev",
+    "aws/aws-sdk-php-silex": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "./src"
+    }
+  }
+}

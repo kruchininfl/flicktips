@@ -1,0 +1,106 @@
+<?php
+
+namespace Repositories;
+
+use Silex\Application;
+
+class MovieRepository {
+    protected $app;
+
+    /**
+     * @var $pdo \PDO
+     */
+    protected $pdo;
+
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+        $this->pdo = $app['pdo'];
+    }
+
+    public function findByUserId($requesterUid, $uid, $limit, $offset)
+    {
+        $query = 'SELECT id FROM movie_vote WHERE user_id = :uid ORDER BY movie_vote.timestamp DESC LIMIT :limit OFFSET :offset';
+        $sth = $this->pdo->prepare($query);
+        $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
+        $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
+        $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
+        $sth->execute();
+        $voteIds = array_column($sth->fetchAll(), 'id');
+
+        if (!count($voteIds)) {
+            return [];
+        }
+
+        $query = 'SELECT UNIX_TIMESTAMP(movie_vote.timestamp) as timestamp, movie_vote.vote AS vote, movie.*, genre.id AS genre_id, genre.name AS genre_name';
+
+        if ($requesterUid) {
+            $query .= ', IF (my_movie_vote.vote = \'2\', true, false) AS isLiked,
+            IF (my_movie_vote.vote = \'1\', true, false) AS isNeutral,
+            IF (my_movie_vote.vote = \'0\', true, false) AS isDisliked';
+        }
+
+        $query .= ' FROM movie_vote
+        LEFT JOIN movie ON movie.id = movie_vote.movie_id
+        LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
+        LEFT JOIN genre ON genre.id=movie_genre.genre_id';
+
+        if ($requesterUid) {
+            $query .= ' LEFT JOIN movie_vote AS my_movie_vote ON my_movie_vote.movie_id = movie.id AND my_movie_vote.user_id = ' . $requesterUid;
+        }
+
+        $query .= ' WHERE movie_vote.id IN(\'' . implode('\',\'', $voteIds) . '\') ORDER BY movie_vote.timestamp DESC';
+
+        $sth = $this->pdo->prepare($query);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+        return $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'likes' => ['type' => 'int'],
+            'neutral' => ['type' => 'int'],
+            'dislikes' => ['type' => 'int'],
+            'isLiked' => ['type' => 'bool'],
+            'isNeutral' => ['type' => 'bool'],
+            'isDisliked' => ['type' => 'bool'],
+            'tmdb_popularity' => ['type' => 'float'],
+            'vote' => ['type' => 'int'],
+            'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
+        ]);
+
+    }
+
+    public function findByTmdbId($tmdbId, $userId = null) {
+        $whereInString = '"' . implode('", "', $tmdbId) . '"';
+        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked';
+        if ($userId) {
+            $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+            IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
+            IF (movie_vote.vote = \'0\', true, false) AS isDisliked';
+        }
+        $query .= ' FROM movie
+            LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id 
+            LEFT JOIN genre ON genre.id=movie_genre.genre_id';
+        if ($userId) {
+            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId;
+        }
+        $query .= ' WHERE movie.tmdb_id IN (' . $whereInString . ') ORDER BY FIELD(movie.tmdb_id, ' . $whereInString . ')';
+
+        $sth = $this->pdo->prepare($query);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        return $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'likes' => ['type' => 'int'],
+            'neutral' => ['type' => 'int'],
+            'dislikes' => ['type' => 'int'],
+            'isLiked' => ['type' => 'bool'],
+            'isNeutral' => ['type' => 'bool'],
+            'isDisliked' => ['type' => 'bool'],
+            'tmdb_popularity' => ['type' => 'float'],
+            'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
+        ]);
+    }
+}

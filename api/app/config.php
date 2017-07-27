@@ -1,0 +1,9 @@
+<?php
+
+define('FACEBOOK_API_KEY',    '323326988105785');
+define('FACEBOOK_API_SECRET', 'e02677691c3687dc3afacbe2cb0dea40');
+define('VKONTAKTE_API_KEY',    '6099031');
+define('VKONTAKTE_API_SECRET', 'dPYM8B9RWwJRQXvmk7Fr');
+
+define('VOTES_LIST_SIZE', 12);
+define('FRIENDS_VOTES_LIST_SIZE', 12);

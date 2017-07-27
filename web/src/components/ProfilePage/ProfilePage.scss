@@ -1,0 +1,31 @@
+.profile {
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.profile__user {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #f1f1f1;
+}
+.profile__user-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+.profile__votes-group {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 0;
+    background: #f1f1f1;
+}
+.profile__votes-item {
+    border-top: 1px solid #f1f1f1;
+    transition: opacity 300ms;
+
+    &.m-inactive {
+        opacity: .7;
+    }
+}

@@ -1,0 +1,67 @@
+@import "../../components/base";
+
+@keyframes movie-votes-hover {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.movie-votes {
+    margin: 0 -10px;
+    user-select: none;
+}
+.movie-vote {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+
+    .movie-votes & {
+        margin: 0 10px;
+    }
+}
+.movie-vote__icn {
+    display: inline-block;
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    font-size: 20px;
+    line-height: 0;
+
+    > .icn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 22px;
+        height: 20px;
+        margin: auto;
+
+        &:last-child {
+            opacity: 0;
+            visibility: hidden;
+
+            .movie-vote.m-active & {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        .movie-vote:hover & {
+            animation: movie-votes-hover 1200ms infinite;
+        }
+    }
+}
+.movie-vote__counter {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 18px;
+    margin-left: 10px;
+}

@@ -1,0 +1,36 @@
+.feed {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    > .friend-vote {
+        border-bottom: 1px solid #f1f1f1;
+
+        &:last-child {
+            border: none;
+        }
+    }
+
+    .p-signin {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+
+        &:before {
+            display: none;
+        }
+
+        .p-signin__slogan {
+            margin-top: 0;
+        }
+    }
+
+    .p-signin__logo,
+    .p-signin__close {
+        display: none;
+    }
+}

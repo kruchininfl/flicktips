@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="search_copy_2" data-name="search copy 2" class="cls-1" d="M10.6-.008A5.406,5.406,0,1,0,16,5.4,5.406,5.406,0,0,0,10.6-.008Zm0,9.425A4.02,4.02,0,1,1,14.619,5.4,4.025,4.025,0,0,1,10.6,9.418Zm-5.856.855L0.2,14.816a0.693,0.693,0,0,0,.98.98l4.544-4.543A0.693,0.693,0,1,0,4.743,10.272Z"/>
+</svg>

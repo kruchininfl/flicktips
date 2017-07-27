@@ -1,0 +1,104 @@
+@import "../../components/base";
+
+.friend-vote {
+    height: 80px;
+    overflow: hidden;
+    position: relative;
+}
+.friend-vote__main {
+    padding-right: 65px;
+    padding-left: 75px;
+    height: 100%;
+    display: block;
+
+    &:after {
+        content: '';
+        display: inline-block;
+        vertical-align: middle;
+        height: 100%;
+        margin-right: -4px;
+    }
+}
+.friend-vote__main-left {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 5px;
+    text-align: center;
+    width: 50px;
+    margin-left: -60px;
+}
+.friend-vote__date {
+    font-size: 11px;
+    color: #c0c0c0;
+    margin-top: 5px;
+    line-height: 1;
+    height: 11px;
+}
+.friend-vote__main-text {
+    display: inline-block;
+    vertical-align: middle;
+    width: 100%;
+    color: #666666;
+    margin-top: -16px;
+}
+.friend-vote__username {
+    font-weight: 700;
+}
+.friend-vote__vote {
+    margin-left: 10px;
+    position: relative;
+    top: 1px;
+}
+.friend-vote__movie-title {
+    white-space: nowrap;
+
+    > strong {
+        font-weight: 600;
+        color: #1d1d1d;
+    }
+}
+.friend-vote__movie {
+    position: absolute;
+    width: 100%;
+    left: 100%;
+    margin-left: -45px;
+    top: 0;
+    bottom: 0;
+    transition: left 500ms;
+
+    > .movie-prev {
+        height: 100%;
+        .movie-prev__cover {
+            width: 45px;
+        }
+        .movie-prev__content {
+            margin-left: 55px;
+        }
+        .movie-prev__title {
+            white-space: nowrap;
+            max-height: 17px;
+        }
+        .movie-prev__genres {
+            white-space: nowrap;
+            max-height: 16px;
+            margin-top: 0;
+        }
+        .movie-prev__date {
+            display: none;
+        }
+        .movie-prev__votes {
+            bottom: 10px;
+        }
+    }
+
+    &.m-active {
+        left: 45px;
+    }
+}
+.friend-vote__movie-toggle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 45px;
+}

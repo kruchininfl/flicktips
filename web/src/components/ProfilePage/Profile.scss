@@ -29,3 +29,29 @@
         opacity: .7;
     }
 }
+
+.profile__friends {
+    font-size: 0;
+    margin: 0 0 -20px;
+}
+.friend {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    width: 33.3333%;
+    text-align: center;
+    font-size: 12px;
+
+    .profile__friends & {
+        margin: 20px 0;
+    }
+}
+.friend__name {
+    font-weight: 600;
+    margin: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.friend__button {
+    margin: 10px 0 0;
+}

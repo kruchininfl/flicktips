@@ -1,3 +1,5 @@
 import ProfilePage from './ProfilePage';
+export {ProfilePage};
 
-export default ProfilePage;
+import ProfileFriendsPage from './ProfileFriendsPage';
+export {ProfileFriendsPage};

@@ -65,6 +65,7 @@ class HeaderProfile extends Component {
               <div className={'header-profile__menu' + (opened ? ' m-active' : '')}>
                 <div className="header-profile__menu-inn">
                   <ul className="header-profile__menu-links">
+                    <li><Link to={'/profile/friends/'} className="header-profile__menu-link">Мои друзья</Link></li>
                     <li><Link to={'/user/' + id} className="header-profile__menu-link">Мои оценки</Link></li>
                   </ul>
 

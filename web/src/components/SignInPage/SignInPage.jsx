@@ -27,7 +27,9 @@ class SignInPage extends Component {
     const {handleCrossClick, loadingFb, loadingVk, userSignedIn} = this.props;
 
     if (userSignedIn) {
-      browserHistory.push('/');
+      if (browserHistory) {
+        setTimeout(() => browserHistory.push('/'), 0);
+      }
       return false;
     }
 
@@ -41,7 +43,7 @@ class SignInPage extends Component {
 
         <div className="p-signin__inn">
           <div className="p-signin__logo"><i className="icn icn_logo">&nbsp;</i></div>
-          <div className="p-signin__slogan"><strong>Присоединяйся!</strong><br />И узнай какие фильмы смотрят твои друзья.</div>
+          <div className="p-signin__slogan"><strong>Присоединяйся!</strong><br />И смотри фильмы, <br />рекомендованные твоими друзьями!</div>
           <div>
             <OAuthButton disabled={loadingFb} loading={loadingVk} provider="vkontakte">Войти через Вконтакте</OAuthButton>
           </div>

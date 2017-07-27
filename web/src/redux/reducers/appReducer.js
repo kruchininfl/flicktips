@@ -6,6 +6,9 @@ import {
   SIGN_IN_POPUP_CLOSE
 } from 'redux/actions/appActions';
 
+import {OAUTH_SIGN_IN_COMPLETE} from 'redux-oauth';
+
+
 
 const initialState = Immutable.fromJS({
   signInPopupOpen: false
@@ -14,5 +17,7 @@ const initialState = Immutable.fromJS({
 export default createReducer(initialState, {
   [SIGN_IN_POPUP_OPEN]: state => state.mergeDeep({signInPopupOpen: true}),
 
-  [SIGN_IN_POPUP_CLOSE]: state => state.mergeDeep({signInPopupOpen: false})
+  [SIGN_IN_POPUP_CLOSE]: state => state.mergeDeep({signInPopupOpen: false}),
+
+  [OAUTH_SIGN_IN_COMPLETE]: state => state.mergeDeep({signInPopupOpen: false})
 });

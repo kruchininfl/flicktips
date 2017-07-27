@@ -322,6 +322,16 @@ textarea {
             background: #0f6099;
         }
     }
+
+    .btn_color_light-gray & {
+        background: #f2f2f2;
+        color: #666666;
+        border-color: transparent;
+
+        &:hover {
+            background: darken(#f2f2f2, 20);
+        }
+    }
 }
 .btn__icn,
 .btn__text {
@@ -534,3 +544,7 @@ html, body, .react-view, .layout {
     text-decoration: none;
 }
 /* </editor-fold> */
+
+.icn-forever-alone {
+    margin-bottom: 20px;
+}

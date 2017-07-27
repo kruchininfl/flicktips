@@ -194,6 +194,14 @@ export default {
     return this._fetch('votes/user/' + uid, {page});
   },
 
+  getUserFriends(page = 1) {
+    return this._fetch('user/friends/', {page}, undefined);
+  },
+
+  toggleSubscribe(friendId) {
+    return this._fetch('user/toggleSubscribe/', {friendId}, 'POST');
+  },
+
   getFriendsVotes(page = 1) {
     return this._fetch('user/friends_votes/', {page}, undefined, true);
   }

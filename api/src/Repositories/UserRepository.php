@@ -12,6 +12,8 @@ class UserRepository {
      */
     protected $pdo;
 
+    protected $safety_fields = ['id', 'username', 'avatar', 'gender', 'registration_date'];
+
     public function __construct(Application $app)
     {
         $this->app = $app;
@@ -66,7 +68,7 @@ class UserRepository {
             SELECT *
             FROM user_friends us
             LEFT JOIN movie_vote mv ON mv.user_id = us.user_2
-            WHERE user_1 = :uid  ORDER BY mv.timestamp DESC LIMIT :limit OFFSET :offset
+            WHERE user_1 = :uid AND subscribed=TRUE ORDER BY mv.timestamp DESC LIMIT :limit OFFSET :offset
         ) votes
         LEFT JOIN movie ON movie.id = votes.movie_id
         LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
@@ -111,5 +113,20 @@ class UserRepository {
         }, $votes);
 
         return $votes;
+    }
+
+    public function getFriends($uid, $limit, $offset)
+    {
+        $safety_fields = array_map(function ($val) { return 'user.' . $val; }, $this->safety_fields);
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ', user_friends.subscribed FROM user_friends 
+        LEFT JOIN user ON user.id = user_friends.user_2
+        WHERE user_1 = :uid ORDER BY user.id LIMIT :limit OFFSET :offset');
+        $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
+        $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
+        $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        return $rows;
     }
 }

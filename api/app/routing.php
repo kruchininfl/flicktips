@@ -12,5 +12,7 @@ $app->get('/api/votes/user/{uid}', '\Controllers\IndexController::getVotes')->va
 $app->get('/api/checkUser/', '\Controllers\UserController::validateToken');
 $app->get('/api/user/{uid}', '\Controllers\UserController::getUser')->value('uid', false);
 $app->get('/api/user/friends_votes/', '\Controllers\UserController::getFriendsVotes');
+$app->get('/api/user/friends/', '\Controllers\UserController::getFriends');
+$app->post('/api/user/toggleSubscribe/', '\Controllers\UserController::toggleSubscribe');
 
 $app->get('/api/updateGenres/', '\Controllers\IndexController::updateGenres');

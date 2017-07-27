@@ -35,11 +35,23 @@ class HomePage extends Component {
   }
 
   componentDidMount() {
+    window.scrollTo(0, 0);
+
     if (this.props.loaded) {
       return false;
     }
 
     this.props.dispatch(getFriendsVotes());
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this.props.userSignedIn && nextProps.userSignedIn) {
+      this.props.dispatch(getFriendsVotes());
+    }
+
+    if (this.props.userSignedIn && !nextProps.userSignedIn) {
+      this.props.dispatch(resetFeed());
+    }
   }
 
   componentWillUnmount() {

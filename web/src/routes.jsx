@@ -4,25 +4,25 @@ import App from 'components/App';
 import HomePage from 'components/HomePage';
 import LayoutPage from 'components/LayoutPage';
 import SignInPage from 'components/SignInPage';
-import ProfilePage from 'components/ProfilePage';
+import {ProfilePage, ProfileFriendsPage} from 'components/ProfilePage';
 
-// import {isUserSignedIn} from 'redux/models/user';
+import {isUserSignedIn} from 'redux/models/user';
 
-// function requireAuth(nextState, transition, cb) {
-//   setTimeout(() => {
-//     if (!isUserSignedIn(store.getState())) {
-//       transition('/signin');
-//     }
-//
-//     cb();
-//   }, 0);
-// }
+function requireAuth(nextState, transition, cb) {
+  setTimeout(() => {
+    if (!isUserSignedIn(store.getState())) {
+      transition('/signin');
+    }
 
-// let store;
+    cb();
+  }, 0);
+}
 
-// export default function routes(storeRef) {
-export default function routes() {
-  // store = storeRef;
+let store;
+
+export default function routes(storeRef) {
+// export default function routes() {
+  store = storeRef;
 
   return (
     <Route component={App} path="/">
@@ -30,6 +30,7 @@ export default function routes() {
       <Route component={LayoutPage} path="layout"/>
       <Route component={SignInPage} path="signin"/>
       <Route component={ProfilePage} path="user/:id"/>
+      <Route component={ProfileFriendsPage} path="profile/friends/" onEnter={requireAuth}/>
     </Route>
   );
 }

@@ -12,6 +12,7 @@ import {ReduxAsyncConnect, loadOnServer} from 'redux-connect';
 // import https from 'https';
 // import fs from 'fs';
 
+const staticVersion = '1';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
 
@@ -71,11 +72,10 @@ function renderHTML(componentHTML, initialState) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
           <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
-          <link rel="stylesheet" href="/public/icons/style.css">
-          <link rel="stylesheet" href="${assetUrl}/public/assets/styles.css">
-          <link rel="shortcut icon" href="/public/favicon.ico?2" type="image/x-icon" />
-          <link rel="icon" href="/public/favicon.ico?2" type="image/x-icon">
-          <script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+          <link rel="stylesheet" href="/public/icons/style.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
+          <link rel="stylesheet" href="${assetUrl}/public/assets/styles.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
+          <link rel="shortcut icon" href="/public/favicon.ico?3" type="image/x-icon" />
+          <link rel="icon" href="/public/favicon.ico?3" type="image/x-icon">
           <script type="application/javascript">
             window.REDUX_INITIAL_STATE = ${JSON.stringify(initialState)};
             window.SERVER_TIMESTAMP = ${new Date().getTime()}
@@ -84,7 +84,7 @@ function renderHTML(componentHTML, initialState) {
       <body>
         ${process.env.NODE_ENV !== 'production' ? `<div id="dev-tools"></div>` : ``}
         <div class="react-view" id="react-view">${componentHTML}</div>
-        <script type="application/javascript" src="${assetUrl}/public/assets/bundle.js"></script>
+        <script type="application/javascript" src="${assetUrl}/public/assets/bundle.js${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}"></script>
       </body>
     </html>
   `;

@@ -7,3 +7,4 @@ define('VKONTAKTE_API_SECRET', 'dPYM8B9RWwJRQXvmk7Fr');
 
 define('VOTES_LIST_SIZE', 12);
 define('FRIENDS_VOTES_LIST_SIZE', 12);
+define('FRIENDS_LIST_SIZE', 12);

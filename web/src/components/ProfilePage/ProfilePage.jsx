@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {asyncConnect}  from 'redux-connect';
 import {getProfile, resetProfile, loadVotes} from 'redux/actions/profileActions';
@@ -8,8 +8,7 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import 'moment/';
 import Button from 'components/Gui/Button';
-
-import './ProfilePage.scss';
+import ProfileLayout from './ProfileLayout';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -31,15 +30,15 @@ const propTypes = {
   }
 ], mapStateToProps)
 
-class ProfilePage extends Component {
+class ProfilePage extends ProfileLayout {
   constructor(props) {
     super(props);
 
+    this.entityIsActive = this.entityIsActive.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
   }
-  componentDidMount() {
-    window.scrollTo(0, 0);
 
+  componentDidMount() {
     if (this.props.loaded) {
       return false;
     }
@@ -129,14 +128,7 @@ class ProfilePage extends Component {
 
     return (
       <div className="profile">
-        <div className="profile__user">
-          <div className="userpic userpic_size_big profile__user-photo">
-            <span style={{backgroundImage: (user.avatar ? `url(${user.avatar})` : null)}} />
-          </div>
-          {user.username ?
-            <div className="profile__user-name">{user.username}</div>
-            : ''}
-        </div>
+        {super.render()}
 
         {votes.total
           ? <div className="profile__votes">{this.renderVotes(votes)}</div>

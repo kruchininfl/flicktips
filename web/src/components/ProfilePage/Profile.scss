@@ -1,3 +1,5 @@
+@import "../../components/base";
+
 .profile {
     background: #ffffff;
     display: flex;
@@ -51,7 +53,16 @@
     margin: 10px;
     white-space: nowrap;
     overflow: hidden;
+    @include multiLineEllipsis(1.2em, 1);
 }
 .friend__button {
     margin: 10px 0 0;
+}
+
+.profile__bookmarks-item {
+    border-bottom: 1px solid #f1f1f1;
+
+    &.m-inactive {
+        opacity: .7;
+    }
 }

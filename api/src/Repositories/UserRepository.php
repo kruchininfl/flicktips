@@ -22,7 +22,7 @@ class UserRepository {
 
     public function getByCredentials($uid, $token)
     {
-        $sth = $this->pdo->prepare('SELECT id, username, avatar, gender, registration_date FROM user WHERE id = :uid AND token = :token');
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $this->safety_fields) . ' FROM user WHERE id = :uid AND token = :token');
         $sth->bindValue('uid', $uid);
         $sth->bindValue('token', $token);
         $sth->execute();
@@ -31,7 +31,7 @@ class UserRepository {
 
     public function findById($uid)
     {
-        $sth = $this->pdo->prepare('SELECT id, username, avatar, gender, registration_date FROM user WHERE id = :uid');
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $this->safety_fields) . ' FROM user WHERE id = :uid');
         $sth->bindValue('uid', $uid);
         $sth->execute();
         return $sth->fetch();
@@ -57,6 +57,7 @@ class UserRepository {
         IF (movie_vote.vote = \'2\', true, false) AS movie_isLiked,
         IF (movie_vote.vote = \'1\', true, false) AS movie_isNeutral,
         IF (movie_vote.vote = \'0\', true, false) AS movie_isDisliked,
+        IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks,
         genre.id AS movie_genre_id, 
         genre.name AS movie_genre_name, 
         user.id AS user_id, 
@@ -74,6 +75,7 @@ class UserRepository {
         LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
         LEFT JOIN genre ON genre.id=movie_genre.genre_id
         LEFT JOIN movie_vote ON (movie_vote.user_id=:uid AND movie_vote.movie_id=movie.id)
+        LEFT JOIN bookmark ON (bookmark.user_id=:uid AND bookmark.movie_id=movie.id)
         LEFT JOIN user ON user.id= votes.user_id');
         $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
         $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
@@ -92,6 +94,7 @@ class UserRepository {
             'movie_isLiked' => ['type' => 'bool'],
             'movie_isNeutral' => ['type' => 'bool'],
             'movie_isDisliked' => ['type' => 'bool'],
+            'movie_inBookmarks' => ['type' => 'bool'],
             'movie_genre_id' => ['group' => 'movie_genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'id', 'type' => 'int'],
             'movie_genre_name' => ['group' => 'movie_genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'name'],
             'user_id' => ['type' => 'int'],
@@ -113,6 +116,46 @@ class UserRepository {
         }, $votes);
 
         return $votes;
+    }
+
+    public function getBookmarks($uid, $limit, $offset)
+    {
+        $sth = $this->pdo->prepare('SELECT 
+        movie.*,
+        IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+        IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
+        IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
+        TRUE AS inBookmarks,
+        genre.id AS genre_id, 
+        genre.name AS genre_name
+        FROM (
+          SELECT movie_id FROM bookmark WHERE bookmark.user_id = :uid ORDER BY bookmark.timestamp DESC LIMIT :limit OFFSET :offset
+        ) bookmarks
+        LEFT JOIN movie ON movie.id = bookmarks.movie_id
+        LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
+        LEFT JOIN genre ON genre.id=movie_genre.genre_id
+        LEFT JOIN movie_vote ON (movie_vote.user_id=:uid AND movie_vote.movie_id=movie.id)');
+        $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
+        $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
+        $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        $bookmarks = $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'tmdb_popularity' => ['type' => 'float'],
+            'likes' => ['type' => 'int'],
+            'neutral' => ['type' => 'int'],
+            'dislikes' => ['type' => 'int'],
+            'isLiked' => ['type' => 'bool'],
+            'isNeutral' => ['type' => 'bool'],
+            'isDisliked' => ['type' => 'bool'],
+            'inBookmarks' => ['type' => 'bool'],
+            'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name']
+        ]);
+
+        return $bookmarks;
     }
 
     public function getFriends($uid, $limit, $offset)

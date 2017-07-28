@@ -38,7 +38,6 @@ class App extends Component {
 
         <div className="footer">
           <div className="wrapper">
-            <div className="footer__copy">Copyright &copy; 2017</div>
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>
         </div>

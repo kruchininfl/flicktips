@@ -37,7 +37,8 @@ class MovieRepository {
         if ($requesterUid) {
             $query .= ', IF (my_movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (my_movie_vote.vote = \'1\', true, false) AS isNeutral,
-            IF (my_movie_vote.vote = \'0\', true, false) AS isDisliked';
+            IF (my_movie_vote.vote = \'0\', true, false) AS isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
         }
 
         $query .= ' FROM movie_vote
@@ -46,7 +47,8 @@ class MovieRepository {
         LEFT JOIN genre ON genre.id=movie_genre.genre_id';
 
         if ($requesterUid) {
-            $query .= ' LEFT JOIN movie_vote AS my_movie_vote ON my_movie_vote.movie_id = movie.id AND my_movie_vote.user_id = ' . $requesterUid;
+            $query .= ' LEFT JOIN movie_vote AS my_movie_vote ON my_movie_vote.movie_id = movie.id AND my_movie_vote.user_id = ' . $requesterUid . '
+            LEFT JOIN bookmark ON (bookmark.user_id=' . $requesterUid . ' AND bookmark.movie_id=movie.id)';
         }
 
         $query .= ' WHERE movie_vote.id IN(\'' . implode('\',\'', $voteIds) . '\') ORDER BY movie_vote.timestamp DESC';
@@ -62,6 +64,7 @@ class MovieRepository {
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
+            'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
             'vote' => ['type' => 'int'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
@@ -76,13 +79,15 @@ class MovieRepository {
         if ($userId) {
             $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
-            IF (movie_vote.vote = \'0\', true, false) AS isDisliked';
+            IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
         }
         $query .= ' FROM movie
             LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id 
             LEFT JOIN genre ON genre.id=movie_genre.genre_id';
         if ($userId) {
-            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId;
+            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
+            LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
         }
         $query .= ' WHERE movie.tmdb_id IN (' . $whereInString . ') ORDER BY FIELD(movie.tmdb_id, ' . $whereInString . ')';
 
@@ -98,6 +103,7 @@ class MovieRepository {
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
+            'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],

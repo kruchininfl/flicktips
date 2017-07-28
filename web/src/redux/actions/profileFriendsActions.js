@@ -1,7 +1,6 @@
 export const PROFILE_FRIENDS_LOADING_START = 'PROFILE_FRIENDS_LOADING_START';
 export const PROFILE_FRIENDS_LOADING_FINISH = 'PROFILE_FRIENDS_LOADING_FINISH';
 export const PROFILE_FRIENDS_LOADING_ERROR = 'PROFILE_FRIENDS_LOADING_ERROR';
-export const PROFILE_FRIENDS_RESET = 'PROFILE_FRIENDS_RESET';
 export const PROFILE_FRIENDS_ADD_START = 'PROFILE_FRIENDS_ADD_START';
 export const PROFILE_FRIENDS_ADD_FINISH = 'PROFILE_FRIENDS_ADD_FINISH';
 export const TOGGLE_FRIEND_SUBSCRIBE_START = 'TOGGLE_FRIEND_SUBSCRIBE_START';
@@ -35,15 +34,10 @@ export function getUserFriends() {
 
     return dispatch(api.getUserFriends())
       .then((response) => {
-        dispatch(resetUserFriends());
         dispatch(finishRequest(response.body));
       })
       .catch((err) => dispatch(errorRequest(err)));
   };
-}
-
-export function resetUserFriends() {
-  return (dispatch) => dispatch({type: PROFILE_FRIENDS_RESET});
 }
 
 export function loadFriends(page) {

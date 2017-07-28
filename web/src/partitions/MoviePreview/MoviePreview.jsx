@@ -21,7 +21,8 @@ const propTypes = {
   neutral      : PropTypes.number,
   isLiked      : PropTypes.bool,
   isDisliked   : PropTypes.bool,
-  isNeutral    : PropTypes.bool
+  isNeutral    : PropTypes.bool,
+  inBookmarks  : PropTypes.bool
 };
 
 const defaultProps = {
@@ -36,7 +37,8 @@ const defaultProps = {
   neutral      : 0,
   isLiked      : false,
   isDisliked   : false,
-  isNeutral    : false
+  isNeutral    : false,
+  inBookmarks  : false
 };
 
 class MoviePreview extends Component {
@@ -63,7 +65,8 @@ class MoviePreview extends Component {
             : ''
           }
           {this.props.vote !== null
-            ? <div className="movie-prev__vote-icn"><i className={'icn ' + getVoteIconClassById(this.props.vote, true)} /></div>
+            ?
+              <div className="movie-prev__vote-icn"><i className={'icn ' + getVoteIconClassById(this.props.vote, true)}/> </div>
             : ''
           }
         </div>

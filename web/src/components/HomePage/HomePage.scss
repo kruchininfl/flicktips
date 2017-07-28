@@ -4,10 +4,10 @@
     flex-direction: column;
 
     > .friend-vote {
-        border-bottom: 1px solid #f1f1f1;
+        border-bottom: 5px solid #f1f1f1;
 
         &:last-child {
-            border: none;
+            border-bottom-width: 1px;
         }
     }
 

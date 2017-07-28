@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {asyncConnect}  from 'redux-connect';
 import {Link} from 'react-router';
-import {getUserFriends, resetUserFriends, loadFriends, toggleSubscribe} from 'redux/actions/profileFriendsActions';
+import {getUserFriends, loadFriends, toggleSubscribe} from 'redux/actions/profileFriendsActions';
 import {getUserModel} from '../../redux/models/user';
 import ProfileLayout from './ProfileLayout';
 import Button from '../Gui/Button';
@@ -40,10 +40,6 @@ class ProfileFriendsPage extends ProfileLayout {
     }
 
     this.props.dispatch(getUserFriends());
-  }
-
-  componentWillUnmount() {
-    this.props.dispatch(resetUserFriends());
   }
 
   handleLoadData() {
@@ -92,7 +88,11 @@ class ProfileFriendsPage extends ProfileLayout {
   render() {
     const {response, loading, user, pending} = this.props;
 
-    if (!user || pending || !response) {
+    if (pending) {
+      return false;
+    }
+
+    if (!user || !response) {
       setTimeout(() => browserHistory.push('/signin'));
       return false;
     }
@@ -100,6 +100,8 @@ class ProfileFriendsPage extends ProfileLayout {
     if (!response.total) {
       return (
         <div className="profile">
+          {super.render()}
+
           <div className="page-ph">
             <div className="page-ph__icn"><img className="icn-forever-alone" src="/public/img/forever-alone.svg" alt="" /></div>
             <div className="page-ph__text">У вас пока нет друзей</div>

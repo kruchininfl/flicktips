@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Exception;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -63,7 +64,7 @@ class UserController
         $totalSth = $app['pdo']->prepare('SELECT COUNT(votes.id) AS num FROM ( 
             SELECT *
             FROM user_friends us
-            LEFT JOIN movie_vote mv ON mv.user_id = us.user_2
+            LEFT JOIN movie_vote mv ON mv.user_id = us.user_2 AND us.subscribed=TRUE
             WHERE user_1 = :uid
         ) votes');
         $totalSth->execute(['uid' => $user['id']]);
@@ -87,7 +88,52 @@ class UserController
                 'total' => $total,
                 'page' => (int) $page,
                 'pages' => ceil($total / $size),
-                'entities' => $app['user.repository']->getFriendsVotes($user['id'], $size, ($page - 1) * $size)
+//                'entities' => $app['user.repository']->getFriendsVotes($user['id'], $size, ($page - 1) * $size)
+                'entities' => $app['user.repository']->getFriendsVotes($user['id'], $size * $page, 0)
+            ]
+        ]);
+    }
+
+    public function getBookmarks(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $size = $request->get('size') ? $request->get('size') : BOOKMARKS_LIST_SIZE;
+        $page = $request->get('page') ? $request->get('page') : 1;
+
+        $totalSth = $app['pdo']->prepare('SELECT COUNT(bookmark.id) AS num FROM bookmark WHERE bookmark.user_id = :uid');
+        $totalSth->execute(['uid' => $user['id']]);
+        $total = intval($totalSth->fetch()['num']);
+
+        if ($total == 0) {
+            return $app->json([
+                'success' => true,
+                'results' => [
+                    'total' => $total,
+                    'page' => (int) $page,
+                    'pages' => ceil($total / $size),
+                    'entities' => []
+                ]
+            ]);
+        }
+
+        return $app->json([
+            'success' => true,
+            'results' => [
+                'total' => $total,
+                'page' => (int) $page,
+                'pages' => ceil($total / $size),
+                'entities' => $app['user.repository']->getBookmarks($user['id'], $size, ($page - 1) * $size)
             ]
         ]);
     }
@@ -177,6 +223,139 @@ class UserController
             'success' => true,
             'friendId' => $resp['friendId'],
             'subscribed' => $resp['subscribed']
+        ]);
+    }
+
+    public function toggleVote(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        /**
+         * @var $pdo \PDO
+         */
+        $pdo = $app['pdo'];
+
+        $entityId = $request->get('id');
+        $action = $request->get('vote');
+        $actionId = $action === 'like' ? 2 : ($action === 'dislike' ? 0 : 1);
+
+        $currentVote = $pdo->prepare('SELECT * FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId');
+        $currentVote->execute([
+            'entityId' => $entityId,
+            'userId' => $user['id']
+        ]);
+        $currentVote = $currentVote->fetch();
+
+        $pdo->beginTransaction();
+        $query = null;
+        try {
+            if ($currentVote) {
+                $pdo->prepare('DELETE FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId')->execute([
+                    'entityId' => $entityId,
+                    'userId' => $user['id']
+                ]);
+            }
+            if (!$currentVote || $actionId != $currentVote['vote']) {
+                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote)')->execute([
+                    'entityId' => $entityId,
+                    'userId' => $user['id'],
+                    'vote' => $actionId
+                ]);
+            }
+
+            $query = 'UPDATE movie';
+            if ($currentVote) {
+                $col = $currentVote['vote'] == 2 ? 'likes' : ($currentVote['vote'] == 0 ? 'dislikes' : 'neutral');
+                $query .= ' SET ' . $col . '=' . $col . '-1';
+            }
+            if (!$currentVote || $actionId != $currentVote['vote']) {
+                $col = $actionId === 2 ? 'likes' : ($actionId === 0 ? 'dislikes' : 'neutral');
+                $query .= ($currentVote ? ', ' : ' SET ') . $col . '=' . $col . '+1';
+            }
+            $query .= ' WHERE id=:entityId';
+            $pdo->prepare($query)->execute([
+                'entityId' => $entityId
+            ]);
+
+            $pdo->commit();
+        } catch(Exception $e){
+            $pdo->rollBack();
+            return $app->json([
+                'success' => false,
+                'msg' => 'something went wrong',
+                'error' => $e
+            ], 500);
+        }
+
+        $entitySth = $pdo->prepare('SELECT id, likes, dislikes, neutral FROM movie WHERE id=:entityId');
+        $entitySth->execute([
+            'entityId' => $entityId
+        ]);
+        $entityData = $entitySth->fetch();
+
+        return $app->json([
+            'success' => true,
+            'data' => [
+                'id' => intval($entityData['id']),
+                'likes' => intval($entityData['likes']),
+                'neutral' => intval($entityData['neutral']),
+                'dislikes' => intval($entityData['dislikes']),
+                'isLiked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 2,
+                'isNeutral' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 1,
+                'isDisliked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 0,
+            ]
+        ]);
+    }
+
+    public function toggleBookmark(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+        $movieId = $request->get('movieId');
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $sth = $app['pdo']->prepare('SELECT * FROM bookmark WHERE movie_id=:mid AND user_id=:uid');
+        $sth->execute([
+            'uid' => $user['id'],
+            'mid' => $movieId
+        ]);
+        $count = $sth->rowCount();
+
+        if ($count) {
+            $sth = $app['pdo']->prepare('DELETE FROM bookmark WHERE movie_id=:mid AND user_id=:uid');
+        } else {
+            $sth = $app['pdo']->prepare('INSERT INTO bookmark (`user_id`, `movie_id`) VALUES (:uid, :mid)');
+        }
+
+        $sth->execute([
+            'uid' => $user['id'],
+            'mid' => $movieId
+        ]);
+
+        return $app->json([
+            'success' => true,
+            'data' => [
+                'movie_id' => (int) $movieId,
+                'inBookmarks' => !$count
+            ]
         ]);
     }
 }

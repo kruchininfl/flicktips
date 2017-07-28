@@ -4,25 +4,28 @@ import {voteRequest} from 'redux/actions/voteActions';
 
 import './MovieStat.scss';
 import {connect} from 'react-redux';
+import {toggleBookmark} from '../../redux/actions/bookmarkActions';
 
 const propTypes = {
-  dispatch  : PropTypes.func.isRequired,
-  id        : PropTypes.number.isRequired,
-  likes     : PropTypes.number,
-  dislikes  : PropTypes.number,
-  neutral   : PropTypes.number,
-  isLiked   : PropTypes.bool,
-  isDisliked: PropTypes.bool,
-  isNeutral : PropTypes.bool
+  dispatch   : PropTypes.func.isRequired,
+  id         : PropTypes.number.isRequired,
+  likes      : PropTypes.number,
+  dislikes   : PropTypes.number,
+  neutral    : PropTypes.number,
+  isLiked    : PropTypes.bool,
+  isDisliked : PropTypes.bool,
+  isNeutral  : PropTypes.bool,
+  inBookmarks: PropTypes.bool
 };
 
 const defaultProps = {
-  likes     : 0,
-  dislikes  : 0,
-  neutral   : 0,
-  isLiked   : false,
-  isDisliked: false,
-  isNeutral : false
+  likes      : 0,
+  dislikes   : 0,
+  neutral    : 0,
+  isLiked    : false,
+  isDisliked : false,
+  isNeutral  : false,
+  inBookmarks: false
 };
 
 class MovieStat extends Component {
@@ -30,19 +33,15 @@ class MovieStat extends Component {
     super(props);
 
     this.handleSendVote = this.handleSendVote.bind(this);
-
-    this.state = {
-      likes     : this.props.likes,
-      dislikes  : this.props.dislikes,
-      neutral   : this.props.neutral,
-      isLiked   : this.props.isLiked,
-      isDisliked: this.props.isDisliked,
-      isNeutral : this.props.isNeutral
-    };
+    this.handleToggleBookmark = this.handleToggleBookmark.bind(this);
   }
 
   handleSendVote(entityId, vote) {
     this.props.dispatch(voteRequest(entityId, vote));
+  }
+
+  handleToggleBookmark(entityId) {
+    this.props.dispatch(toggleBookmark(entityId));
   }
 
   render() {
@@ -82,6 +81,16 @@ class MovieStat extends Component {
           </div>
 
           <div className="movie-vote__counter">{this.props.dislikes}</div>
+        </div>
+
+        <div
+          onClick={() => this.handleToggleBookmark(this.props.id)}
+          className={'movie-bookmark' + (this.props.inBookmarks ? ' m-active' : '')}
+        >
+          <div className="movie-bookmark__icn">
+            <span className="icn icn_bookmark"/>
+            <span className="icn icn_bookmark-fill"/>
+          </div>
         </div>
       </div>
     );

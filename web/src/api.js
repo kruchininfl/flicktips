@@ -180,10 +180,14 @@ export default {
   },
 
   toggleVote(entityId, vote) {
-    return this._fetch('vote/', {
+    return this._fetch('user/vote/', {
       id: entityId,
       vote
     }, 'POST');
+  },
+
+  toggleBookmark(movieId) {
+    return this._fetch('user/toggle_bookmark/', {movieId}, 'POST');
   },
 
   getUser(uid) {
@@ -195,11 +199,15 @@ export default {
   },
 
   getUserFriends(page = 1) {
-    return this._fetch('user/friends/', {page}, undefined);
+    return this._fetch('user/friends/', {page});
+  },
+
+  getUserBookmarks(page = 1) {
+    return this._fetch('user/bookmarks/', {page});
   },
 
   toggleSubscribe(friendId) {
-    return this._fetch('user/toggleSubscribe/', {friendId}, 'POST');
+    return this._fetch('user/toggle_subscribe/', {friendId}, 'POST');
   },
 
   getFriendsVotes(page = 1) {

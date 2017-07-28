@@ -12,7 +12,7 @@ import {ReduxAsyncConnect, loadOnServer} from 'redux-connect';
 // import https from 'https';
 // import fs from 'fs';
 
-const staticVersion = '1';
+const staticVersion = '2';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
 
@@ -93,8 +93,12 @@ function renderHTML(componentHTML, initialState) {
 const PORT = process.env.PORT || 3001;
 
 // const httpsOptions = {
-//   key: fs.readFileSync('./src/key.pem'),
-//   cert: fs.readFileSync('./src/cert.pem')
+//   key: fs.readFileSync('./src/server.key').toString(),
+//   cert: fs.readFileSync('./src/server.crt').toString(),
+//   passphrase: '422673',
+//   ciphers: 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-SHA384',
+//   honorCipherOrder: true,
+//   secureProtocol: 'TLSv1_2_method'
 // };
 //
 // const server = https.createServer(httpsOptions, app).listen(PORT, () => {

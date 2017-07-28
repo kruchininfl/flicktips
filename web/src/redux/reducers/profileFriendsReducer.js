@@ -4,7 +4,6 @@ import {createReducer} from 'redux-immutablejs';
 import {
   PROFILE_FRIENDS_LOADING_START,
   PROFILE_FRIENDS_LOADING_FINISH,
-  PROFILE_FRIENDS_RESET,
   PROFILE_FRIENDS_ADD_START,
   PROFILE_FRIENDS_ADD_FINISH,
   TOGGLE_FRIEND_SUBSCRIBE_START,
@@ -36,8 +35,6 @@ export default createReducer(initialState, {
     action.response.results.entities = state.getIn(['response', 'entities']).toJS().concat(action.response.results.entities);
     return state.mergeDeep({loading: false, response: action.response.results});
   },
-
-  [PROFILE_FRIENDS_RESET]: () => initialState.mergeDeep(),
 
   [TOGGLE_FRIEND_SUBSCRIBE_START]: (state, {friendId}) => {
     let friendIndex = null;

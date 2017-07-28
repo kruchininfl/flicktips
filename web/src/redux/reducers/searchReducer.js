@@ -13,6 +13,7 @@ import {
   VOTE_REQUEST_FINISHED,
   VOTE_REQUEST_ERROR
 } from 'redux/actions/voteActions';
+import {BOOKMARK_REQUEST_FINISHED} from '../actions/bookmarkActions';
 
 const initialState = Immutable.fromJS({
   response: null,
@@ -56,6 +57,30 @@ export default createReducer(initialState, {
       return state.mergeDeep({
         response: Object.assign({}, state.get('response').toJS(), {results: entities})
       });
+    }
+
+    return state;
+  },
+
+  [BOOKMARK_REQUEST_FINISHED]: (state, action) => {
+    let entityIndex = null;
+    const results = state.getIn(['response', 'results']);
+
+    if (results && results.size) {
+      results.forEach((entity, index) => {
+        if (entity.get('id') === action.response.data.movie_id) {
+          entityIndex = index;
+        }
+      });
+
+      if (entityIndex === null) {
+        return state;
+      }
+
+      return state.setIn(
+        ['response', 'results', entityIndex, 'inBookmarks'],
+        action.response.data.inBookmarks
+      );
     }
 
     return state;

@@ -65,3 +65,40 @@
     font-size: 18px;
     margin-left: 10px;
 }
+
+.movie-bookmark {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+    font-size: 20px;
+    color: #ba4b4b;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+.movie-bookmark__icn {
+    position: relative;
+
+    > .icn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: opacity 300ms;
+    }
+
+    .icn_bookmark-fill {
+        opacity: 0;
+
+        .movie-bookmark.m-active & {
+            opacity: 1;
+        }
+    }
+
+    .icn_bookmark {
+        opacity: 1;
+
+        .movie-bookmark.m-active & {
+            opacity: 2;
+        }
+    }
+}

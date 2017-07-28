@@ -6,7 +6,6 @@ import MoviePreview from 'partitions/MoviePreview';
 import {pluralGender} from 'helpers';
 import moment from 'moment';
 import 'moment/locale/ru';
-import 'moment/';
 import Button from 'components/Gui/Button';
 import ProfileLayout from './ProfileLayout';
 
@@ -102,6 +101,7 @@ class ProfilePage extends ProfileLayout {
               isLiked={entity.isLiked}
               isDisliked={entity.isDisliked}
               isNeutral={entity.isNeutral}
+              inBookmarks={entity.inBookmarks}
             />
           </div>
         </div>

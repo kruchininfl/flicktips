@@ -1,7 +1,6 @@
 export const VOTE_REQUEST_STARTED = 'VOTE_REQUEST_STARTED';
 export const VOTE_REQUEST_FINISHED = 'VOTE_REQUEST_FINISHED';
 export const VOTE_REQUEST_ERROR = 'VOTE_REQUEST_ERROR';
-export const VOTE_ADD_ENTITIES = 'VOTE_ADD_ENTITIES';
 
 import api from 'api';
 import isFunction from 'lodash/isFunction';

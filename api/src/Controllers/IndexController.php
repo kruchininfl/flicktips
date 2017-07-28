@@ -3,7 +3,6 @@
 namespace Controllers;
 
 use Aws\Api\DateTimeResult;
-use Exception;
 use Services\TMDBServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,97 +96,6 @@ class IndexController
         return $app->json([
             'total' => count($movies),
             'results' => $movies
-        ]);
-    }
-
-    public function toggleVote(Request $request, Application $app)
-    {
-        $uid = $request->headers->get('uid');
-        $token = $request->headers->get('access-token');
-
-        $user = $app['user.repository']->getByCredentials($uid, $token);
-
-        if (!$user) {
-            return $app->json([
-                'success' => false,
-                'msg' => 'authorization required'
-            ], 401);
-        }
-
-        /**
-         * @var $pdo \PDO
-         */
-        $pdo = $app['pdo'];
-
-        $entityId = $request->get('id');
-        $action = $request->get('vote');
-        $actionId = $action === 'like' ? 2 : ($action === 'dislike' ? 0 : 1);
-
-        $currentVote = $pdo->prepare('SELECT * FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId');
-        $currentVote->execute([
-            'entityId' => $entityId,
-            'userId' => $user['id']
-        ]);
-        $currentVote = $currentVote->fetch();
-
-        $pdo->beginTransaction();
-        $query = null;
-        try {
-            if ($currentVote) {
-                $pdo->prepare('DELETE FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId')->execute([
-                    'entityId' => $entityId,
-                    'userId' => $user['id']
-                ]);
-            }
-            if (!$currentVote || $actionId != $currentVote['vote']) {
-                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote)')->execute([
-                    'entityId' => $entityId,
-                    'userId' => $user['id'],
-                    'vote' => $actionId
-                ]);
-            }
-
-            $query = 'UPDATE movie';
-            if ($currentVote) {
-                $col = $currentVote['vote'] == 2 ? 'likes' : ($currentVote['vote'] == 0 ? 'dislikes' : 'neutral');
-                $query .= ' SET ' . $col . '=' . $col . '-1';
-            }
-            if (!$currentVote || $actionId != $currentVote['vote']) {
-                $col = $actionId === 2 ? 'likes' : ($actionId === 0 ? 'dislikes' : 'neutral');
-                $query .= ($currentVote ? ', ' : ' SET ') . $col . '=' . $col . '+1';
-            }
-            $query .= ' WHERE id=:entityId';
-            $pdo->prepare($query)->execute([
-                'entityId' => $entityId
-            ]);
-
-            $pdo->commit();
-        } catch(Exception $e){
-            $pdo->rollBack();
-            return $app->json([
-                'success' => false,
-                'msg' => 'something went wrong',
-                'error' => $e
-            ], 500);
-        }
-
-        $entitySth = $pdo->prepare('SELECT id, likes, dislikes, neutral FROM movie WHERE id=:entityId');
-        $entitySth->execute([
-            'entityId' => $entityId
-        ]);
-        $entityData = $entitySth->fetch();
-
-        return $app->json([
-            'success' => true,
-            'data' => [
-                'id' => intval($entityData['id']),
-                'likes' => intval($entityData['likes']),
-                'neutral' => intval($entityData['neutral']),
-                'dislikes' => intval($entityData['dislikes']),
-                'isLiked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 2,
-                'isNeutral' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 1,
-                'isDisliked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 0,
-            ]
         ]);
     }
 

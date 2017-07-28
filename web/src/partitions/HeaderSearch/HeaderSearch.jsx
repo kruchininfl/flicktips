@@ -84,6 +84,7 @@ class HeaderSearch extends Component {
               isLiked={entity.isLiked}
               isDisliked={entity.isDisliked}
               isNeutral={entity.isNeutral}
+              inBookmarks={entity.inBookmarks}
             />
           </div>
         );

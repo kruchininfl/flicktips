@@ -89,6 +89,7 @@ class FriendsVote extends Component {
             isLiked={movie.isLiked}
             isDisliked={movie.isDisliked}
             isNeutral={movie.isNeutral}
+            inBookmarks={movie.inBookmarks}
           />
           <div className="friend-vote__movie-toggle" onClick={this.handleToggleMovieVisibility} />
         </div>

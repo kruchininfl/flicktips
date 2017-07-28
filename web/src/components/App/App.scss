@@ -505,6 +505,7 @@ html, body, .react-view, .layout {
 .header__right {
     float: right;
     height: 100%;
+    white-space: nowrap;
 
     &:after {
         content: '';
@@ -518,6 +519,7 @@ html, body, .react-view, .layout {
     display: inline-block;
     vertical-align: middle;
     margin: 0 13px;
+    white-space: normal;
 
     &:last-child {
         margin-right: 0;

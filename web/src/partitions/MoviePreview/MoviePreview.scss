@@ -55,13 +55,13 @@
     box-sizing: border-box;
 }
 .movie-prev__title {
-    @include multiLineEllipsis(1.2em);
+    @include multiLineEllipsis(1.2em, 2);
 }
 .movie-prev__genres,
 .movie-prev__date {
     margin: .25em 0;
     color: #c0c0c0;
-    @include multiLineEllipsis(1.2em);
+    @include multiLineEllipsis(1.2em, 2);
 }
 .movie-prev__votes {
     position: absolute;

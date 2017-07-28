@@ -1,7 +1,6 @@
 export const PROFILE_LOADING_START = 'PROFILE_LOADING_START';
 export const PROFILE_LOADING_FINISH = 'PROFILE_LOADING_FINISH';
 export const PROFILE_LOADING_ERROR = 'PROFILE_LOADING_ERROR';
-export const PROFILE_RESET = 'PROFILE_RESET';
 export const PROFILE_ADD_VOTES_FINISH = 'PROFILE_ADD_VOTES_FINISH';
 export const PROFILE_ADD_VOTES_START = 'PROFILE_ADD_VOTES_START';
 
@@ -49,15 +48,10 @@ export function getProfile(userId) {
           return dispatch(errorRequest(user.err));
         }
 
-        dispatch(resetProfile());
         dispatch(finishRequest({user: user.user, votes: votes.results, isMyPage}));
       })
       .catch((err) => dispatch(errorRequest(err)));
   };
-}
-
-export function resetProfile() {
-  return (dispatch) => dispatch({type: PROFILE_RESET});
 }
 
 export function loadVotes(userId, page) {

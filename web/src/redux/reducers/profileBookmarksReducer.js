@@ -40,47 +40,36 @@ export default createReducer(initialState, {
   },
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {
-    const entities = [];
-    const results = state.getIn(['response', 'entities']);
-
-    if (results && results.size) {
-      results.forEach(entity => {
-        if (entity.get('id') === action.response.data.id) {
-          entities.push(Object.assign({}, entity.toJS, action.response.data));
-        } else {
-          entities.push(entity.toJS());
-        }
-      });
-
-      return state.mergeDeep({
-        response: Object.assign({}, state.get('response').toJS(), {entities})
-      });
+    if (!state.getIn(['response', 'entities'])) {
+      return state;
     }
 
-    return state;
+    return state.updateIn(
+      ['response', 'entities'],
+      (entities) => entities.map((entity) => {
+        if (entity.get('id') === action.response.data.id) {
+          return entity.mergeDeep(action.response.data);
+        }
+
+        return entity;
+      })
+    );
   },
 
   [BOOKMARK_REQUEST_FINISHED]: (state, action) => {
-    let entityIndex = null;
-    const results = state.getIn(['response', 'entities']);
-
-    if (results && results.size) {
-      results.forEach((entity, index) => {
-        if (entity.get('id') === action.response.data.movie_id) {
-          entityIndex = index;
-        }
-      });
-
-      if (entityIndex === null) {
-        return state;
-      }
-
-      return state.setIn(
-        ['response', 'entities', entityIndex, 'inBookmarks'],
-        action.response.data.inBookmarks
-      );
+    if (!state.getIn(['response', 'entities'])) {
+      return state;
     }
 
-    return state;
+    return state.updateIn(
+      ['response', 'entities'],
+      (entities) => entities.map((entity) => {
+        if (entity.get('id') === action.response.data.movie_id) {
+          return entity.set('inBookmarks', action.response.data.inBookmarks);
+        }
+
+        return entity;
+      })
+    );
   }
 });

@@ -12,7 +12,7 @@ import {ReduxAsyncConnect, loadOnServer} from 'redux-connect';
 // import https from 'https';
 // import fs from 'fs';
 
-const staticVersion = '2';
+const staticVersion = '3';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
 

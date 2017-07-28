@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {asyncConnect}  from 'redux-connect';
-import {getProfile, resetProfile, loadVotes} from 'redux/actions/profileActions';
+import {getProfile, loadVotes} from 'redux/actions/profileActions';
 import MoviePreview from 'partitions/MoviePreview';
 import {pluralGender} from 'helpers';
 import moment from 'moment';
@@ -43,10 +43,6 @@ class ProfilePage extends ProfileLayout {
     }
 
     this.props.dispatch(getProfile(this.props.params && this.props.params.id ? this.props.params.id : null));
-  }
-
-  componentWillUnmount() {
-    this.props.dispatch(resetProfile());
   }
 
   handleLoadData() {

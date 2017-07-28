@@ -43,52 +43,41 @@ export default createReducer(initialState, {
     return state
       .set('loading', false)
       .mergeIn(['response'], {results: action.response.results});
-      // .mergeIn(['response', 'results'], {entities});
+    // .mergeIn(['response', 'results'], {entities});
   },
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {
-    let entityIndex = null;
-    const results = state.getIn(['response', 'results', 'entities']);
-
-    if (results && results.size) {
-      results.forEach((entity, index) => {
-        if (entity.getIn(['movie', 'id']) === action.response.data.id) {
-          entityIndex = index;
-        }
-      });
-
-      if (entityIndex === null) {
-        return state;
-      }
-
-      return state.mergeDeepIn(['response', 'results', 'entities', entityIndex, 'movie'], action.response.data);
+    if (!state.getIn(['response', 'results', 'entities'])) {
+      return state;
     }
 
-    return state;
+    return state.updateIn(
+      ['response', 'results', 'entities'],
+      (entities) => entities.map((entity) => {
+        if (entity.getIn(['movie', 'id']) === action.response.data.id) {
+          return entity.mergeDeep({movie: action.response.data});
+        }
+
+        return entity;
+      })
+    );
   },
 
   [BOOKMARK_REQUEST_FINISHED]: (state, action) => {
-    let entityIndex = null;
-    const results = state.getIn(['response', 'results', 'entities']);
-
-    if (results && results.size) {
-      results.forEach((entity, index) => {
-        if (entity.getIn(['movie', 'id']) === action.response.data.movie_id) {
-          entityIndex = index;
-        }
-      });
-
-      if (entityIndex === null) {
-        return state;
-      }
-
-      return state.setIn(
-        ['response', 'results', 'entities', entityIndex, 'movie', 'inBookmarks'],
-        action.response.data.inBookmarks
-      );
+    if (!state.getIn(['response', 'results', 'entities'])) {
+      return state;
     }
 
-    return state;
+    return state.updateIn(
+      ['response', 'results', 'entities'],
+      (entities) => entities.map((entity) => {
+        if (entity.getIn(['movie', 'id']) === action.response.data.movie_id) {
+          return entity.setIn(['movie', 'inBookmarks'], action.response.data.inBookmarks);
+        }
+
+        return entity;
+      })
+    );
   },
 
   [FEED_RESET]: () => initialState.mergeDeep({pending: true})

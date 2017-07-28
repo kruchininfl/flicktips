@@ -24,11 +24,13 @@ export default createReducer(initialState, {
     errors : null
   }),
 
-  [BOOKMARKS_GET_FINISHED]: (state, action) => state.mergeDeep({
-    pending : false,
-    errors  : null,
-    response: action.response.results
-  }),
+  [BOOKMARKS_GET_FINISHED]: (state, action) => {
+    return state.mergeDeep({
+      pending : false,
+      errors  : null,
+      response: action.response.results
+    }).set('response', action.response.results);
+  },
 
   [BOOKMARKS_GET_ERROR]: (state, errors) => state.mergeDeep({errors}),
 

@@ -31,10 +31,9 @@ export default createReducer(initialState, {
   [PROFILE_LOADING_FINISH]: (state, action) => state.mergeDeep({
     pending : false,
     errors  : null,
-    votes   : action.response.votes,
     user    : action.response.user,
     isMyPage: action.response.isMyPage
-  }),
+  }).set('votes', action.response.votes),
 
   [PROFILE_ADD_VOTES_START]: (state) => state.mergeDeep({loading: true}),
 

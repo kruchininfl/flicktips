@@ -53,20 +53,23 @@
     position: absolute;
     width: 100%;
     left: 100%;
-    margin-left: -60px;
+    margin-left: -80px;
     top: 0;
     bottom: 0;
+    padding: 0 20px;
     transition: left 500ms;
+    box-sizing: border-box;
+    background: #ffffff;
 
-    &:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: -20px;
-        width: 20px;
-        background: #ffffff;
-    }
+    //&:before {
+    //    content: '';
+    //    position: absolute;
+    //    top: 0;
+    //    bottom: 0;
+    //    left: -20px;
+    //    width: 20px;
+    //    background: #ffffff;
+    //}
 
     > .movie-prev {
         height: 100%;

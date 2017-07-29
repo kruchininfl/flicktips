@@ -6,8 +6,8 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 
 var publicPath = 'http://flicktips.local:8050/public/assets';
-var cssName = process.env.NODE_ENV === 'production' ? 'styles.css' : 'styles.css';
-var jsName = process.env.NODE_ENV === 'production' ? 'bundle.js' : 'bundle.js';
+var cssName = process.env.NODE_ENV === 'cordova' ? 'styles-mobile.css' : 'styles.css';
+var jsName = process.env.NODE_ENV === 'cordova' ? 'bundle-mobile.js' : 'bundle.js';
 
 var plugins = [
   new webpack.DefinePlugin({

@@ -29,7 +29,7 @@ export default createReducer(initialState, {
       pending : false,
       errors  : null,
       response: action.response.results
-    }).set('response', action.response.results);
+    }).set('response', Immutable.fromJS(action.response.results));
   },
 
   [BOOKMARKS_GET_ERROR]: (state, errors) => state.mergeDeep({errors}),

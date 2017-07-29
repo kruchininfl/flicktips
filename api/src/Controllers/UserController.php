@@ -82,14 +82,20 @@ class UserController
             ]);
         }
 
+//        $votes = $app['user.repository']->getFriendsVotes($user['id'], $size, ($page - 1) * $size);
+        $votes = $app['user.repository']->getFriendsVotes($user['id'], $size * $page, 0);
+
+        // update last seen notifications
+        $sth = $app['pdo']->prepare('UPDATE user SET last_seen_notifications=NOW() WHERE id=:uid');
+        $sth->execute(['uid' => $user['id']]);
+
         return $app->json([
             'success' => true,
             'results' => [
                 'total' => $total,
                 'page' => (int) $page,
                 'pages' => ceil($total / $size),
-//                'entities' => $app['user.repository']->getFriendsVotes($user['id'], $size, ($page - 1) * $size)
-                'entities' => $app['user.repository']->getFriendsVotes($user['id'], $size * $page, 0)
+                'entities' => $votes
             ]
         ]);
     }

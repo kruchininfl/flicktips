@@ -33,7 +33,7 @@ export default createReducer(initialState, {
     errors  : null,
     user    : action.response.user,
     isMyPage: action.response.isMyPage
-  }).set('votes', action.response.votes),
+  }).set('votes', Immutable.fromJS(action.response.votes)),
 
   [PROFILE_ADD_VOTES_START]: (state) => state.mergeDeep({loading: true}),
 

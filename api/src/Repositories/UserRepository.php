@@ -58,6 +58,7 @@ class UserRepository {
         IF (movie_vote.vote = \'1\', true, false) AS movie_isNeutral,
         IF (movie_vote.vote = \'0\', true, false) AS movie_isDisliked,
         IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks,
+        IF (u.last_seen_notifications <= votes.timestamp, true, false) AS isNew,
         genre.id AS movie_genre_id, 
         genre.name AS movie_genre_name, 
         user.id AS user_id, 
@@ -76,7 +77,8 @@ class UserRepository {
         LEFT JOIN genre ON genre.id=movie_genre.genre_id
         LEFT JOIN movie_vote ON (movie_vote.user_id=:uid AND movie_vote.movie_id=movie.id)
         LEFT JOIN bookmark ON (bookmark.user_id=:uid AND bookmark.movie_id=movie.id)
-        LEFT JOIN user ON user.id= votes.user_id');
+        LEFT JOIN user ON user.id= votes.user_id
+        LEFT JOIN user u ON u.id = :uid');
         $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
         $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
         $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
@@ -98,6 +100,7 @@ class UserRepository {
             'movie_genre_id' => ['group' => 'movie_genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'id', 'type' => 'int'],
             'movie_genre_name' => ['group' => 'movie_genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'name'],
             'user_id' => ['type' => 'int'],
+            'isNew' => ['type' => 'bool']
         ]);
 
         $votes = array_map(function ($vote) {

@@ -15,7 +15,8 @@ const propTypes = {
   vote     : PropTypes.number.isRequired,
   timestamp: PropTypes.number.isRequired,
   movie    : PropTypes.any.isRequired,
-  user     : PropTypes.any.isRequired
+  user     : PropTypes.any.isRequired,
+  isNew    : PropTypes.bool.isRequired
 };
 
 class FriendsVote extends Component {
@@ -39,11 +40,11 @@ class FriendsVote extends Component {
   }
 
   render() {
-    const {vote, timestamp, movie, user} = this.props;
+    const {vote, timestamp, movie, user, isNew} = this.props;
     const {openedMovie} = this.state;
 
     return (
-      <div className="friend-vote">
+      <div className={'friend-vote' + (isNew ? ' m-new' : '')}>
         <Link to={'/user/' + user.id} className="friend-vote__main">
           <div className="friend-vote__main-left">
             <div

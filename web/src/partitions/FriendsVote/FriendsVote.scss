@@ -4,6 +4,21 @@
     height: 80px;
     overflow: hidden;
     position: relative;
+
+    &.m-new {
+        &:after {
+            content: '';
+            position: absolute;
+            background: #ed6767;
+            width: 5px;
+            height: 5px;
+            top: -16px;
+            bottom: 0;
+            left: 8px;
+            margin: auto;
+            border-radius: 50%;
+        }
+    }
 }
 .friend-vote__main {
     padding-right: 75px;
@@ -111,7 +126,7 @@
 .friend-vote__movie-toggle {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 20px;
     bottom: 0;
     width: 45px;
 }

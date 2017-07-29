@@ -1,6 +1,7 @@
 import React      from 'react';
 import ReactDOM   from 'react-dom';
-import {browserHistory, Router} from 'react-router';
+import {browserHistory, Router, useRouterHistory} from 'react-router';
+import {createHashHistory} from 'history';
 import routes from './routes';
 import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
@@ -14,9 +15,15 @@ function asyncRender(props) {
   return <ReduxAsyncConnect {...props} />;
 }
 
+let appHistory = browserHistory;
+
+if (process.env.NODE_ENV === 'cordova') {
+  appHistory = useRouterHistory(createHashHistory)({queryKey: false});
+}
+
 const component = (
   <Provider store={store}>
-    <Router history={browserHistory} render={asyncRender}>
+    <Router history={appHistory} render={asyncRender}>
       {routes(store)}
     </Router>
   </Provider>

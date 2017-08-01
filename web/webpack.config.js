@@ -5,7 +5,7 @@ var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 
-var publicPath = 'http://flicktips.local:8050/public/assets';
+var publicPath = 'https://flicktips.local:8050/public/assets';
 var cssName = process.env.NODE_ENV === 'cordova' ? 'styles-mobile.css' : 'styles.css';
 var jsName = process.env.NODE_ENV === 'cordova' ? 'bundle-mobile.js' : 'bundle.js';
 

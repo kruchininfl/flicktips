@@ -51,7 +51,7 @@ class OAuthUserInfoListener implements EventSubscriberInterface
         $callback = isset($config['user_callback']) && is_callable($config['user_callback']) ? $config['user_callback'] : array($this, 'defaultUserCallback');
 
         if (isset($config['user_endpoint'])) {
-            $rawUserInfo = json_decode($oauthService->request($config['user_endpoint']), true);
+            $rawUserInfo = json_decode($oauthService->request(is_callable($config['user_endpoint']) ? $config['user_endpoint']($token) : $config['user_endpoint']), true);
         }
         call_user_func($callback, $token, $rawUserInfo, $oauthService);
     }

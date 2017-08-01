@@ -24,20 +24,20 @@ $app->before(function (Request $request) {
 });
 
 // Please set to false in a production environment
-//$app['debug'] = true;
-//ini_set('display_errors', 1);
+$app['debug'] = true;
+ini_set('display_errors', 1);
 
 //register an error handler
-//Symfony\Component\Debug\ErrorHandler::register();
-//$app->error(function (\Exception $e, $code) use ($app) {
-//
-//    $error = array(
-//        'code' => $e->getCode(),
-//        'message' => $e->getMessage()
-//    );
-//
-//    return $app->json($error, 200);
-//});
+Symfony\Component\Debug\ErrorHandler::register();
+$app->error(function (\Exception $e, $code) use ($app) {
+
+    $error = array(
+        'code' => $e->getCode(),
+        'message' => $e->getMessage()
+    );
+
+    return $app->json($error, 200);
+});
 
 //$app->register(new Silex\Provider\MonologServiceProvider(), array(
 //    'monolog.logfile' => __DIR__.'/log/prod.log',

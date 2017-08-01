@@ -6,7 +6,7 @@
   "scripts": {
     "build": "set NODE_ENV=production&& webpack -p",
     "build-cordova": "set NODE_ENV=cordova&& webpack -p",
-    "webpack-devserver": "webpack-dev-server --debug --hot --devtool source-map --output-pathinfo --watch --colors --inline --content-base public --port 8050 --host 0.0.0.0 --public flicktips.local:8050",
+    "webpack-devserver": "webpack-dev-server --debug --hot --devtool source-map --output-pathinfo --watch --colors --inline --content-base public --port 8050 --host 0.0.0.0 --public flicktips.local:8050 --https",
     "nodemon": "set NODE_PATH=./src&& nodemon server.js",
     "server": "NODE_PATH=./src NODE_ENV='production' node server.js"
   },

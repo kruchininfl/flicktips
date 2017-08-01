@@ -1,5 +1,4 @@
 import config from 'config';
-import {fetch} from 'redux-oauth';
 import request from 'superagent';
 import superagentJsonapify from 'superagent-jsonapify';
 import keys from 'lodash/keys';
@@ -152,12 +151,11 @@ export default {
           if (err.status === 401 && !skipAuthCheck) {
             dispatch(openSignInPopup());
           }
-        })
-        .send(data);
+        });
 
       if (data) {
         if (method === 'GET') {
-          req.query(data);
+          req.query(data).send();
         } else {
           req.send(data);
         }
@@ -169,10 +167,6 @@ export default {
 
       return req;
     };
-  },
-
-  getNotifications() {
-    return fetch('notifications/');
   },
 
   search(query) {

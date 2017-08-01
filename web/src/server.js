@@ -9,12 +9,13 @@ import configureStore from './redux/configureStore';
 import cookieParser from 'cookie-parser';
 import {getHeaders, initialize} from 'redux-oauth';
 import {ReduxAsyncConnect, loadOnServer} from 'redux-connect';
-// import https from 'https';
-// import fs from 'fs';
+import request from 'request';
+import https from 'https';
+import fs from 'fs';
 
 const staticVersion = '6';
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 
 app.use(cookieParser());
 
@@ -24,44 +25,94 @@ if (process.env.NODE_ENV !== 'productions') {
 
 app.use((req, res) => {
   const store = configureStore();
+  const referer = req.header('Referer');
 
-  store.dispatch(initialize(Object.assign({}, config.oAuth, {
-    currentLocation: req.url,
-    cookies        : req.cookies
-  }))).then(() => {
-    match({routes: routes(store), location: req.url}, (error, redirectLocation, renderProps) => {
-      if (redirectLocation) { // Если необходимо сделать redirect
-        return res.redirect(301, redirectLocation.pathname + redirectLocation.search);
-      }
+  if (referer === config.vkAppUrl) {
+    const {auth_key, viewer_id: user_id} = req.query;
+    const auth_origin_url = req.protocol + '://' + req.get('host');
 
-      if (error) { // Произошла ошибка любого рода
-        return res.status(500).send(error.message);
-      }
+    if (!auth_key || !user_id) {
+      return res.redirect(301, '/');
+    }
 
-      if (!renderProps) { // Мы не определили путь, который бы подошел для URL
-        return res.status(404).send('Not found');
-      }
+    const headers = {
+      'Cookie': request.cookie('XDEBUG_SESSION=xdebug')
+    };
 
-      loadOnServer({...renderProps, store})
-        .then(() => {
-          const componentHTML = ReactDom.renderToString(
-            <Provider store={store}>
-              <RouterContext {...renderProps} />
-            </Provider>
-          );
+    const options = {
+      url      : config.oAuth.backend.apiUrl + '/api/app/authVk/',
+      method   : 'GET',
+      headers: headers,
+      jar      : true,
+      strictSSL: false,
+      qs       : {auth_key, user_id, auth_origin_url}
+    };
 
-          const state = store.getState();
+    request(options, (e, response) => {
+      return res.status(200).send(response.body);
+    });
+  } else {
+    const auth_token = req.query.auth_token;
+    const uid = req.query.uid;
+    let cookies = req.cookies;
 
-          res.cookie('authHeaders', JSON.stringify(getHeaders(state)), {maxAge: 3600 * 24 * 30 * 1000});
-
-          return res.end(renderHTML(componentHTML, state));
+    if (auth_token && uid) {
+      cookies = Object.assign({}, cookies, {
+        'authHeaders': JSON.stringify({
+          'token-type'  : 'Bearer',
+          'access-token': auth_token,
+          'uid'         : uid
         })
-        .catch(err => {
-          console.log(err.stack);
-          res.end(err.message);
-        });
-    })
+      });
+    }
+
+    store.dispatch(initialize(Object.assign({}, config.oAuth, {
+      currentLocation: req.url,
+      cookies        : cookies
+    }))).then(() => {
+      match({routes: routes(store), location: req.url}, (error, redirectLocation, renderProps) => {
+        if (redirectLocation) { // Если необходимо сделать redirect
+          return res.redirect(301, redirectLocation.pathname + redirectLocation.search);
+        }
+
+        if (error) { // Произошла ошибка любого рода
+          return res.status(500).send(error.message);
+        }
+
+        if (!renderProps) { // Мы не определили путь, который бы подошел для URL
+          return res.status(404).send('Not found');
+        }
+
+        loadOnServer({...renderProps, store})
+          .then(() => {
+            const componentHTML = ReactDom.renderToString(
+              <Provider store={store}>
+                <RouterContext {...renderProps} />
+              </Provider>
+            );
+
+            const state = store.getState();
+
+            res.cookie('authHeaders', JSON.stringify(getHeaders(state)), {maxAge: 3600 * 24 * 30 * 1000});
+
+            return res.end(renderHTML(componentHTML, state));
+          })
+          .catch(err => {
+            console.log(err.stack);
+            res.end(err.message);
+          });
+      })
+    });
+  }
+
+  const readyToRender = new Promise((resolve, reject) => {
+    if (referer === config.vkAppUrl) {
+
+    } else {
+      resolve();
+    }
   });
+
 });
 
 function renderHTML(componentHTML, initialState) {
@@ -92,24 +143,26 @@ function renderHTML(componentHTML, initialState) {
 
 const PORT = process.env.PORT || 3001;
 
-// const httpsOptions = {
-//   key: fs.readFileSync('./src/server.key').toString(),
-//   cert: fs.readFileSync('./src/server.crt').toString(),
-//   passphrase: '422673',
-//   ciphers: 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-SHA384',
-//   honorCipherOrder: true,
-//   secureProtocol: 'TLSv1_2_method'
-// };
-//
-// const server = https.createServer(httpsOptions, app).listen(PORT, () => {
-//   console.log(`Server listening on: ${PORT}`);
-// });
+if (process.env.NODE_ENV === 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server listening on: ${PORT}`);
+  });
+} else {
+  const httpsOptions = {
+    key             : fs.readFileSync('./src/server.key').toString(),
+    cert            : fs.readFileSync('./src/server.crt').toString(),
+    passphrase      : '422673',
+    ciphers         : 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-SHA384',
+    honorCipherOrder: true,
+    secureProtocol  : 'TLSv1_2_method'
+  };
 
-app.listen(PORT, () => {
-  console.log(`Server listening on: ${PORT}`);
-});
+  https.createServer(httpsOptions, app).listen(PORT, () => {
+    console.log(`Server listening on: ${PORT}`);
+  });
+}
 
 process.on('unhandledRejection', function (reason, p) {
-  console.log("Unhandled Rejection:", reason.stack);
+  console.log('Unhandled Rejection:', reason.stack);
   process.exit(1);
 });

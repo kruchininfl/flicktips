@@ -44,7 +44,7 @@ class MyOAuthServiceRegistry extends OAuthServiceRegistry
      *
      * @return ServiceInterface
      */
-    protected function createService($service, $authOriginUrl = '')
+    public function createService($service, $authOriginUrl = '')
     {
         if (!isset($this->config[$service])) {
             throw new \InvalidArgumentException(sprintf('OAuth configuration not defined for the "%s" service.', $service));

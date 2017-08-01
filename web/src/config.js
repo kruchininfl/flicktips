@@ -3,10 +3,11 @@ const TMDB_POSTER_PATH = '//image.tmdb.org/t/p';
 const config = {
   apiUrl: 'https://flick.tips/api',
 
+  vkAppUrl: 'https://vk.com/app6127205_4197873',
+
   oAuth: {
     backend: {
       apiUrl             : 'https://flick.tips',
-      // apiUrl           : 'https://redux-oauth-backend.herokuapp.com',
       authProviderPaths  : {
         vkontakte: '/auth/vkontakte',
         facebook : '/auth/facebook'

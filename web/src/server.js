@@ -30,17 +30,17 @@ app.use((req, res) => {
   const store = configureStore();
   const referer = req.header('Referer');
 
-  if (referer.indexOf(config.vkAppUrl) === 0) {
+  if (referer && referer.indexOf(config.vkAppUrl) === 0) {
     const {auth_key, viewer_id: user_id} = req.query;
-    const auth_origin_url = req.protocol + '://' + req.get('host');
+    const auth_origin_url = 'https://' + req.get('host') + '/';
 
     if (!auth_key || !user_id) {
       return res.redirect(301, '/');
     }
 
-    // const headers = {
-    //   'Cookie': request.cookie('XDEBUG_SESSION=xdebug')
-    // };
+    const headers = {
+      'Cookie': request.cookie('XDEBUG_SESSION=xdebug')
+    };
 
     const options = {
       url      : config.oAuth.backend.apiUrl + '/api/app/authVk/',

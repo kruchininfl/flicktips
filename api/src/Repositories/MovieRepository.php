@@ -109,4 +109,56 @@ class MovieRepository {
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
         ]);
     }
+
+    public function getTrends($limit = null, $userId = null) {
+        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked';
+        if ($userId) {
+            $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+            IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
+            IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
+        }
+        $query .= ' FROM 
+            (SELECT 
+                COUNT(*) AS sum_total,
+                movie_vote.* FROM movie_vote
+                GROUP BY movie_id 
+                ORDER BY 
+                    SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 1 DAY), 1, 0)) DESC,
+                    SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 2 DAY), 1, 0)) DESC,
+                    SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 3 DAY), 1, 0)) DESC,
+                    SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY), 1, 0)) DESC,
+                    sum_total DESC
+                LIMIT :limit
+            ) votes 
+            LEFT JOIN movie ON movie.id = votes.movie_id
+            LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id 
+            LEFT JOIN genre ON genre.id=movie_genre.genre_id';
+        if ($userId) {
+            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=:uid
+            LEFT JOIN bookmark ON (bookmark.user_id=:uid AND bookmark.movie_id=movie.id)';
+        }
+
+        $sth = $this->pdo->prepare($query);
+        if ($userId) {
+            $sth->bindValue(':uid', (int) $userId, \PDO::PARAM_INT);
+        }
+        $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        return $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'likes' => ['type' => 'int'],
+            'neutral' => ['type' => 'int'],
+            'dislikes' => ['type' => 'int'],
+            'isLiked' => ['type' => 'bool'],
+            'isNeutral' => ['type' => 'bool'],
+            'isDisliked' => ['type' => 'bool'],
+            'inBookmarks' => ['type' => 'bool'],
+            'tmdb_popularity' => ['type' => 'float'],
+            'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
+        ]);
+    }
 }

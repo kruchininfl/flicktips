@@ -5,6 +5,7 @@ $app->options('{anything}', function () {
 
 $app->get('/api/', '\Controllers\IndexController::index');
 $app->get('/api/search/{query}', '\Controllers\IndexController::search')->value('query', false);
+$app->get('/api/get_trends/', '\Controllers\IndexController::getTrends');
 
 $app->get('/api/votes/user/{uid}', '\Controllers\IndexController::getVotes')->value('uid', false);
 

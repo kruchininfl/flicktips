@@ -40,6 +40,18 @@ body {
     justify-content: center;
     flex-direction: column;
     color: #c0c0c0;
+
+    .layout.m-vk-app & {
+        display: block;
+        width: 300px;
+        height: 250px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+    }
 }
 .page-ph__icn {
     font-size: 72px;
@@ -469,6 +481,7 @@ html, body, .react-view, .layout {
     flex-direction: column;
 
     .layout.m-vk-app & {
+        max-width: 807px;
         min-height: 0;
         height: auto;
         overflow-y: auto;
@@ -560,6 +573,18 @@ html, body, .react-view, .layout {
     font-size: 10px;
     position: relative;
     top: 18px;
+}
+.footer__mail {
+    float: left;
+    font-size: 14px;
+    position: relative;
+    top: 18px;
+    text-decoration: none;
+    border-bottom: 1px dashed;
+
+    &:hover {
+        text-decoration: none;
+    }
 }
 .footer__logo {
     font-size: 16px;

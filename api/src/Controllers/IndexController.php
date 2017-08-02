@@ -99,11 +99,33 @@ class IndexController
         ]);
     }
 
-    public function getNotifications(Request $request, Application $app)
+    public function getTrends(Request $request, Application $app)
     {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        $totalSth = $app['pdo']->query('SELECT COUNT(DISTINCT movie_id) AS num FROM movie_vote');
+        $total = intval($totalSth->fetch()['num']);
+
+        if ($total == 0) {
+            return $app->json([
+                'success' => true,
+                'results' => [
+                    'total' => $total,
+                    'entities' => []
+                ]
+            ]);
+        }
+
+        $movies = $app['movie.repository']->getTrends(TRENDS_LIST_SIZE, $user ? $user['id'] : null);
+
         return $app->json([
-            'payload' => [
-                'time' => new DateTimeResult()
+            'success' => true,
+            'results' => [
+                'total' => $total,
+                'entities' => $movies
             ]
         ]);
     }

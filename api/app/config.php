@@ -12,3 +12,4 @@ define('VOTES_LIST_SIZE', 24);
 define('FRIENDS_VOTES_LIST_SIZE', 24);
 define('FRIENDS_LIST_SIZE', 24);
 define('BOOKMARKS_LIST_SIZE', 24);
+define('TRENDS_LIST_SIZE', 24);

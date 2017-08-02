@@ -53,6 +53,7 @@ class App extends Component {
 
         <div className="footer">
           <div className="wrapper">
+            <a href="mailto:support@flick.tips" className="footer__mail">support@flick.tips</a>
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>
         </div>

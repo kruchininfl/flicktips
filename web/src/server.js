@@ -14,7 +14,7 @@ import https from 'https';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 
-const staticVersion = '6';
+const staticVersion = '7';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 
@@ -30,7 +30,7 @@ app.use((req, res) => {
   const store = configureStore();
   const referer = req.header('Referer');
 
-  if (referer === config.vkAppUrl) {
+  if (referer.indexOf(config.vkAppUrl) === 0) {
     const {auth_key, viewer_id: user_id} = req.query;
     const auth_origin_url = req.protocol + '://' + req.get('host');
 

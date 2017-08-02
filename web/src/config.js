@@ -3,7 +3,7 @@ const TMDB_POSTER_PATH = '//image.tmdb.org/t/p';
 const config = {
   apiUrl: 'https://flick.tips/api',
 
-  vkAppUrl: 'https://vk.com/app6127205_4197873',
+  vkAppUrl: 'https://vk.com/app6127205',
 
   oAuth: {
     backend: {

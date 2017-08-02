@@ -8,10 +8,11 @@ import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
 import cookieParser from 'cookie-parser';
 import {getHeaders, initialize} from 'redux-oauth';
-import {ReduxAsyncConnect, loadOnServer} from 'redux-connect';
+import {loadOnServer} from 'redux-connect';
 import request from 'request';
 import https from 'https';
 import fs from 'fs';
+import {setAsVkApp} from './redux/actions/appActions';
 
 const staticVersion = '6';
 const app = express();
@@ -22,6 +23,8 @@ app.use(cookieParser());
 if (process.env.NODE_ENV !== 'productions') {
   app.use('/public', express.static(__dirname + '/../public'));
 }
+
+let isVkApp = false;
 
 app.use((req, res) => {
   const store = configureStore();
@@ -35,20 +38,21 @@ app.use((req, res) => {
       return res.redirect(301, '/');
     }
 
-    const headers = {
-      'Cookie': request.cookie('XDEBUG_SESSION=xdebug')
-    };
+    // const headers = {
+    //   'Cookie': request.cookie('XDEBUG_SESSION=xdebug')
+    // };
 
     const options = {
       url      : config.oAuth.backend.apiUrl + '/api/app/authVk/',
       method   : 'GET',
-      headers: headers,
+      // headers: headers,
       jar      : true,
       strictSSL: false,
       qs       : {auth_key, user_id, auth_origin_url}
     };
 
     request(options, (e, response) => {
+      isVkApp = true;
       return res.status(200).send(response.body);
     });
   } else {
@@ -64,6 +68,8 @@ app.use((req, res) => {
           'uid'         : uid
         })
       });
+
+      store.dispatch(setAsVkApp());
     }
 
     store.dispatch(initialize(Object.assign({}, config.oAuth, {
@@ -104,15 +110,6 @@ app.use((req, res) => {
       })
     });
   }
-
-  const readyToRender = new Promise((resolve, reject) => {
-    if (referer === config.vkAppUrl) {
-
-    } else {
-      resolve();
-    }
-  });
-
 });
 
 function renderHTML(componentHTML, initialState) {
@@ -133,6 +130,7 @@ function renderHTML(componentHTML, initialState) {
           </script>
       </head>
       <body>
+        ${isVkApp ? `<script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>` : ``}
         ${process.env.NODE_ENV !== 'production' ? `<div id="dev-tools"></div>` : ``}
         <div class="react-view" id="react-view">${componentHTML}</div>
         <script type="application/javascript" src="${assetUrl}/public/assets/bundle.js${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}"></script>

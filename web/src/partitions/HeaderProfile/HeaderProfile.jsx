@@ -9,6 +9,7 @@ import './HeaderProfile.scss';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
+  isVkApp : PropTypes.bool,
   user    : PropTypes.any
 };
 
@@ -70,9 +71,11 @@ class HeaderProfile extends Component {
                     <li><Link to={'/user/' + id} className="header-profile__menu-link">Мои оценки</Link></li>
                   </ul>
 
-                  <div className="header-profile__menu-links">
-                    <li><span onClick={this.handleSignOut} className="header-profile__menu-link">Выйти</span></li>
-                  </div>
+                  {!this.props.isVkApp
+                    ? <div className="header-profile__menu-links">
+                      <li><span onClick={this.handleSignOut} className="header-profile__menu-link">Выйти</span></li>
+                    </div>
+                    : ''}
                 </div>
               </div>
             </div>
@@ -87,8 +90,9 @@ HeaderProfile.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const user = getUserModel(state);
+  const isVkApp = state.app.get('isVkApp');
 
-  return {user};
+  return {user, isVkApp};
 }
 
 export default connect(mapStateToProps)(HeaderProfile);

@@ -199,9 +199,12 @@ dl.unstyled dd {
 
     .p-signin,
     .header,
-    .header-search__result-wrap {
+    .header-search__result-wrap,
+    .layout.m-vk-app .container,
+    .layout.m-vk-app .footer {
       right: 30%;
     }
   }
+
 }
 /* </editor-fold> */

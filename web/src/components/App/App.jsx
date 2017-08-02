@@ -7,17 +7,29 @@ import HeaderSearch from 'partitions/HeaderSearch';
 import HeaderProfile from 'partitions/HeaderProfile';
 
 import './App.scss';
+import {connect} from 'react-redux';
+
+const VK = typeof window !== 'undefined' ? window.VK : null;
 
 const propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
+  isVkApp : PropTypes.bool
 };
 
 class App extends Component {
+  componentDidMount() {
+    if (this.props.isVkApp) {
+      VK.init(() => {
+        VK.callMethod('resizeWindow', '100%', 'auto');
+      });
+    }
+  }
+
   render() {
     return (
-      <div className="layout">
+      <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
         <Helmet>
-          <meta charSet="utf-8"/>
+          <meta charSet="utf-8" />
           <title>FlickTips</title>
         </Helmet>
         <div className="header">
@@ -32,7 +44,10 @@ class App extends Component {
           </div>
         </div>
 
-        <div className="container">
+        <div
+          className="container"
+          ref={(ref) => this._container = ref}
+        >
           {this.props.children}
         </div>
 
@@ -48,4 +63,10 @@ class App extends Component {
 
 App.propTypes = propTypes;
 
-export default App;
+function mapStateToProps(state) {
+  const isVkApp = state.app.get('isVkApp');
+
+  return {isVkApp};
+}
+
+export default connect(mapStateToProps)(App);

@@ -8,6 +8,7 @@ import './HomePage.scss';
 import Button from '../Gui/Button';
 import {isUserSignedIn} from '../../redux/models/user';
 import SignInPage from '../SignInPage/SignInPage';
+import InviteButton from '../../partitions/VkApp/InviteButton';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -81,6 +82,7 @@ class HomePage extends Component {
       return (<div className="page-ph">
         <div className="page-ph__icn"><i className="icn icn_list"/></div>
         <div className="page-ph__text">Ваша лента пока пуста</div>
+        <InviteButton />
       </div>);
     }
 

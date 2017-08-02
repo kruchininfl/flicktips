@@ -383,6 +383,13 @@ textarea {
         opacity: 0;
     }
 }
+
+.invite-btn {
+    width: 220px;
+    display: block;
+    text-align: center;
+    margin: 20px auto;
+}
 /* </editor-fold> */
 
 /* <editor-fold desc="Spinners"> */
@@ -453,10 +460,6 @@ html, body, .react-view, .layout {
 .container {
     max-width: 768px;
     margin: 0 auto;
-    box-sizing: border-box;
-}
-
-.container {
     min-height: 100%;
     box-sizing: border-box;
     padding-top: 70px;
@@ -464,6 +467,19 @@ html, body, .react-view, .layout {
     background: #ffffff;
     display: flex;
     flex-direction: column;
+
+    .layout.m-vk-app & {
+        min-height: 0;
+        height: auto;
+        overflow-y: auto;
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 70px;
+        bottom: 50px;
+        padding: 0;
+    }
 }
 
 .wrapper {
@@ -531,6 +547,13 @@ html, body, .react-view, .layout {
     color: #f1f1ef;
     height: 50px;
     margin-top: -50px;
+
+    .layout.m-vk-app & {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
 }
 .footer__copy {
     float: left;

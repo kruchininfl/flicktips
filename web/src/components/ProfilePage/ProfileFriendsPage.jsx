@@ -7,6 +7,7 @@ import {getUserModel} from '../../redux/models/user';
 import ProfileLayout from './ProfileLayout';
 import Button from '../Gui/Button';
 import {browserHistory} from 'react-router';
+import InviteButton from '../../partitions/VkApp/InviteButton';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -105,6 +106,7 @@ class ProfileFriendsPage extends ProfileLayout {
           <div className="page-ph">
             <div className="page-ph__icn"><img className="icn-forever-alone" src="/public/img/forever-alone.svg" alt="" /></div>
             <div className="page-ph__text">У вас пока нет друзей</div>
+            <InviteButton />
           </div>
         </div>
       );
@@ -122,6 +124,8 @@ class ProfileFriendsPage extends ProfileLayout {
           <Button onClick={this.handleLoadData} loading={loading} additionClass="btn_more">Показать еще</Button>
           : ''
         }
+
+        <InviteButton />
       </div>
     );
   }

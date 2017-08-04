@@ -1,29 +1,24 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {asyncConnect}  from 'redux-connect';
-import {getFriendsVotes, loadVotes, resetFeed} from 'redux/actions/feedActions';
-import FriendsVote from 'partitions/FriendsVote/FriendsVote';
-
 import './HomePage.scss';
+import {asyncConnect}  from 'redux-connect';
+import {getTrends, addTrends} from 'redux/actions/trendsActions';
 import Button from '../Gui/Button';
-import {isUserSignedIn} from '../../redux/models/user';
-import SignInPage from '../SignInPage/SignInPage';
-import InviteButton from '../../partitions/VkApp/InviteButton';
+import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
 
 const propTypes = {
-  dispatch    : PropTypes.func,
-  pending     : PropTypes.bool,
-  loaded      : PropTypes.bool,
-  loading     : PropTypes.bool,
-  response    : PropTypes.any,
-  userSignedIn: PropTypes.bool
+  dispatch: PropTypes.func,
+  pending : PropTypes.bool,
+  loaded  : PropTypes.bool,
+  loading : PropTypes.bool,
+  response: PropTypes.any
 };
 
 @asyncConnect([
   {
-    key    : 'feed',
+    key    : 'trends',
     promise: ({store}) => {
-      return store.dispatch(getFriendsVotes());
+      return store.dispatch(getTrends());
     }
   }
 ], mapStateToProps)
@@ -42,21 +37,7 @@ class HomePage extends Component {
       return false;
     }
 
-    this.props.dispatch(getFriendsVotes());
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (!this.props.userSignedIn && nextProps.userSignedIn) {
-      this.props.dispatch(getFriendsVotes());
-    }
-
-    if (this.props.userSignedIn && !nextProps.userSignedIn) {
-      this.props.dispatch(resetFeed());
-    }
-  }
-
-  componentWillUnmount() {
-    this.props.dispatch(resetFeed());
+    this.props.dispatch(getTrends());
   }
 
   handleLoadData() {
@@ -66,37 +47,43 @@ class HomePage extends Component {
       return false;
     }
 
-    this.props.dispatch(loadVotes(response.results.page + 1));
+    this.props.dispatch(addTrends(response.results.page + 1));
   }
 
-  static renderVotes(entities) {
+  renderMovies(entities) {
     return entities.map((entity, key) => {
       return (
-        <FriendsVote key={key} {...entity} />
+        <MoviePreview key={key}
+          dispatch={this.props.dispatch}
+          id={entity.id}
+          vote={entity.vote}
+          image={entity.tmdb_poster_path}
+          title={entity.title}
+          originalTitle={entity.original_title}
+          genres={entity.genres ? entity.genres.map((el) => el.name) : []}
+          date={entity.release_date || entity.first_air_date}
+          likes={entity.likes}
+          dislikes={entity.dislikes}
+          neutral={entity.neutral}
+          isLiked={entity.isLiked}
+          isDisliked={entity.isDisliked}
+          isNeutral={entity.isNeutral}
+          inBookmarks={entity.inBookmarks}
+        />
       );
     });
   }
 
-  static renderEmptyPage(userSignedIn) {
-    if (userSignedIn) {
-      return (<div className="page-ph">
-        <div className="page-ph__icn"><i className="icn icn_list"/></div>
-        <div className="page-ph__text">Ваша лента пока пуста</div>
-        <InviteButton />
-      </div>);
-    }
-
-    return <SignInPage />;
-  }
-
   render() {
-    const {response, loading, userSignedIn} = this.props;
+    const {response, loading} = this.props;
 
     return (
-      <div className="feed">
+      <div className="trends">
+        <h1 className="title">Популярные фильмы</h1>
+
         {response && response.results && response.results.total
-          ? HomePage.renderVotes(response.results.entities)
-          : HomePage.renderEmptyPage(userSignedIn)
+          ? this.renderMovies(response.results.entities)
+          : ''
         }
 
         {response && response.results && response.results.total && response.results.pages > response.results.page ?
@@ -111,11 +98,10 @@ class HomePage extends Component {
 HomePage.propTypes = propTypes;
 
 function mapStateToProps(state) {
-  const {pending, loading, response} = state.feed.toJS();
-  const loaded = state.reduxAsyncConnect.loadState.feed && state.reduxAsyncConnect.loadState.feed.loaded;
-  const userSignedIn = isUserSignedIn(state);
+  const {pending, loading, response} = state.trends.toJS();
+  const loaded = state.reduxAsyncConnect.loadState.trends && state.reduxAsyncConnect.loadState.trends.loaded;
 
-  return {pending, loading, loaded, response, userSignedIn};
+  return {pending, loading, loaded, response};
 }
 
 export default HomePage;

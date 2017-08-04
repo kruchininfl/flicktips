@@ -32,6 +32,22 @@ body {
     }
 }
 
+.title {
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 14px;
+    color: #000000;
+    background: #ffffff;
+    margin: 0;
+    padding: 10px 0;
+    text-align: center;
+    border: {
+        width: 1px 0;
+        color: #f1f1f1;
+        style: solid;
+    }
+}
+
 .page-ph {
     display: flex;
     height: 100%;

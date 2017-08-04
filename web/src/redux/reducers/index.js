@@ -7,10 +7,12 @@ import {authStateReducer} from 'redux-oauth';
 import {reducer as reduxAsyncConnect} from 'redux-connect';
 import feedReducer from './feedReducer';
 import profileBookmarksReducer from './profileBookmarksReducer';
+import trendsReducer from './trendsReducer';
 
 export default combineReducers({
   app          : appReducer,
   feed         : feedReducer,
+  trends       : trendsReducer,
   auth         : authStateReducer,
   search       : searchReducer,
   profile      : profileReducer,

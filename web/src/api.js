@@ -173,6 +173,10 @@ export default {
     return this._fetch('search/' + query);
   },
 
+  getTrends(page = 1) {
+    return this._fetch('get_trends/', {page}, undefined, true);
+  },
+
   toggleVote(entityId, vote) {
     return this._fetch('user/vote/', {
       id: entityId,

@@ -8,6 +8,7 @@ import HeaderProfile from 'partitions/HeaderProfile';
 
 import './App.scss';
 import {connect} from 'react-redux';
+import HeaderNotifications from '../../partitions/HeaderNotifications/HeaderNotifications';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
@@ -38,6 +39,7 @@ class App extends Component {
 
             <div className="header__right">
               <HeaderSearch />
+              <HeaderNotifications />
               <SignInButton />
               <HeaderProfile />
             </div>

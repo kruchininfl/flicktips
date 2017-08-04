@@ -1,0 +1,16 @@
+@import "../../components/base";
+
+.header-notifications__toggle {
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.header-notifications__list {
+    .friend-vote {
+        border-bottom: 1px solid #f1f1f1;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}

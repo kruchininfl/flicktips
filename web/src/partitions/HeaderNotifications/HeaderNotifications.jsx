@@ -8,6 +8,7 @@ import {isUserSignedIn} from '../../redux/models/user';
 import {getFriendsVotes, loadVotes} from '../../redux/actions/feedActions';
 import FriendsVote from '../FriendsVote/FriendsVote';
 import Button from '../../components/Gui/Button';
+import InviteButton from '../VkApp/InviteButton';
 
 const propTypes = {
   dispatch    : PropTypes.func.isRequired,
@@ -63,6 +64,7 @@ class HeaderNotifications extends Component {
     return (<div className="page-ph">
       <div className="page-ph__icn"><i className="icn icn_list"/></div>
       <div className="page-ph__text">Ваша лента пока пуста</div>
+      <InviteButton />
     </div>);
   }
 

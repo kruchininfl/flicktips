@@ -63,23 +63,38 @@
     bottom: 0;
     right: -375px;
     background: #ffffff;
-    overflow-y: auto;
     width: 375px;
     max-width: 100%;
     box-shadow: 0 0 10px 0 rgba(#000000, .2);
     transition: {
-        property: right;
+        property: transform;
         duration: 200ms;
         delay: 0ms;
     };
 
     .sidepanel.m-opened & {
-        right: 0;
+        transform: translateX(-375px);
         transition: {
-            property: right;
+            property: transform;
             duration: 300ms;
             delay: 200ms;
         };
+    }
+}
+.sidepanel__content {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+
+    .page-ph {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
 }
 .sidepanel__head {

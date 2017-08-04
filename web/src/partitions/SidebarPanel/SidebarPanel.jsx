@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import ScrollLock from 'react-scrolllock';
+// import ScrollLock from 'react-scrolllock';
 
 import './SidebarPanel.scss';
 
@@ -27,8 +27,6 @@ class SidebarPanel extends Component {
 
     return (
       <div className={'sidepanel' + (opened ? ' m-opened' : '')}>
-        {opened ? <ScrollLock /> : ''}
-
         <div
           onClick={this.handleClose}
           className="sidepanel__overlay overlay"

@@ -18,6 +18,102 @@ class MovieRepository {
         $this->pdo = $app['pdo'];
     }
 
+    public function getFilm($id, $userId = null) {
+        $query = 'SELECT 
+            movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked,
+            country.name AS country_name, country.id AS country_id,
+            CONCAT_WS(\'_\', people.id, `group`.id) AS people_field_group, people.id AS people_id, people.name AS people_name, people.original_name AS people_original_name, people.kp_photo AS people_photo, movie_people.order AS people_order, movie_people.description AS people_description, `group`.type AS people_group_type, `group`.title AS people_group_title';
+        if ($userId) {
+            $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+            IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
+            IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
+        }
+        $query .= ' FROM movie
+            LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id 
+            LEFT JOIN genre ON genre.id=movie_genre.genre_id
+            
+            LEFT JOIN movie_country ON movie_country.movie_id=movie.id 
+            LEFT JOIN country ON country.id=movie_country.country_id
+            
+            LEFT JOIN movie_people ON movie_people.movie_id=movie.id 
+            LEFT JOIN people ON people.id=movie_people.people_id
+            LEFT JOIN `group` ON `group`.id=movie_people.group_id';
+        if ($userId) {
+            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
+            LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
+        }
+        $query .= ' WHERE movie.id = ' . $id;
+
+        $sth = $this->pdo->prepare($query);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        if (!count($rows)) {
+            return null;
+        }
+
+
+        $movie = $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'likes' => ['type' => 'int'],
+            'neutral' => ['type' => 'int'],
+            'dislikes' => ['type' => 'int'],
+            'isLiked' => ['type' => 'bool'],
+            'isNeutral' => ['type' => 'bool'],
+            'isDisliked' => ['type' => 'bool'],
+            'inBookmarks' => ['type' => 'bool'],
+            'tmdb_popularity' => ['type' => 'float'],
+            'kp_rating_value' => ['type' => 'float'],
+            'kp_rating_count' => ['type' => 'int'],
+            'imdb_rating_value' => ['type' => 'float'],
+            'imdb_rating_count' => ['type' => 'int'],
+
+            'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
+
+            'country_id' => ['group' => 'countries', 'group_id_field' => 'country_id', 'rename' => 'id', 'type' => 'int'],
+            'country_name' => ['group' => 'countries', 'group_id_field' => 'country_id', 'rename' => 'name'],
+
+            'people_id' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'id', 'type' => 'int'],
+            'people_field_group' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'id_group'],
+            'people_name' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'name'],
+            'people_original_name' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'original_name'],
+            'people_photo' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'photo'],
+            'people_order' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'order', 'type' => 'int'],
+            'people_description' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'description'],
+            'people_group_type' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'group_type'],
+            'people_group_title' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'group_title']
+        ])[0];
+
+        unset($movie['kp_check_date']);
+        unset($movie['kp_error']);
+
+        // group staff
+        if (isset($movie['staff'])) {
+            usort($movie['staff'], function($a, $b) {
+                return $a['order'] - $b['order'];
+            });
+            $staff = array();
+            foreach($movie['staff'] as $key => $item)
+            {
+                $gtype = $item['group_type'];
+                $gtitle = $item['group_title'];
+
+                unset($item['group_type']);
+                unset($item['id_group']);
+                unset($item['group_title']);
+                unset($item['order']);
+
+                $staff[$gtype]['title'] = $gtitle;
+                $staff[$gtype]['people'][] = $item;
+            }
+            $movie['staff'] = $staff;
+        }
+
+        return $movie;
+    }
+
     public function findByUserId($requesterUid, $uid, $limit, $offset)
     {
         $query = 'SELECT id FROM movie_vote WHERE user_id = :uid ORDER BY movie_vote.timestamp DESC LIMIT :limit OFFSET :offset';

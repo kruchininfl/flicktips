@@ -2,9 +2,9 @@
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-require_once __DIR__.'/vendor/autoload.php';
-require_once __DIR__.'/kp/src/wielski/KinopoiskApi/Kinopoisk.php';
-require_once '../rediska/library/Rediska.php';
+require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/../kp/src/wielski/KinopoiskApi/Kinopoisk.php';
+require_once '/../../rediska/library/Rediska.php';
 
 $app = new Silex\Application();
 $kp = new \wielski\KinopoiskApi\Kinopoisk();

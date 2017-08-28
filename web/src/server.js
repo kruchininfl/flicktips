@@ -14,7 +14,7 @@ import https from 'https';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 
-const staticVersion = '9';
+const staticVersion = '10';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 

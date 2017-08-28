@@ -25,6 +25,8 @@ class HeaderNotifications extends Component {
     this.handleOpen = this.handleOpen.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
     this.closeSidebar = this.closeSidebar.bind(this);
+    this.renderVotes = this.renderVotes.bind(this);
+    this.renderEmptyPage = this.renderEmptyPage.bind(this);
 
     this.state = {
       opened: false
@@ -52,7 +54,7 @@ class HeaderNotifications extends Component {
   }
 
 
-  static renderVotes(entities) {
+  renderVotes(entities) {
     return entities.map((entity, key) => {
       return (
         <FriendsVote key={key} {...entity} />
@@ -60,10 +62,14 @@ class HeaderNotifications extends Component {
     });
   }
 
-  static renderEmptyPage() {
+  renderEmptyPage() {
+    if (this.props.pending) {
+      return false;
+    }
+
     return (<div className="page-ph">
       <div className="page-ph__icn"><i className="icn icn_list"/></div>
-      <div className="page-ph__text">Ваша лента пока пуста</div>
+      <div className="page-ph__text">Здесь будут отображаться оценки ваших друзей</div>
       <InviteButton />
     </div>);
   }
@@ -92,8 +98,8 @@ class HeaderNotifications extends Component {
           >
             <div className="header-notifications__list">
               {response && response.results && response.results.total
-                ? HeaderNotifications.renderVotes(response.results.entities)
-                : HeaderNotifications.renderEmptyPage()
+                ? this.renderVotes(response.results.entities)
+                : this.renderEmptyPage()
               }
             </div>
 

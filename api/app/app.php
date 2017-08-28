@@ -23,9 +23,9 @@ $app->before(function (Request $request) {
     }
 });
 
-// Please set to false in a production environment
-$app['debug'] = true;
-ini_set('display_errors', 1);
+$app['env'] = $_SERVER['HTTP_HOST'] == 'dev.flick.tips' ? 'dev' : 'prod';
+//$app['debug'] = true;
+//ini_set('display_errors', 1);
 
 //register an error handler
 Symfony\Component\Debug\ErrorHandler::register();

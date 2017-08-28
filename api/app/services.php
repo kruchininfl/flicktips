@@ -10,7 +10,7 @@ $app->register(
         'pdo.server'   => array(
             'driver'   => 'mysql',
             'host'     => 'localhost',
-            'dbname'   => 'flicktips',
+            'dbname'   => $app['env'] == 'prod' ? 'flicktips' : 'flicktips_test',
             'port'     => 3306,
             'user'     => 'flicktips',
             'password' => 'Aing6si',

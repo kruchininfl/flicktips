@@ -2,7 +2,7 @@
 
 namespace wielski\KinopoiskApi;
 
-require_once __DIR__.'/../../../../../rediska/library/Rediska.php';
+require_once __DIR__.'/../../../../rediska/library/Rediska.php';
 use Rediska;
 
 Class Kinopoisk
@@ -18,7 +18,7 @@ Class Kinopoisk
     private $proxyIp = null;
     private $proxyType = null;
 
-    public $enableSetProxyFromRedis = true;
+    public $enableSetProxyFromRedis = false;
 
     public $enableTorProxy = false;
 

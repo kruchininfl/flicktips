@@ -533,6 +533,12 @@ html, body, .react-view, .layout {
     > .wrapper {
         height: 100%;
     }
+
+    .layout.m-vk-app & {
+        background: #ffffff;
+        color: #333b41;
+        border-bottom: 1px solid #e7e8ec;
+    }
 }
 .header__loader {
     position: absolute;
@@ -589,6 +595,8 @@ html, body, .react-view, .layout {
         bottom: 0;
         left: 0;
         right: 0;
+        background: #ffffff;
+        color: #333b41;
     }
 }
 .footer__copy {

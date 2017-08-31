@@ -19,7 +19,7 @@ const selectMovie = async () => {
 
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
-    movie.id, movie.title,
+    movie.id, movie.title, movie.kp_id,
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 
@@ -146,6 +146,7 @@ const updateFilm = async (film) => {
       kp_rating_count    : film.kp_rating.count,
       imdb_rating_value  : film.imdb_rating.value,
       imdb_rating_count  : film.imdb_rating.count,
+      kp_error           : null,
       kp_check_date      : new Date()
     }, film.my_id]);
 
@@ -181,15 +182,15 @@ const worker = (mainResolve) => {
         return false;
       }
 
-      const {id, original_title, year} = result[0];
+      const {id, original_title, year, kp_id: dbKpId} = result[0];
 
       kpSearch(original_title, year).then(kpId => {
-        if (!kpId) {
+        if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
         } else {
-          Promise.all([id, getFilm(kpId), getFilmStaff(kpId)]).then(([my_id, film, staff]) => {
+          Promise.all([id, getFilm(kpId || dbKpId), getFilmStaff(kpId || dbKpId)]).then(([my_id, film, staff]) => {
             film.my_id = my_id;
 
             const countriesReady = insertCountries(film.countries);

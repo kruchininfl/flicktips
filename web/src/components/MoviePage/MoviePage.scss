@@ -37,11 +37,15 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  max-width: calc(100% - 105px);
 
   .movie-title,
-  .movie-genres,
-  .movie-c-d {
-    @include multiLineEllipsis(1.2em, 2);
+  .movie-ot {
+    overflow: auto;
+    white-space: normal;
+  }
+  .movie-ot {
+    display: inline;
   }
 }
 .movie__votes {

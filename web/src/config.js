@@ -1,8 +1,8 @@
 const TMDB_POSTER_PATH = '//image.tmdb.org/t/p';
 
 const config = {
-  apiUrl: 'http://dev.flick.tips:8888/api',
-  // apiUrl: 'https://flick.tips/api',
+  // apiUrl: 'http://dev.flick.tips:8888/api',
+  apiUrl: 'https://flick.tips/api',
 
   vkAppUrl: 'https://vk.com/app6127205',
 

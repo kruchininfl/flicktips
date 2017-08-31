@@ -1,0 +1,8 @@
+User-Agent: *
+Disallow: /api
+Disallow: /profile
+Disallow: /signin
+Disallow: /user
+Disallow: /404
+
+Host: https://flick.tips

@@ -5,6 +5,7 @@ import Helmet from 'react-helmet';
 import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
 import HeaderProfile from 'partitions/HeaderProfile';
+import LoadingBar from 'react-redux-loading-bar';
 
 import './App.scss';
 import {connect} from 'react-redux';
@@ -34,6 +35,7 @@ class App extends Component {
           <title>FlickTips</title>
         </Helmet>
         <div className="header">
+          <LoadingBar updateTime={100} className="header__loader" />
           <div className="wrapper">
             <IndexLink to="/" className="header__logo"><span className="icn icn_logo" /></IndexLink>
 

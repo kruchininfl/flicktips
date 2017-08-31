@@ -19,26 +19,26 @@ const initialState = Immutable.fromJS({
 });
 
 export default createReducer(initialState, {
-  [BOOKMARKS_GET_STARTED]: state => state.mergeDeep({
+  [BOOKMARKS_GET_STARTED]: state => state.merge({
     pending: true,
     errors : null
   }),
 
   [BOOKMARKS_GET_FINISHED]: (state, action) => {
-    return state.mergeDeep({
+    return state.merge({
       pending : false,
       errors  : null,
       response: action.response.results
     }).set('response', Immutable.fromJS(action.response.results));
   },
 
-  [BOOKMARKS_GET_ERROR]: (state, errors) => state.mergeDeep({errors}),
+  [BOOKMARKS_GET_ERROR]: (state, errors) => state.merge({errors}),
 
-  [BOOKMARKS_ADD_STARTED]: (state) => state.mergeDeep({loading: true}),
+  [BOOKMARKS_ADD_STARTED]: (state) => state.merge({loading: true}),
 
   [BOOKMARKS_ADD_FINISHED]: (state, action) => {
     action.response.results.entities = state.getIn(['response', 'entities']).toJS().concat(action.response.results.entities);
-    return state.mergeDeep({loading: false, response: action.response.results});
+    return state.merge({loading: false, response: action.response.results});
   },
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {

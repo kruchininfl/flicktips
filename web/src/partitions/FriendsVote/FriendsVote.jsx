@@ -11,12 +11,13 @@ import {Link} from 'react-router';
 import {getVoteIconClassById} from '../../helpers';
 
 const propTypes = {
-  dispatch : PropTypes.func.isRequired,
-  vote     : PropTypes.number.isRequired,
-  timestamp: PropTypes.number.isRequired,
-  movie    : PropTypes.any.isRequired,
-  user     : PropTypes.any.isRequired,
-  isNew    : PropTypes.bool.isRequired
+  dispatch    : PropTypes.func.isRequired,
+  vote        : PropTypes.number.isRequired,
+  timestamp   : PropTypes.number.isRequired,
+  movie       : PropTypes.any.isRequired,
+  user        : PropTypes.any.isRequired,
+  isNew       : PropTypes.bool.isRequired,
+  closeSidebar: PropTypes.func.isRequired
 };
 
 class FriendsVote extends Component {
@@ -25,18 +26,24 @@ class FriendsVote extends Component {
 
     this.handleToggleMovieVisibility = this.handleToggleMovieVisibility.bind(this);
     this.handleSendVote = this.handleSendVote.bind(this);
+    this.handleClickMovie = this.handleClickMovie.bind(this);
 
     this.state = {
       openedMovie: false
     };
   }
 
-  handleToggleMovieVisibility() {
+  handleToggleMovieVisibility(e) {
+    e.stopPropagation();
     this.setState({openedMovie: !this.state.openedMovie});
   }
 
   handleSendVote(entityId, vote) {
     this.props.dispatch(voteRequest(entityId, vote));
+  }
+
+  handleClickMovie() {
+    this.props.closeSidebar();
   }
 
   render() {
@@ -76,22 +83,8 @@ class FriendsVote extends Component {
           </div>
         </Link>
 
-        <div className={'friend-vote__movie' + (openedMovie ? ' m-active' : '')}>
-          <MoviePreview
-            id={movie.id}
-            image={movie.tmdb_poster_path}
-            title={movie.title}
-            originalTitle={movie.original_title}
-            genres={movie.genres ? movie.genres.map((el) => el.name) : []}
-            date={movie.release_date || movie.first_air_date}
-            likes={movie.likes}
-            dislikes={movie.dislikes}
-            neutral={movie.neutral}
-            isLiked={movie.isLiked}
-            isDisliked={movie.isDisliked}
-            isNeutral={movie.isNeutral}
-            inBookmarks={movie.inBookmarks}
-          />
+        <div onClick={this.handleClickMovie} className={'friend-vote__movie' + (openedMovie ? ' m-active' : '')}>
+          <MoviePreview movie={movie} />
           <div className="friend-vote__movie-toggle" onClick={this.handleToggleMovieVisibility} />
         </div>
       </div>

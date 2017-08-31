@@ -19,18 +19,18 @@ const initialState = Immutable.fromJS({
 });
 
 export default createReducer(initialState, {
-  [TRENDS_LOADING_START]: state => state.mergeDeep({
+  [TRENDS_LOADING_START]: state => state.merge({
     pending: true,
     errors : null
   }),
 
-  [TRENDS_LOADING_FINISH]: (state, action) => state.mergeDeep({
+  [TRENDS_LOADING_FINISH]: (state, action) => state.merge({
     pending : false,
     errors  : null,
     response: action.response
   }),
 
-  [TRENDS_ADD_START]: (state) => state.mergeDeep({loading: true}),
+  [TRENDS_ADD_START]: (state) => state.merge({loading: true}),
 
   [TRENDS_ADD_FINISH]: (state, action) => {
     return state

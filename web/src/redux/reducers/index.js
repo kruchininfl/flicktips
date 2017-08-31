@@ -8,6 +8,8 @@ import {reducer as reduxAsyncConnect} from 'redux-connect';
 import feedReducer from './feedReducer';
 import profileBookmarksReducer from './profileBookmarksReducer';
 import trendsReducer from './trendsReducer';
+import movieReducer from './movieReducer';
+import {loadingBarReducer} from 'react-redux-loading-bar';
 
 export default combineReducers({
   app          : appReducer,
@@ -18,5 +20,7 @@ export default combineReducers({
   profile      : profileReducer,
   userFriends  : profileFriendsReducer,
   userBookmarks: profileBookmarksReducer,
+  loadingBar   : loadingBarReducer,
+  movie        : movieReducer,
   reduxAsyncConnect
 });

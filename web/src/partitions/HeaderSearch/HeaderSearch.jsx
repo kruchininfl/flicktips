@@ -70,22 +70,7 @@ class HeaderSearch extends Component {
       return response.results.map((entity, key) => {
         return (
           <div key={key} className="header-search__result-item">
-            <MoviePreview
-              dispatch={this.props.dispatch}
-              id={entity.id}
-              image={entity.tmdb_poster_path}
-              title={entity.title}
-              originalTitle={entity.original_title}
-              genres={entity.genres ? entity.genres.map((el) => el.name) : []}
-              date={entity.release_date || entity.first_air_date}
-              likes={entity.likes}
-              dislikes={entity.dislikes}
-              neutral={entity.neutral}
-              isLiked={entity.isLiked}
-              isDisliked={entity.isDisliked}
-              isNeutral={entity.isNeutral}
-              inBookmarks={entity.inBookmarks}
-            />
+            <MoviePreview movie={entity} />
           </div>
         );
       });

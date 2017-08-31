@@ -32,12 +32,6 @@ class HomePage extends Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-
-    if (this.props.loaded) {
-      return false;
-    }
-
-    this.props.dispatch(getTrends());
   }
 
   handleLoadData() {
@@ -53,23 +47,7 @@ class HomePage extends Component {
   renderMovies(entities) {
     return entities.map((entity, key) => {
       return (
-        <MoviePreview key={key}
-          dispatch={this.props.dispatch}
-          id={entity.id}
-          vote={entity.vote}
-          image={entity.tmdb_poster_path}
-          title={entity.title}
-          originalTitle={entity.original_title}
-          genres={entity.genres ? entity.genres.map((el) => el.name) : []}
-          date={entity.release_date || entity.first_air_date}
-          likes={entity.likes}
-          dislikes={entity.dislikes}
-          neutral={entity.neutral}
-          isLiked={entity.isLiked}
-          isDisliked={entity.isDisliked}
-          isNeutral={entity.isNeutral}
-          inBookmarks={entity.inBookmarks}
-        />
+        <MoviePreview key={key} movie={entity} />
       );
     });
   }

@@ -3,101 +3,84 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import 'moment/locale/ru';
 import MovieStat from 'partitions/MovieStat';
+import MovieStatExternal from 'partitions/MovieStatExternal';
 import config from 'config';
 
 import './MoviePreview.scss';
 import {getVoteIconClassById} from '../../helpers';
+import {Link} from 'react-router';
 
 const propTypes = {
-  id           : PropTypes.number.isRequired,
-  image        : PropTypes.string,
-  title        : PropTypes.string,
-  originalTitle: PropTypes.string,
-  genres       : PropTypes.array,
-  date         : PropTypes.string,
-  vote         : PropTypes.number,
-  likes        : PropTypes.number,
-  dislikes     : PropTypes.number,
-  neutral      : PropTypes.number,
-  isLiked      : PropTypes.bool,
-  isDisliked   : PropTypes.bool,
-  isNeutral    : PropTypes.bool,
-  inBookmarks  : PropTypes.bool
-};
-
-const defaultProps = {
-  image        : null,
-  title        : null,
-  originalTitle: null,
-  genres       : [],
-  date         : null,
-  vote         : null,
-  likes        : 0,
-  dislikes     : 0,
-  neutral      : 0,
-  isLiked      : false,
-  isDisliked   : false,
-  isNeutral    : false,
-  inBookmarks  : false
+  movie  : PropTypes.any
 };
 
 class MoviePreview extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {};
   }
 
   render() {
+    const {movie} = this.props;
+
+    movie.genres = movie.genres ? movie.genres.map((el) => el.name || el) : [];
+    movie.date = movie.release_date || movie.first_air_date;
+
     return (
       <div className="movie-prev">
-        <div className="movie-prev__cover">
-          {this.props.image
-            ?
-              <div
-                style={{backgroundImage: `url(${config.tmdb.posterPath185 + this.props.image})`}}
-                className="movie-prev__cover-inn"
-              >
-                <img src={config.tmdb.posterPath185 + this.props.image}
-                  alt={this.props.title}
-                />
-              </div>
+        <Link to={'/movie/' + movie.id} className="movie-prev__link">подробнее</Link>
+
+        <div className="movie-cover movie-cover__prev">
+          {movie.tmdb_poster_path
+            ? <div
+              style={{backgroundImage: `url(${config.tmdb.posterPath185 + movie.tmdb_poster_path})`}}
+              className="movie-cover-inn"
+            >
+              <img src={config.tmdb.posterPath185 + movie.tmdb_poster_path}
+                alt={movie.title}
+              />
+            </div>
             : ''
           }
-          {this.props.vote !== null
-            ?
-              <div className="movie-prev__vote-icn"><i className={'icn ' + getVoteIconClassById(this.props.vote, true)}/> </div>
+          {typeof movie.vote !== 'undefined'
+            ? <div className="movie-vote-icn"><i className={'icn ' + getVoteIconClassById(movie.vote, true)} /></div>
             : ''
           }
         </div>
 
         <div className="movie-prev__content">
-          {this.props.title || this.props.originalTitle
-            ? <div className="movie-prev__title">
-              {this.props.title
-                ? <strong>{this.props.title}</strong>
+          {movie.title
+            ? <div className="movie-title">{movie.title}</div>
+            : ''
+          }
+
+          {movie.original_title || movie.date
+            ? <div className="movie-ot-y">
+              {movie.original_title
+                ? <div className="movie-ot">{movie.original_title}</div>
                 : ''
               }
-              {this.props.originalTitle
-                ? <span>{this.props.title ? ' / ' : ''}{this.props.originalTitle}</span>
+
+              {movie.date
+                ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
                 : ''
               }
             </div>
             : ''
           }
 
-          {this.props.genres.length
-            ? <div className="movie-prev__genres">{this.props.genres.join(', ')}</div>
+          {movie.genres.length
+            ? <div className="movie-genres">{movie.genres.join(', ')}</div>
             : ''
           }
 
-          {this.props.date
-            ? <div className="movie-prev__date">{moment(this.props.date).format('MMMM YYYY')}</div>
-            : ''
-          }
+          <MovieStatExternal
+            kpValue={movie.kp_rating_value}
+            imdbValue={movie.imdb_rating_value}
+            additionClass="m-prev"
+          />
 
           <div className="movie-prev__votes">
-            <MovieStat {...this.props} />
+            <MovieStat {...movie} />
           </div>
         </div>
       </div>
@@ -106,6 +89,5 @@ class MoviePreview extends Component {
 }
 
 MoviePreview.propTypes = propTypes;
-MoviePreview.defaultProps = defaultProps;
 
 export default MoviePreview;

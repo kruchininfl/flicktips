@@ -20,7 +20,7 @@ class Mapper
 
                 if (isset($fieldOptions['group'])) {
                     $groupId = $row[$fieldOptions['group_id_field']];
-                    if (isset($groupId)) {
+                    if (isset($groupId) && $groupId != '') {
                         @$result[$row[$key]][$fieldOptions['group']][$groupId][$newFieldName] = $value;
                     }
                 } else {

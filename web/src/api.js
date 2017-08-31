@@ -210,5 +210,9 @@ export default {
 
   getFriendsVotes(page = 1) {
     return this._fetch('user/friends_votes/', {page}, undefined, true);
+  },
+
+  getMovie(id) {
+    return this._fetch('get_film/' + id);
   }
 };

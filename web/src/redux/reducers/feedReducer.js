@@ -22,18 +22,18 @@ const initialState = Immutable.fromJS({
 });
 
 export default createReducer(initialState, {
-  [FEED_LOADING_START]: state => state.mergeDeep({
+  [FEED_LOADING_START]: state => state.merge({
     pending: true,
     errors : null
   }),
 
-  [FEED_LOADING_FINISH]: (state, action) => state.mergeDeep({
+  [FEED_LOADING_FINISH]: (state, action) => state.merge({
     pending : false,
     errors  : null,
     response: action.response
   }),
 
-  [FEED_ADD_VOTES_START]: (state) => state.mergeDeep({loading: true}),
+  [FEED_ADD_VOTES_START]: (state) => state.merge({loading: true}),
 
   [FEED_ADD_VOTES_FINISH]: (state, action) => {
     // const entities = state

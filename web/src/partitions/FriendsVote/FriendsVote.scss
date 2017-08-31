@@ -88,22 +88,26 @@
 
     > .movie-prev {
         height: 100%;
-        .movie-prev__cover {
+        .movie-cover {
             width: 45px;
+            height: 100%;
         }
         .movie-prev__content {
             margin-left: 65px;
         }
-        .movie-prev__title {
+        .movie-title {
             white-space: nowrap;
             max-height: 17px;
         }
-        .movie-prev__genres {
+        .movie-ot-y {
+            display: none;
+        }
+        .movie-genres {
             white-space: nowrap;
             max-height: 16px;
             margin-top: 0;
         }
-        .movie-prev__date {
+        .movie-date {
             display: none;
         }
         .movie-prev__votes {
@@ -129,4 +133,5 @@
     left: 20px;
     bottom: 0;
     width: 45px;
+    z-index: 2;
 }

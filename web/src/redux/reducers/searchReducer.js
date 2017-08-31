@@ -23,7 +23,7 @@ const initialState = Immutable.fromJS({
 
 export default createReducer(initialState, {
   [SEARCH_REQUEST_STARTED]: state => {
-    return state.mergeDeep({pending: true, errors: null});
+    return state.merge({pending: true, errors: null});
   },
 
   [SEARCH_REQUEST_FINISHED]: (state, action) => {
@@ -37,9 +37,9 @@ export default createReducer(initialState, {
 
   [SEARCH_REQUEST_CLEAR]: () => initialState,
 
-  [SEARCH_REQUEST_ERROR]: (state, action) => state.mergeDeep({pending: false, errors: action.errors}),
+  [SEARCH_REQUEST_ERROR]: (state, action) => state.merge({pending: false, errors: action.errors}),
 
-  [VOTE_REQUEST_STARTED]: (state) => state.mergeDeep({errors: null}),
+  [VOTE_REQUEST_STARTED]: (state) => state.merge({errors: null}),
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {
     if (!state.getIn(['response', 'results'])) {
@@ -75,5 +75,5 @@ export default createReducer(initialState, {
     );
   },
 
-  [VOTE_REQUEST_ERROR]: (state, action) => state.mergeDeep({errors: action.errors})
+  [VOTE_REQUEST_ERROR]: (state, action) => state.merge({errors: action.errors})
 });

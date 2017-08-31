@@ -11,6 +11,7 @@ import {getHeaders, initialize} from 'redux-oauth';
 import {loadOnServer} from 'redux-connect';
 import request from 'request';
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 
@@ -119,7 +120,7 @@ function renderHTML(componentHTML, initialState) {
       <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
-          <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
+          <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
           <link rel="stylesheet" href="/public/icons/style.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
           <link rel="stylesheet" href="${assetUrl}/public/assets/styles.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
           <link rel="shortcut icon" href="/public/favicon.ico?3" type="image/x-icon" />
@@ -155,7 +156,10 @@ if (process.env.NODE_ENV === 'production') {
     secureProtocol  : 'TLSv1_2_method'
   };
 
-  https.createServer(httpsOptions, app).listen(PORT, () => {
+  // https.createServer(httpsOptions, app).listen(PORT, () => {
+  //   console.log(`Server listening on: ${PORT}`);
+  // });
+  http.createServer(app).listen(PORT, () => {
     console.log(`Server listening on: ${PORT}`);
   });
 }

@@ -42,7 +42,7 @@ function cpToUTF8(body) {
   return Iconv.encode(Iconv.decode(new Buffer(body, 'binary'), 'cp1251'), 'utf8').toString();
 }
 
-function sleep(ms) {
+export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 

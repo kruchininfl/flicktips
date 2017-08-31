@@ -1,0 +1,144 @@
+@import "../base";
+@import "../Common/Movie";
+
+.movie {
+  padding: 10px;
+}
+
+.movie__head {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.movie__head-left {
+  width: 95px;
+
+  .movie-eStat__item {
+    margin-right: 7px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .movie-eStat__item-icn {
+    margin-right: 5px;
+  }
+  .movie-eStat__item-val.m-na {
+    font-size: 12px;
+  }
+}
+.movie-cover {
+  width: 95px;
+  height: 140px;
+}
+.movie__head-data {
+  flex: 1;
+  padding: 0 10px 44px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .movie-title,
+  .movie-genres,
+  .movie-c-d {
+    @include multiLineEllipsis(1.2em, 2);
+  }
+}
+.movie__votes {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 0 0 10px;
+  text-align: center;
+
+  .movie-votes {
+    margin: 0;
+
+    .movie-vote {
+      margin: 0 5px;
+    }
+  }
+}
+
+.movie__descr {
+  font-size: 14px;
+  font-weight: 300;
+  text-align: justify;
+  margin: 10px -10px;
+  padding: 15px 10px;
+  border-top: 1px solid #f1f1f1;
+  border-bottom: 1px solid #f1f1f1;
+  position: relative;
+  line-height: 1.4em;
+  overflow: hidden;
+  max-height: 150px;
+
+  &:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5) 0%,rgba(255,255,255,1) 80%);
+  }
+
+  &.m-open {
+    max-height: none;
+
+    &:after {
+      display: none;
+    }
+  }
+}
+
+.movie__staff-group {
+  margin: 20px 0;
+}
+.movie__staff-group-list {
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.movie__staff-group-title {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.movie-person_details {
+  width: 80px;
+  white-space: normal;
+
+  .movie__staff-group-list & {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.movie-person__name,
+.movie-person__original-name,
+.movie-person__descr {
+  @include multiLineEllipsis(1.2em, 3);
+}
+.movie-person__name {
+  font-size: 14px;
+  margin-top: 5px;
+  font-weight: 600;
+}
+.movie-person__original-name,
+.movie-person__descr {
+  font-size: 12px;
+  margin-top: 2px;
+}
+.movie-person__original-name {
+  color: #666666;
+}
+.movie-person__descr {
+  color: #f0be0f;
+}

@@ -55,23 +55,7 @@ class ProfileBookmarksPage extends ProfileLayout {
     return response.entities.map((entity, key) => {
       return (
         <div key={key} className={'profile__bookmarks-item' + (entity.inBookmarks ? '' : ' m-inactive')}>
-          <MoviePreview
-            dispatch={this.props.dispatch}
-            id={entity.id}
-            vote={!this.props.isMyPage ? entity.vote : null}
-            image={entity.tmdb_poster_path}
-            title={entity.title}
-            originalTitle={entity.original_title}
-            genres={entity.genres ? entity.genres.map((el) => el.name) : []}
-            date={entity.release_date || entity.first_air_date}
-            likes={entity.likes}
-            dislikes={entity.dislikes}
-            neutral={entity.neutral}
-            isLiked={entity.isLiked}
-            isDisliked={entity.isDisliked}
-            isNeutral={entity.isNeutral}
-            inBookmarks={entity.inBookmarks}
-          />
+          <MoviePreview movie={entity} />
         </div>
       );
     });

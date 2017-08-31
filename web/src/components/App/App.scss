@@ -528,11 +528,18 @@ html, body, .react-view, .layout {
     background: #333b41;
     height: 70px;
     box-sizing: border-box;
-    z-index: 1;
+    z-index: 3;
 
     > .wrapper {
         height: 100%;
     }
+}
+.header__loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: #fb4b4b;
 }
 .header__logo {
     text-decoration: none;

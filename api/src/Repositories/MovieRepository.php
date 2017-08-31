@@ -90,11 +90,11 @@ class MovieRepository {
         unset($movie['kp_error']);
 
         // group staff
-        if (isset($movie['staff'])) {
+        if (isset($movie['staff']) && count($movie['staff'])) {
             usort($movie['staff'], function($a, $b) {
                 return $a['order'] - $b['order'];
             });
-            $staff = array();
+            $staff = [];
             foreach($movie['staff'] as $key => $item)
             {
                 $gtype = $item['group_type'];
@@ -105,10 +105,11 @@ class MovieRepository {
                 unset($item['group_title']);
                 unset($item['order']);
 
+                $staff[$gtype]['type'] = $gtype;
                 $staff[$gtype]['title'] = $gtitle;
                 $staff[$gtype]['people'][] = $item;
             }
-            $movie['staff'] = $staff;
+            $movie['staff'] = array_values($staff);
         }
 
         return $movie;
@@ -163,6 +164,10 @@ class MovieRepository {
             'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
             'vote' => ['type' => 'int'],
+            'kp_rating_count' => ['type' => 'int'],
+            'imdb_rating_count' => ['type' => 'int'],
+            'kp_rating_value' => ['type' => 'float'],
+            'imdb_rating_value' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
         ]);
@@ -201,6 +206,10 @@ class MovieRepository {
             'isDisliked' => ['type' => 'bool'],
             'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
+            'kp_rating_count' => ['type' => 'int'],
+            'imdb_rating_count' => ['type' => 'int'],
+            'kp_rating_value' => ['type' => 'float'],
+            'imdb_rating_value' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
         ]);
@@ -253,6 +262,10 @@ class MovieRepository {
             'isDisliked' => ['type' => 'bool'],
             'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
+            'kp_rating_count' => ['type' => 'int'],
+            'imdb_rating_count' => ['type' => 'int'],
+            'kp_rating_value' => ['type' => 'float'],
+            'imdb_rating_value' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
         ]);

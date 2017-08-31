@@ -23,23 +23,23 @@ const initialState = Immutable.fromJS({
 });
 
 export default createReducer(initialState, {
-  [PROFILE_LOADING_START]: state => state.mergeDeep({
+  [PROFILE_LOADING_START]: state => state.merge({
     pending: true,
     errors : null
   }),
 
-  [PROFILE_LOADING_FINISH]: (state, action) => state.mergeDeep({
+  [PROFILE_LOADING_FINISH]: (state, action) => state.merge({
     pending : false,
     errors  : null,
     user    : action.response.user,
     isMyPage: action.response.isMyPage
   }).set('votes', Immutable.fromJS(action.response.votes)),
 
-  [PROFILE_ADD_VOTES_START]: (state) => state.mergeDeep({loading: true}),
+  [PROFILE_ADD_VOTES_START]: (state) => state.merge({loading: true}),
 
   [PROFILE_ADD_VOTES_FINISH]: (state, action) => {
     action.response.results.entities = state.getIn(['votes', 'entities']).toJS().concat(action.response.results.entities);
-    return state.mergeDeep({loading: false, votes: action.response.results});
+    return state.merge({loading: false, votes: action.response.results});
   },
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {

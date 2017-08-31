@@ -57,7 +57,7 @@ class HeaderNotifications extends Component {
   renderVotes(entities) {
     return entities.map((entity, key) => {
       return (
-        <FriendsVote key={key} {...entity} />
+        <FriendsVote closeSidebar={this.closeSidebar} key={key} {...entity} />
       );
     });
   }

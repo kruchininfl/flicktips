@@ -18,22 +18,22 @@ const initialState = Immutable.fromJS({
 });
 
 export default createReducer(initialState, {
-  [PROFILE_FRIENDS_LOADING_START]: state => state.mergeDeep({
+  [PROFILE_FRIENDS_LOADING_START]: state => state.merge({
     pending: true,
     errors : null
   }),
 
-  [PROFILE_FRIENDS_LOADING_FINISH]: (state, action) => state.mergeDeep({
+  [PROFILE_FRIENDS_LOADING_FINISH]: (state, action) => state.merge({
     pending : false,
     errors  : null,
     response: action.response.results
   }),
 
-  [PROFILE_FRIENDS_ADD_START]: (state) => state.mergeDeep({loading: true}),
+  [PROFILE_FRIENDS_ADD_START]: (state) => state.merge({loading: true}),
 
   [PROFILE_FRIENDS_ADD_FINISH]: (state, action) => {
     action.response.results.entities = state.getIn(['response', 'entities']).toJS().concat(action.response.results.entities);
-    return state.mergeDeep({loading: false, response: action.response.results});
+    return state.merge({loading: false, response: action.response.results});
   },
 
   [TOGGLE_FRIEND_SUBSCRIBE_START]: (state, {friendId}) => {

@@ -154,6 +154,10 @@ class UserRepository {
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
             'inBookmarks' => ['type' => 'bool'],
+            'kp_rating_count' => ['type' => 'int'],
+            'imdb_rating_count' => ['type' => 'int'],
+            'kp_rating_value' => ['type' => 'float'],
+            'imdb_rating_value' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name']
         ]);

@@ -1,4 +1,4 @@
-import {search as kpSearch, getFilm, getFilmStaff} from './components/parser';
+import {search as kpSearch, getFilm, getFilmStaff, sleep} from './components/parser';
 import mysql from 'mysql2/promise';
 import cs from 'console-stamp';
 
@@ -8,21 +8,39 @@ const MAX_WORKERS = 1;
 const MAX_DIFF_CHECKING_DAY = 7;
 
 const mysqlConfig = {
-  host    : '185.117.155.141',
+  host    : 'localhost',
   user    : 'flicktips',
   password: 'Aing6si',
-  database: 'flicktips_test'
+  database: 'flicktips'
 };
 
 const selectMovie = async () => {
   const connection = await mysql.createConnection(mysqlConfig);
 
-  const [rows] = await connection.execute('SELECT ' +
-    'id, (likes + dislikes + neutral) AS votes, original_title, ' +
-    'CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS \'year\'' +
-    'FROM movie ' +
-    'WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? ' +
-    'ORDER BY votes DESC LIMIT 1', [MAX_DIFF_CHECKING_DAY]);
+  let [rows] = await connection.execute(`SELECT 
+    COUNT(*) AS sum_total,
+    movie.id, movie.title,
+    CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
+    FROM movie_vote
+    LEFT JOIN movie ON movie.id=movie_vote.movie_id 
+    WHERE movie.kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
+    GROUP BY movie_id 
+    ORDER BY 
+      SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 1 DAY), 1, 0)) DESC,
+      SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 2 DAY), 1, 0)) DESC,
+      SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 3 DAY), 1, 0)) DESC,
+      SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY), 1, 0)) DESC,
+      sum_total DESC
+    LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
+
+  if (!rows || !rows.length) {
+    [rows] = await connection.execute(`SELECT
+      id, (likes + dislikes + neutral) AS votes, original_title, 
+      CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
+      FROM movie 
+      WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
+      ORDER BY votes DESC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
+  }
 
   connection.end();
 
@@ -198,6 +216,9 @@ for (let i = 0; i < MAX_WORKERS; i++) {
   workers.push(worker());
 }
 
-Promise.all(workers).then(() => {
-  console.log('end');
-}).catch(err => console.error(err));
+// Promise.all(workers).then(() => {
+//   (async function () {
+//     console.log('end');
+//     sleep(1800000);
+//   })();
+// }).catch(err => console.error(err));

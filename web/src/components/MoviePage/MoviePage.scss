@@ -27,9 +27,8 @@
     font-size: 12px;
   }
 }
-.movie-cover {
+.movie__cover {
   width: 95px;
-  height: 140px;
 }
 .movie__head-data {
   flex: 1;
@@ -152,3 +151,5 @@
 .movie-person__descr {
   color: #f0be0f;
 }
+
+@import "MoviePageTablets";

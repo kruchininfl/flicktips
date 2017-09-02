@@ -1,0 +1,14 @@
+@import "../../components/base";
+
+.profile__votes {
+    > div {
+        width: 50%;
+        display: inline-block;
+        vertical-align: top;
+        box-sizing: border-box;
+    }
+
+    .profile__votes-group {
+        display: none;
+    }
+}

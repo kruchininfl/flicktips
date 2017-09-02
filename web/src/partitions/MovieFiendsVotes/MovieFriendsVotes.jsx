@@ -4,10 +4,12 @@ import './MovieFriendsVotes.scss';
 import {connect} from 'react-redux';
 import {getVoteIconClassById} from '../../helpers';
 import {Link} from 'react-router';
+import {isUserSignedIn} from '../../redux/models/user';
 
 const propTypes = {
-  dispatch   : PropTypes.func.isRequired,
-  votes         : PropTypes.array
+  dispatch    : PropTypes.func.isRequired,
+  votes       : PropTypes.array,
+  userSignedIn: PropTypes.bool
 };
 
 
@@ -35,7 +37,11 @@ class MovieFriendsVotes extends Component {
   }
 
   render() {
-    const {votes} = this.props;
+    const {votes, userSignedIn} = this.props;
+
+    if (!userSignedIn) {
+      return false;
+    }
 
     if (!votes || !votes.length) {
       return <div className="movie-friends-votes-ph">Ваши друзья пока не оценивали этот фильм</div>;
@@ -51,4 +57,10 @@ class MovieFriendsVotes extends Component {
 
 MovieFriendsVotes.propTypes = propTypes;
 
-export default connect()(MovieFriendsVotes);
+function mapStateToProps(state) {
+  const userSignedIn = isUserSignedIn(state);
+
+  return {userSignedIn};
+}
+
+export default connect(mapStateToProps)(MovieFriendsVotes);

@@ -6,6 +6,7 @@ import LayoutPage from 'components/LayoutPage';
 import SignInPage from 'components/SignInPage';
 import {ProfilePage, ProfileFriendsPage, ProfileBookmarksPage} from 'components/ProfilePage';
 import MoviePage from 'components/MoviePage';
+import AboutPage from 'components/AboutPage';
 
 import {isUserSignedIn} from 'redux/models/user';
 
@@ -29,6 +30,7 @@ export default function routes(storeRef) {
     <Route component={App} path="/">
       <IndexRoute component={HomePage}/>
       <Route component={LayoutPage} path="layout"/>
+      <Route component={AboutPage} path="about"/>
       <Route component={SignInPage} path="signin"/>
       <Route component={ProfilePage} path="user/:id"/>
       <Route component={MoviePage} path="movie/:id"/>

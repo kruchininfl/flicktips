@@ -96,6 +96,8 @@
         }
         .movie-prev__content {
             margin-left: 65px;
+            height: 80px;
+            min-height: 0;
         }
         .movie-title {
             white-space: nowrap;

@@ -7,10 +7,17 @@
     overflow: hidden;
     position: relative;
     padding: 10px;
+
+    .movie-prev-list & {
+        border-bottom: 1px solid #f1f1f1;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
 }
 .movie-cover__prev {
     width: 90px;
-    height: 100%;
 }
 .movie-prev__content {
     min-height: 140px;
@@ -41,5 +48,10 @@
 .movie-prev__friends-votes {
     position: relative;
     z-index: 1;
-    margin-top: 10px;
+
+    > div {
+        margin-top: 10px;
+    }
 }
+
+@import "MoviePreviewTablets";

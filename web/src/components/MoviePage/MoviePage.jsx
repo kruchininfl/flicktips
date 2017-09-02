@@ -117,7 +117,7 @@ class MoviePage extends Component {
       <div className="movie">
         <div className="movie__head">
           <div className="movie__head-left">
-            <div className="movie-cover movie-cover__details">
+            <div className="movie-cover movie__cover">
               {movie.tmdb_poster_path
                 ? <div
                   style={{backgroundImage: `url(${config.tmdb.posterPath185 + movie.tmdb_poster_path})`}}

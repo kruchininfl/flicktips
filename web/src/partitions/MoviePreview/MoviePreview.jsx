@@ -34,10 +34,10 @@ class MoviePreview extends Component {
         <div className="movie-cover movie-cover__prev">
           {movie.tmdb_poster_path
             ? <div
-              style={{backgroundImage: `url(${config.tmdb.posterPath185 + movie.tmdb_poster_path})`}}
+              style={{backgroundImage: `url(${config.tmdb.posterPath342 + movie.tmdb_poster_path})`}}
               className="movie-cover-inn"
             >
-              <img src={config.tmdb.posterPath185 + movie.tmdb_poster_path}
+              <img src={config.tmdb.posterPath342 + movie.tmdb_poster_path}
                 alt={movie.title}
               />
             </div>
@@ -52,14 +52,14 @@ class MoviePreview extends Component {
 
         <div className="movie-prev__content">
           {movie.title
-            ? <div className="movie-title">{movie.title}</div>
+            ? <div className="movie-title" title={movie.title}>{movie.title}</div>
             : ''
           }
 
           {movie.original_title || movie.date
             ? <div className="movie-ot-y">
               {movie.original_title
-                ? <div className="movie-ot">{movie.original_title}</div>
+                ? <div className="movie-ot" title={movie.original_title}>{movie.original_title}</div>
                 : ''
               }
 

@@ -8,21 +8,23 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import Button from 'components/Gui/Button';
 import ProfileLayout from './ProfileLayout';
+import {isUserSignedIn} from '../../redux/models/user';
 
 const propTypes = {
-  dispatch: PropTypes.func,
-  pending : PropTypes.bool,
-  loaded  : PropTypes.bool,
-  loading : PropTypes.bool,
-  params  : PropTypes.any,
-  isMyPage: PropTypes.bool,
-  user    : PropTypes.any,
-  votes   : PropTypes.any
+  dispatch    : PropTypes.func,
+  pending     : PropTypes.bool,
+  loaded      : PropTypes.bool,
+  loading     : PropTypes.bool,
+  params      : PropTypes.any,
+  isMyPage    : PropTypes.bool,
+  user        : PropTypes.any,
+  votes       : PropTypes.any,
+  userSignedIn: PropTypes.bool
 };
 
 @asyncConnect([
   {
-    key: 'profile',
+    key    : 'profile',
     promise: ({params, store}) => {
       return store.dispatch(getProfile(params && params.id ? params.id : null));
     }
@@ -38,11 +40,13 @@ class ProfilePage extends ProfileLayout {
   }
 
   componentDidMount() {
-    if (this.props.loaded) {
-      return false;
-    }
+    window.scrollTo(0, 0);
+  }
 
-    this.props.dispatch(getProfile(this.props.params && this.props.params.id ? this.props.params.id : null));
+  componentWillReceiveProps(nextProps) {
+    if (this.props.userSignedIn !== nextProps.userSignedIn) {
+      this.props.dispatch(getProfile(this.props.params && this.props.params.id ? this.props.params.id : null));
+    }
   }
 
   handleLoadData() {
@@ -131,9 +135,10 @@ ProfilePage.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const {pending, votes, user, isMyPage, loading} = state.profile.toJS();
+  const userSignedIn = isUserSignedIn(state);
   const loaded = state.reduxAsyncConnect.loadState.profile && state.reduxAsyncConnect.loadState.profile.loaded;
 
-  return {pending, loaded, user, votes, isMyPage, loading};
+  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn};
 }
 
 export default ProfilePage;

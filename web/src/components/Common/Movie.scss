@@ -2,18 +2,26 @@
 
 .movie-cover {
     float: left;
-    background: {
-        image: url(../../img/ph-movie.svg);
-        size: 50% auto;
-        position: 50% 50%;
-        color: #d9e1ea;
-        repeat: no-repeat;
-    };
     position: relative;
+    &:before {
+        content: '';
+        display: block;
+        padding-top: 150%;
+        background: {
+            image: url(../../img/ph-movie.svg);
+            size: 50% auto;
+            position: 50% 50%;
+            color: #d9e1ea;
+            repeat: no-repeat;
+        };
+    }
 }
 .movie-cover-inn {
-    position: relative;
-    height: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: {
         size: cover;
         repeat: no-repeat;

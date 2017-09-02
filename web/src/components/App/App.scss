@@ -486,7 +486,7 @@ html, body, .react-view, .layout {
 }
 
 .container {
-    max-width: 768px;
+    max-width: 1024px;
     margin: 0 auto;
     min-height: 100%;
     box-sizing: border-box;
@@ -605,13 +605,17 @@ html, body, .react-view, .layout {
     position: relative;
     top: 18px;
 }
-.footer__mail {
+.footer__link {
     float: left;
     font-size: 14px;
     position: relative;
     top: 18px;
-    text-decoration: none;
-    border-bottom: 1px dashed;
+    text-decoration: underline;
+    margin-right: 10px;
+
+    &:last-child {
+        margin-right: 0;
+    }
 
     &:hover {
         text-decoration: none;
@@ -629,3 +633,9 @@ html, body, .react-view, .layout {
 .icn-forever-alone {
     margin-bottom: 20px;
 }
+.static-page {
+    padding: 0 20px;
+    text-align: justify;
+}
+
+@import "AppTablets";

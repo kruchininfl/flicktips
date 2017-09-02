@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {IndexLink} from 'react-router';
+import {IndexLink, Link} from 'react-router';
 import Helmet from 'react-helmet';
 import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
@@ -57,7 +57,8 @@ class App extends Component {
 
         <div className="footer">
           <div className="wrapper">
-            <a href="mailto:support@flick.tips" className="footer__mail">support@flick.tips</a>
+            <a href="mailto:support@flick.tips" className="footer__link">Контакты</a>
+            <Link to="/about" className="footer__link">О Проекте</Link>
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>
         </div>

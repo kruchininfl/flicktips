@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'icons';
   src:
-    url('fonts/icons.ttf?eb7i41') format('truetype'),
-    url('fonts/icons.woff?eb7i41') format('woff'),
-    url('fonts/icons.svg?eb7i41#icons') format('svg');
+    url('fonts/icons.ttf?hc9kc1') format('truetype'),
+    url('fonts/icons.woff?hc9kc1') format('woff'),
+    url('fonts/icons.svg?hc9kc1#icons') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -23,13 +23,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icn_bookmark-book:before {
+.icn_checked:before {
   content: "\e915";
 }
-.icn_bookmark:before {
+.icn_bookmark-fill:before {
   content: "\e913";
 }
-.icn_bookmark-fill:before {
+.icn_bookmark:before {
   content: "\e914";
 }
 .icn_bell:before {

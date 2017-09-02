@@ -9,6 +9,8 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import 'moment-duration-format';
 import MovieStat from '../../partitions/MovieStat/MovieStat';
+import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
+import MovieFriendsVotes from '../../partitions/MovieFiendsVotes/MovieFriendsVotes';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -127,6 +129,7 @@ class MoviePage extends Component {
                 </div>
                 : ''
               }
+              <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />
             </div>
 
             <MovieStatExternal
@@ -198,6 +201,10 @@ class MoviePage extends Component {
               <MovieStat {...movie} />
             </div>
           </div>
+        </div>
+
+        <div className="movie__friends-votes">
+          <MovieFriendsVotes votes={movie.friend_votes} />
         </div>
 
         {movie.descr

@@ -4,7 +4,7 @@ var webpack = require('webpack');
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
-var UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 var publicPath = process.env.NODE_ENV === 'production' ? '/assets/' : 'https://flicktips.local:8050/public/assets';
 var cssName = process.env.NODE_ENV === 'cordova' ? 'styles-mobile.css' : 'styles.css';

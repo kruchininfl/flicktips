@@ -4,17 +4,17 @@
 .movie-prev {
     background: #ffffff;
     color: #666666;
-    height: 140px;
     overflow: hidden;
     position: relative;
+    padding: 10px;
 }
 .movie-cover__prev {
     width: 90px;
     height: 100%;
 }
 .movie-prev__content {
-    height: 100%;
-    margin-left: 100px;
+    min-height: 140px;
+    margin-left: 110px;
     padding-top: .5em;
     padding-right: 10px;
     position: relative;
@@ -37,4 +37,9 @@
     right: 0;
     opacity: 0;
     z-index: 1;
+}
+.movie-prev__friends-votes {
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
 }

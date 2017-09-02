@@ -4,7 +4,6 @@ import {voteRequest} from 'redux/actions/voteActions';
 
 import './MovieStat.scss';
 import {connect} from 'react-redux';
-import {toggleBookmark} from '../../redux/actions/bookmarkActions';
 
 const propTypes = {
   dispatch   : PropTypes.func.isRequired,
@@ -33,15 +32,10 @@ class MovieStat extends Component {
     super(props);
 
     this.handleSendVote = this.handleSendVote.bind(this);
-    this.handleToggleBookmark = this.handleToggleBookmark.bind(this);
   }
 
   handleSendVote(entityId, vote) {
     this.props.dispatch(voteRequest(entityId, vote));
-  }
-
-  handleToggleBookmark(entityId) {
-    this.props.dispatch(toggleBookmark(entityId));
   }
 
   render() {
@@ -81,16 +75,6 @@ class MovieStat extends Component {
           </div>
 
           <div className="movie-vote__counter">{this.props.dislikes}</div>
-        </div>
-
-        <div
-          onClick={() => this.handleToggleBookmark(this.props.id)}
-          className={'movie-bookmark' + (this.props.inBookmarks ? ' m-active' : '')}
-        >
-          <div className="movie-bookmark__icn">
-            <span className="icn icn_bookmark"/>
-            <span className="icn icn_bookmark-fill"/>
-          </div>
         </div>
       </div>
     );

@@ -9,6 +9,8 @@ import config from 'config';
 import './MoviePreview.scss';
 import {getVoteIconClassById} from '../../helpers';
 import {Link} from 'react-router';
+import MovieBookmark from '../MovieBookmark/MovieBookmark';
+import MovieFriendsVotes from '../MovieFiendsVotes/MovieFriendsVotes';
 
 const propTypes = {
   movie  : PropTypes.any
@@ -45,6 +47,7 @@ class MoviePreview extends Component {
             ? <div className="movie-vote-icn"><i className={'icn ' + getVoteIconClassById(movie.vote, true)} /></div>
             : ''
           }
+          <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />
         </div>
 
         <div className="movie-prev__content">
@@ -82,6 +85,10 @@ class MoviePreview extends Component {
           <div className="movie-prev__votes">
             <MovieStat {...movie} />
           </div>
+        </div>
+
+        <div className="movie-prev__friends-votes">
+          <MovieFriendsVotes votes={movie.friend_votes} />
         </div>
       </div>
     );

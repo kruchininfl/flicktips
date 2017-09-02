@@ -507,7 +507,7 @@ html, body, .react-view, .layout {
         right: 0;
         top: 70px;
         bottom: 50px;
-        padding: 0;
+        padding: 10px 20px;
     }
 }
 
@@ -558,6 +558,10 @@ html, body, .react-view, .layout {
 
     &:hover {
         color: #ffffff;
+
+        .layout.m-vk-app & {
+            color: #18476d;
+        }
     }
 }
 .header__right {
@@ -597,6 +601,7 @@ html, body, .react-view, .layout {
         right: 0;
         background: #ffffff;
         color: #333b41;
+        border-top: 1px solid #e7e8ec;
     }
 }
 .footer__copy {

@@ -54,9 +54,11 @@ class ProfileBookmarksPage extends ProfileLayout {
   renderMovies(response) {
     return response.entities.map((entity, key) => {
       return (
-        <div key={key} className={'profile__bookmarks-item' + (entity.inBookmarks ? '' : ' m-inactive')}>
-          <MoviePreview movie={entity} />
-        </div>
+        <MoviePreview
+          key={key}
+          className={'profile__bookmarks-item' + (entity.inBookmarks ? '' : ' m-inactive')}
+          movie={entity}
+        />
       );
     });
   }
@@ -90,7 +92,7 @@ class ProfileBookmarksPage extends ProfileLayout {
       <div className="profile">
         {super.render()}
 
-        {this.renderMovies(response)}
+        <div className="movie-prev-list">{this.renderMovies(response)}</div>
 
         {response.total && response.pages > response.page ?
           <Button onClick={this.handleLoadData} loading={loading} additionClass="btn_more">Показать еще</Button>

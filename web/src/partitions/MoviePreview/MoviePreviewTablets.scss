@@ -55,7 +55,7 @@
         }
 
         .movie-prev__link:hover {
-            & ~ .movie-cover.movie-cover__prev {
+            & ~ .movie-cover-inn.movie-cover__prev {
                 filter: brightness(120%);
             }
         }

@@ -1,24 +1,26 @@
 @import "../base";
 
-.movie {
-  padding: 10px;
-  background: #ffffff;
-}
-.movie__head-left,
-.movie__cover {
-  width: 185px;
-}
-.movie-eStat.m-details {
-  .movie-eStat__item {
-    font-size: 18px;
-    margin: 0;
-    width: 50%;
-    background: #f1f1f1;
-  }
-  .movie-eStat__item-icn {
-    margin-right: 15px;
-    width: 32px;
-    height: 32px;
-    background-size: 32px 32px;
-  }
+@media screen and (min-width: 768px) {
+    .movie {
+        padding: 10px;
+        background: #ffffff;
+    }
+    .movie__head-left,
+    .movie__cover {
+        width: 185px;
+    }
+    .movie-eStat.m-details {
+        .movie-eStat__item {
+            font-size: 18px;
+            margin: 0;
+            width: 50%;
+            background: #f1f1f1;
+        }
+        .movie-eStat__item-icn {
+            margin-right: 15px;
+            width: 32px;
+            height: 32px;
+            background-size: 32px 32px;
+        }
+    }
 }

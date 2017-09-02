@@ -1,14 +1,27 @@
 @import "../../components/base";
 
-.profile__votes {
-    > div {
-        width: 50%;
-        display: inline-block;
-        vertical-align: top;
-        box-sizing: border-box;
+@media screen and (min-width: 768px) {
+    .profile {
+        background: transparent;
+        padding-bottom: 20px;
     }
 
-    .profile__votes-group {
-        display: none;
+    .profile__votes {
+        > div {
+            width: 50%;
+            display: inline-block;
+            vertical-align: top;
+            box-sizing: border-box;
+        }
+
+        .profile__votes-group {
+            display: none;
+        }
+    }
+
+    .profile__bookmarks-item {
+        display: inline-block;
+        vertical-align: top;
+        width: 33.33%;
     }
 }

@@ -15,7 +15,7 @@ import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 
-const staticVersion = '20';
+const staticVersion = '22';
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 

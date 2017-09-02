@@ -125,6 +125,12 @@ class UserRepository {
     {
         $sth = $this->pdo->prepare('SELECT 
         movie.*,
+        friend_votes.vote AS friends_votes_val, 
+        friend.id AS friends_votes_user_id, 
+        friend.username AS friends_votes_user_name, 
+        friend.avatar AS friends_votes_user_avatar,
+        UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp, 
+        IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
         IF (movie_vote.vote = \'2\', true, false) AS isLiked,
         IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
         IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
@@ -137,7 +143,9 @@ class UserRepository {
         LEFT JOIN movie ON movie.id = bookmarks.movie_id
         LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
         LEFT JOIN genre ON genre.id=movie_genre.genre_id
-        LEFT JOIN movie_vote ON (movie_vote.user_id=:uid AND movie_vote.movie_id=movie.id)');
+        LEFT JOIN movie_vote ON (movie_vote.user_id=:uid AND movie_vote.movie_id=movie.id)
+        LEFT JOIN movie_vote AS friend_votes ON friend_votes.movie_id = movie.id AND friend_votes.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = :uid AND user_friends.subscribed = 1)
+        LEFT JOIN `user` AS friend ON friend.id = friend_votes.user_id');
         $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
         $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
         $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
@@ -159,8 +167,22 @@ class UserRepository {
             'kp_rating_value' => ['type' => 'float'],
             'imdb_rating_value' => ['type' => 'float'],
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
-            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name']
+            'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
+
+            'friends_votes_user_id' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_id', 'type' => 'int'],
+            'friends_votes_user_name' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_name'],
+            'friends_votes_user_avatar' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_avatar'],
+            'friends_votes_val' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote', 'type' => 'int'],
+            'friends_votes_timestamp' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote_timestamp', 'type' => 'int']
         ]);
+
+        foreach ($bookmarks as &$movie) {
+            if (isset($movie['friend_votes']) && count($movie['friend_votes'])) {
+                usort($movie['friend_votes'], function($a, $b) {
+                    return $b['vote_timestamp'] - $a['vote_timestamp'];
+                });
+            }
+        }
 
         return $bookmarks;
     }

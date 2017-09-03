@@ -22,7 +22,12 @@ class UserRepository {
 
     public function getByCredentials($uid, $token)
     {
-        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $this->safety_fields) . ' FROM user WHERE id = :uid AND token = :token');
+        $safety_fields = array_map(function ($val) { return '`user`.' . $val; }, $this->safety_fields);
+        $safety_fields[] = 'SUM(IF(movie_vote.timestamp > `user`.last_seen_notifications, 1, 0)) AS new_notifications';
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ' 
+        FROM user 
+        LEFT JOIN `movie_vote` ON `movie_vote`.`user_id` IN (SELECT `user_friends`.`user_2` FROM `user_friends` WHERE `user_friends`.`user_1` = :uid)
+        WHERE `user`.id = :uid AND token = :token');
         $sth->bindValue('uid', $uid);
         $sth->bindValue('token', $token);
         $sth->execute();

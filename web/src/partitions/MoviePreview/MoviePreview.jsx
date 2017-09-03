@@ -87,9 +87,7 @@ class MoviePreview extends Component {
           </div>
         </div>
 
-        <div className="movie-prev__friends-votes">
-          <MovieFriendsVotes votes={movie.friend_votes} />
-        </div>
+        <MovieFriendsVotes className="movie-prev__friends-votes" votes={movie.friend_votes} />
       </div>
     );
   }

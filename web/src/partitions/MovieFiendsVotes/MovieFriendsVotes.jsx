@@ -9,6 +9,7 @@ import {isUserSignedIn} from '../../redux/models/user';
 const propTypes = {
   dispatch    : PropTypes.func.isRequired,
   votes       : PropTypes.array,
+  className   : PropTypes.any,
   userSignedIn: PropTypes.bool
 };
 
@@ -37,19 +38,25 @@ class MovieFriendsVotes extends Component {
   }
 
   render() {
-    const {votes, userSignedIn} = this.props;
+    const {votes, userSignedIn, className} = this.props;
 
     if (!userSignedIn) {
       return false;
     }
 
     if (!votes || !votes.length) {
-      return <div className="movie-friends-votes-ph">Ваши друзья пока не оценивали этот фильм</div>;
+      return (
+        <div className={'movie-friends-votes ' + (className || '')}>
+          <div className="movie-friends-votes-ph">Ваши друзья пока не оценивали этот фильм</div>
+        </div>
+      );
     }
 
     return (
-      <div className="movie-friends-votes">
-        {votes.map((v, key) => MovieFriendsVotes.renderItem(v, key))}
+      <div className={'movie-friends-votes ' + (className || '')}>
+        <div className="movie-friends-votes__list">
+          {votes.map((v, key) => MovieFriendsVotes.renderItem(v, key))}
+        </div>
       </div>
     );
   }

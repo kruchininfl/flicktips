@@ -4,18 +4,19 @@ import {connect} from 'react-redux';
 
 import './HeaderNotifications.scss';
 import SidebarPanel from '../SidebarPanel/SidebarPanel';
-import {isUserSignedIn} from '../../redux/models/user';
+import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import {getFriendsVotes, loadVotes} from '../../redux/actions/feedActions';
 import FriendsVote from '../FriendsVote/FriendsVote';
 import Button from '../../components/Gui/Button';
 import InviteButton from '../VkApp/InviteButton';
 
 const propTypes = {
-  dispatch    : PropTypes.func.isRequired,
-  pending     : PropTypes.bool.isRequired,
-  loading     : PropTypes.bool.isRequired,
-  userSignedIn: PropTypes.bool,
-  response    : PropTypes.any
+  dispatch           : PropTypes.func.isRequired,
+  pending            : PropTypes.bool.isRequired,
+  loading            : PropTypes.bool.isRequired,
+  userSignedIn       : PropTypes.bool,
+  newNotificationsNum: PropTypes.number,
+  response           : PropTypes.any
 };
 
 class HeaderNotifications extends Component {
@@ -68,14 +69,14 @@ class HeaderNotifications extends Component {
     }
 
     return (<div className="page-ph">
-      <div className="page-ph__icn"><i className="icn icn_list"/></div>
+      <div className="page-ph__icn"><i className="icn icn_list" /></div>
       <div className="page-ph__text">Здесь будут отображаться оценки ваших друзей</div>
       <InviteButton />
     </div>);
   }
 
   render() {
-    const {userSignedIn, response, loading} = this.props;
+    const {userSignedIn, response, loading, newNotificationsNum} = this.props;
     const {opened} = this.state;
 
     if (!userSignedIn) {
@@ -90,6 +91,14 @@ class HeaderNotifications extends Component {
             onClick={this.handleOpen}
           >
             <span className="icn icn_bell" />
+            {newNotificationsNum
+              ? <div
+                className="header-notifications__num"
+              >
+                {newNotificationsNum > 99 ? '99+' : newNotificationsNum}
+              </div>
+              : ''
+            }
           </div>
           <SidebarPanel
             opened={opened}
@@ -119,8 +128,9 @@ HeaderNotifications.propTypes = propTypes;
 function mapStateToProps(state) {
   const {pending, loading, response} = state.feed.toJS();
   const userSignedIn = isUserSignedIn(state);
+  const newNotificationsNum = userSignedIn ? +getUserModel(state).get('new_notifications') : 0;
 
-  return {pending, loading, response, userSignedIn};
+  return {pending, loading, response, userSignedIn, newNotificationsNum};
 }
 
 export default connect(mapStateToProps)(HeaderNotifications);

@@ -19,7 +19,10 @@
         .movie-cover.movie-cover__prev {
             float: none;
             width: 100%;
-            transition: all 300ms;
+
+            .movie-cover-inn {
+                transition: all 300ms;
+            }
         }
         .movie-prev__content {
             display: block;
@@ -50,12 +53,12 @@
 
         .movie-prev__friends-votes {
             background: #ffffff;
-            margin-top: 1px;
             padding: 10px;
+            margin-top: 1px;
         }
 
         .movie-prev__link:hover {
-            & ~ .movie-cover-inn.movie-cover__prev {
+            & ~ .movie-cover .movie-cover-inn {
                 filter: brightness(120%);
             }
         }

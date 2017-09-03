@@ -48,10 +48,6 @@
 .movie-prev__friends-votes {
     position: relative;
     z-index: 1;
-
-    > div {
-        margin-top: 10px;
-    }
 }
 
 @import "MoviePreviewTablets";

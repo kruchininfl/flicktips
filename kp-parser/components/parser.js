@@ -197,7 +197,7 @@ async function search(query, year) {
 
   let id = null;
   result.page.suggest.items.movies.some((movie) => {
-    if (+movie.year === +year) {
+    if (Math.abs(movie.year - year) <= 1) {
       id = movie.id;
       return true;
     }

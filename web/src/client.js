@@ -7,6 +7,8 @@ import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
 import DevTools from './components/DevTools';
 import {ReduxAsyncConnect} from 'redux-connect';
+import {initialize} from 'redux-oauth';
+import config from './config';
 
 const initialState = window.REDUX_INITIAL_STATE || {};
 const store = configureStore(initialState);
@@ -29,10 +31,21 @@ const component = (
   </Provider>
 );
 
-ReactDOM.render(component, document.getElementById('react-view'));
+if (process.env.NODE_ENV === 'cordova') {
+  store.dispatch(initialize(Object.assign({}, config.oAuth, {
+    currentLocation: document.URL,
+    cookies        : document.cookie
+  }))).then(
+    () => {
+      ReactDOM.render(component, document.getElementById('react-view'));
+    }
+  );
+} else {
+  ReactDOM.render(component, document.getElementById('react-view'));
+}
 
-if (process.env.NODE_ENV !== 'production') {
-  ReactDOM.render(<DevTools store={store} />, document.getElementById('dev-tools'));
+if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'cordova') {
+  ReactDOM.render(<DevTools store={store}/>, document.getElementById('dev-tools'));
 }
 
 if (module.hot) {

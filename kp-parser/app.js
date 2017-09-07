@@ -19,7 +19,7 @@ const selectMovie = async () => {
 
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
-    movie.id, movie.title, movie.kp_id,
+    movie.id, movie.title, movie.kp_id, movie.original_title,
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 

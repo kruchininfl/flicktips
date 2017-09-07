@@ -10,6 +10,7 @@ import LoadingBar from 'react-redux-loading-bar';
 import './App.scss';
 import {connect} from 'react-redux';
 import HeaderNotifications from '../../partitions/HeaderNotifications/HeaderNotifications';
+import YaMetrica from './YaMetrica';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
@@ -32,7 +33,7 @@ class App extends Component {
       <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
         <Helmet>
           <meta charSet="utf-8" />
-          <title>FlickTips</title>
+          <title>FlickTips — фильмы, друзья, лайки</title>
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
@@ -62,6 +63,8 @@ class App extends Component {
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>
         </div>
+
+        <YaMetrica />
       </div>
     );
   }

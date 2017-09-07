@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Helmet from 'react-helmet';
 
 class AboutPage extends Component {
   constructor(props) {
@@ -12,6 +13,9 @@ class AboutPage extends Component {
   render() {
     return (
       <div className="static-page">
+        <Helmet>
+          <title>О Проекте — FlickTips</title>
+        </Helmet>
         <p>После окончания любимого сериала или просмотра захватывающего фильма хочется найти что-то не менее стоящее.
           Часто поиски затягиваются настолько, что желание что-то смотреть пропадает вовсе. Знакомо?</p>
         <p>Как вы выбираете фильмы или сериалы? Тыкаете на предложенные сайтом варианты? Просматриваете новинки?

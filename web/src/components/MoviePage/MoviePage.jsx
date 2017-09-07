@@ -11,6 +11,7 @@ import 'moment-duration-format';
 import MovieStat from '../../partitions/MovieStat/MovieStat';
 import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
 import MovieFriendsVotes from '../../partitions/MovieFiendsVotes/MovieFriendsVotes';
+import {Helmet} from 'react-helmet';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -115,6 +116,10 @@ class MoviePage extends Component {
 
     return (
       <div className="movie">
+        <Helmet>
+          <title>{movie.title + ' (' + moment(movie.date).format('YYYY') + ')'} — FlickTips</title>
+        </Helmet>
+
         <div className="movie__head">
           <div className="movie__head-left">
             <div className="movie-cover movie__cover">

@@ -15,11 +15,13 @@ import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 
-const staticVersion = '24';
+const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 
 app.use(cookieParser());
+
+app.set('view engine', 'ejs');
 
 if (process.env.NODE_ENV !== 'productions') {
   app.use('/public', express.static(__dirname + '/../public'));
@@ -102,7 +104,14 @@ app.use((req, res) => {
 
             res.cookie('authHeaders', JSON.stringify(getHeaders(state)), {maxAge: 3600 * 24 * 30 * 1000});
 
-            return res.end(renderHTML(componentHTML, state));
+            res.render('app', {
+              assetUrl,
+              initialState: state,
+              isVkApp,
+              componentHTML,
+              hash
+            });
+            // return res.end(renderHTML(componentHTML, state));
           })
           .catch(err => {
             console.log(err.stack);
@@ -113,62 +122,6 @@ app.use((req, res) => {
   }
 });
 
-function renderHTML(componentHTML, initialState) {
-  return `
-    <!DOCTYPE html>
-      <html>
-      <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
-          <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
-          <link rel="stylesheet" href="/public/icons/style.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
-          <link rel="stylesheet" href="${assetUrl}/public/assets/styles.css${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}">
-          <link rel="shortcut icon" href="/public/favicon.ico?3" type="image/x-icon" />
-          <link rel="icon" href="/public/favicon.ico?3" type="image/x-icon">
-          <script type="application/javascript">
-            window.REDUX_INITIAL_STATE = ${JSON.stringify(initialState)};
-            window.SERVER_TIMESTAMP = ${new Date().getTime()}
-          </script>
-      </head>
-      <body>
-        ${isVkApp ? `<script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>` : ``}
-        ${process.env.NODE_ENV !== 'production' ? `<div id="dev-tools"></div>` : ``}
-        <div class="react-view" id="react-view">${componentHTML}</div>
-        <script type="application/javascript" src="${assetUrl}/public/assets/bundle.js${process.env.NODE_ENV !== 'production' ? `` : `?v=${staticVersion}`}"></script>
-        ${process.env.NODE_ENV !== 'production' ? `` : `<script type="text/javascript" >
-    (function (d, w, c) {
-        (w[c] = w[c] || []).push(function() {
-            try {
-                w.yaCounter45804789 = new Ya.Metrika({
-                    id:45804789,
-                    clickmap:true,
-                    trackLinks:true,
-                    accurateTrackBounce:true,
-                    webvisor:true
-                });
-            } catch(e) { }
-        });
-
-        var n = d.getElementsByTagName("script")[0],
-            s = d.createElement("script"),
-            f = function () { n.parentNode.insertBefore(s, n); };
-        s.type = "text/javascript";
-        s.async = true;
-        s.src = "https://mc.yandex.ru/metrika/watch.js";
-
-        if (w.opera == "[object Opera]") {
-            d.addEventListener("DOMContentLoaded", f, false);
-        } else { f(); }
-    })(document, window, "yandex_metrika_callbacks");
-</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/45804789" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-        <noscript><div><img src="https://mc.yandex.ru/watch/45804789" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-        `}
-      </body>
-    </html>
-  `;
-}
-
 const PORT = process.env.PORT || 3001;
 
 if (process.env.NODE_ENV === 'production') {
@@ -177,20 +130,19 @@ if (process.env.NODE_ENV === 'production') {
   });
 } else {
   const httpsOptions = {
-    key             : fs.readFileSync('./src/server.key').toString(),
-    cert            : fs.readFileSync('./src/server.crt').toString(),
-    passphrase      : '422673',
+    key             : fs.readFileSync('./src/flicktips.local.key').toString(),
+    cert            : fs.readFileSync('./src/flicktips.local.crt').toString(),
     ciphers         : 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-SHA384',
     honorCipherOrder: true,
     secureProtocol  : 'TLSv1_2_method'
   };
 
-  // https.createServer(httpsOptions, app).listen(PORT, () => {
-  //   console.log(`Server listening on: ${PORT}`);
-  // });
-  http.createServer(app).listen(PORT, () => {
+  https.createServer(httpsOptions, app).listen(PORT, () => {
     console.log(`Server listening on: ${PORT}`);
   });
+  // http.createServer(app).listen(PORT, () => {
+  //   console.log(`Server listening on: ${PORT}`);
+  // });
 }
 
 process.on('unhandledRejection', function (reason, p) {

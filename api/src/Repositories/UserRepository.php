@@ -22,6 +22,10 @@ class UserRepository {
 
     public function getByCredentials($uid, $token)
     {
+        if (!isset($uid) || !isset($token)) {
+            return null;
+        }
+
         $safety_fields = array_map(function ($val) { return '`user`.' . $val; }, $this->safety_fields);
         $safety_fields[] = 'SUM(IF(movie_vote.timestamp > `user`.last_seen_notifications, 1, 0)) AS new_notifications';
         $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ' 
@@ -31,7 +35,13 @@ class UserRepository {
         $sth->bindValue('uid', $uid);
         $sth->bindValue('token', $token);
         $sth->execute();
-        return $sth->fetch();
+        $user = $sth->fetch();
+
+        if (!$user['id']) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function findById($uid)

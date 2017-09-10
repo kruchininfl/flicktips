@@ -370,4 +370,110 @@ class MovieRepository {
 
         return $movies;
     }
+
+    public function getFilmsOrderedByVotes($limit = null, $userId = null, $onlyFriends = false) {
+
+        $query = 'SELECT 
+        movie.id as movie_id,
+        movie.title AS movie_title, 
+        movie.original_title AS movie_original_title, 
+        movie.tmdb_poster_path AS movie_tmdb_poster_path, 
+        movie.release_date AS movie_release_date, 
+        movie.first_air_date AS movie_first_air_date, 
+        movie.tmdb_overview AS movie_tmdb_overview, 
+        movie.original_language AS movie_original_language, 
+        movie.tmdb_popularity AS movie_tmdb_popularity, 
+        movie.likes AS movie_likes, 
+        movie.neutral AS movie_neutral, 
+        movie.dislikes AS movie_dislikes,
+        movie.kp_rating_value AS movie_kp_rating_value,
+        movie.imdb_rating_value AS movie_imdb_rating_value,
+        genre.id AS movie_genre_id, 
+        genre.name AS movie_genre_name,
+        UNIX_TIMESTAMP(votes.timestamp) as vote_timestamp,
+        votes.vote as vote_val,
+        `user`.id as vote_user_id,
+        `user`.username as vote_user_username,
+        `user`.avatar as vote_user_avatar,
+        CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
+
+        if ($userId) {
+            $query .= ', IF (my_mote.vote = \'2\', true, false) AS movie_isLiked,
+            IF (my_mote.vote = \'1\', true, false) AS movie_isNeutral,
+            IF (my_mote.vote = \'0\', true, false) AS movie_isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks';
+        }
+
+        if ($onlyFriends) {
+            $query .= ' FROM (SELECT movie_vote.movie_id FROM movie_vote WHERE movie_vote.user_id IN 
+            (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) 
+            GROUP BY movie_id DESC ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
+        } else {
+            $query .= ' FROM (SELECT movie_vote.movie_id FROM movie_vote GROUP BY movie_id DESC ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
+        }
+
+        $query .= ' LEFT JOIN movie ON movie.id = mv.movie_id
+        LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
+        LEFT JOIN genre ON genre.id=movie_genre.genre_id
+        
+        LEFT JOIN movie_vote AS votes ON votes.movie_id = mv.movie_id
+        LEFT JOIN `user` ON `user`.id = votes.user_id';
+
+        if ($userId) {
+            $query .= ' LEFT JOIN movie_vote AS my_mote ON my_mote.movie_id=movie.id AND my_mote.user_id=:uid
+            LEFT JOIN bookmark ON (bookmark.user_id=:uid AND bookmark.movie_id=movie.id)';
+        }
+
+        $sth = $this->pdo->prepare($query);
+        if ($userId) {
+            $sth->bindValue(':uid', (int) $userId, \PDO::PARAM_INT);
+        }
+        $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        $movies = $this->app['mapper']->group($rows, 'movie_id', [
+            'movie_id' => ['type' => 'int', 'rename' => 'id'],
+            'movie_title' => ['rename' => 'title'],
+            'movie_original_title' => ['rename' => 'original_title'],
+            'movie_tmdb_poster_path' => ['rename' => 'tmdb_poster_path'],
+            'movie_release_date' => ['rename' => 'release_date'],
+            'movie_first_air_date' => ['rename' => 'first_air_date'],
+            'movie_tmdb_overview' => ['rename' => 'tmdb_overview'],
+            'movie_original_language' => ['rename' => 'original_language'],
+            'movie_tmdb_popularity' => ['type' => 'float', 'rename' => 'tmdb_popularity'],
+            'movie_likes' => ['type' => 'int', 'rename' => 'likes'],
+            'movie_neutral' => ['type' => 'int', 'rename' => 'neutral'],
+            'movie_dislikes' => ['type' => 'int', 'rename' => 'dislikes'],
+            'movie_kp_rating_value' => ['type' => 'float', 'rename' => 'kp_rating_value'],
+            'movie_imdb_rating_value' => ['type' => 'float', 'rename' => 'imdb_rating_value'],
+            'movie_isLiked' => ['type' => 'bool', 'rename' => 'isLiked'],
+            'movie_isNeutral' => ['type' => 'bool', 'rename' => 'isNeutral'],
+            'movie_isDisliked' => ['type' => 'bool', 'rename' => 'isDisliked'],
+            'movie_inBookmarks' => ['type' => 'bool', 'rename' => 'inBookmarks'],
+
+            'movie_genre_id' => ['group' => 'genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'id', 'type' => 'int'],
+            'movie_genre_name' => ['group' => 'genres', 'group_id_field' => 'movie_genre_id', 'rename' => 'name'],
+
+            'vote_timestamp' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'timestamp', 'type' => 'int'],
+            'vote_val' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'value', 'type' => 'int'],
+            'vote_user_id' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_id', 'type' => 'int'],
+            'vote_user_username' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_name'],
+            'vote_user_avatar' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_avatar']
+        ]);
+
+        if (count($movies)) {
+            foreach ($movies as &$movie) {
+                unset($movie['votes_field_group']);
+
+                if (isset($movie['votes']) && count($movie['votes'])) {
+                    usort($movie['votes'], function($a, $b) {
+                        return $b['timestamp'] - $a['timestamp'];
+                    });
+                }
+            }
+        }
+
+        return $movies;
+    }
 }

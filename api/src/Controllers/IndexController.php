@@ -253,4 +253,75 @@ class IndexController
 
         return $app->json($sth->fetchAll());
     }
+
+    public function getLastGradedFilms(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id DESC) mv');
+        $total = intval($totalSth->fetch()['num']);
+
+        if ($total == 0) {
+            return $app->json([
+                'success' => true,
+                'results' => [
+                    'total' => $total,
+                    'entities' => []
+                ]
+            ]);
+        }
+
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes(HOME_LIST_SIZE, $user ? $user['id'] : null);
+
+        return $app->json([
+            'success' => true,
+            'results' => [
+                'total' => $total,
+                'entities' => $movies
+            ]
+        ]);
+    }
+
+    public function getLastGradedFilmsFriends(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+//        if (!$user) {
+//            return $app->json([
+//                'success' => false,
+//                'msg' => 'authorization required'
+//            ], 401);
+//        }
+        $user = ['id' => 1];
+
+        $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+        $totalSth->execute(['uid' => $user['id']]);
+        $total = intval($totalSth->fetch()['num']);
+
+        if ($total == 0) {
+            return $app->json([
+                'success' => true,
+                'results' => [
+                    'total' => $total,
+                    'entities' => []
+                ]
+            ]);
+        }
+
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes(HOME_LIST_SIZE, $user ? $user['id'] : null, true);
+
+        return $app->json([
+            'success' => true,
+            'results' => [
+                'total' => $total,
+                'entities' => $movies
+            ]
+        ]);
+    }
 }

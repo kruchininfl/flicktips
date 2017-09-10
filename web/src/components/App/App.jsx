@@ -32,8 +32,10 @@ class App extends Component {
     return (
       <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
         <Helmet>
-          <meta charSet="utf-8" />
           <title>FlickTips — фильмы, друзья, лайки</title>
+          <meta name="description" content="Теперь находить лучшие фильмы и сриалы намного проще.
+          Благодаря нашему сервису кино и сериалы можно выбирать не на основе обложки и краткого
+          описания или рецензий неизвестных вам критиков, а по оценкам друзей."/>
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />

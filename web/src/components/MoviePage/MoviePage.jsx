@@ -114,10 +114,13 @@ class MoviePage extends Component {
     movie.date = movie.release_date || movie.first_air_date;
     movie.descr = movie.tmdb_overview || movie.kp_overview;
 
+    const title = movie.title + ' (' + moment(movie.date).format('YYYY') + ')' + ' — FlickTips';
+
     return (
       <div className="movie">
         <Helmet>
-          <title>{movie.title + ' (' + moment(movie.date).format('YYYY') + ')'} — FlickTips</title>
+          <title>{title}</title>
+          <meta name="description" content={movie.descr} />
         </Helmet>
 
         <div className="movie__head">

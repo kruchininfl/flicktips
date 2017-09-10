@@ -8,7 +8,7 @@ var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
-var publicPath = process.env.NODE_ENV === 'developments' ? 'https://flicktips.local:8050/public/assets' : '/assets/';
+var publicPath = process.env.NODE_ENV === 'development' ? 'https://flicktips.local:8050/public/assets' : '/assets/';
 var outputPath = process.env.NODE_ENV === 'cordova' ? `${__dirname}/cordova/www/public/assets/` : `${__dirname}/public/assets/`;
 var cssName = 'styles.css';
 var jsName = 'bundle.js';

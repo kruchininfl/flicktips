@@ -13,8 +13,12 @@
 	<% if (process.env.NODE_ENV === 'cordova') { %>
 	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'"/>
 	<% } %>
+	<% if (helmet) { %>
+	<%- helmet.title.toString(); %>
+	<%- helmet.meta.toString(); %>
+	<% } %>
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
-	<link rel="stylesheet" href="public/icons/style.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
+	<link rel="stylesheet" href="<%- process.env.NODE_ENV === 'cordova' ? '' : '/' %>public/icons/style.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
 	<link rel="stylesheet" href="<%= assetUrl %>public/assets/styles.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
 	<link rel="shortcut icon" href="public/favicon.ico?3" type="image/x-icon" />
 	<link rel="icon" href="public/favicon.ico?3" type="image/x-icon">

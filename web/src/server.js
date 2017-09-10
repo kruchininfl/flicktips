@@ -14,10 +14,11 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
+import Helmet from 'react-helmet';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050/' : '';
 
 app.use(cookieParser());
 
@@ -100,6 +101,8 @@ app.use((req, res) => {
               </Provider>
             );
 
+            const helmet = Helmet.renderStatic();
+
             const state = store.getState();
 
             res.cookie('authHeaders', JSON.stringify(getHeaders(state)), {maxAge: 3600 * 24 * 30 * 1000});
@@ -109,7 +112,8 @@ app.use((req, res) => {
               initialState: state,
               isVkApp,
               componentHTML,
-              hash
+              hash,
+              helmet
             });
             // return res.end(renderHTML(componentHTML, state));
           })

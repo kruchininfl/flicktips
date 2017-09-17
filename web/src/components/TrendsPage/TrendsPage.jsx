@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import './HomePage.scss';
 import {asyncConnect}  from 'redux-connect';
 import {getTrends, addTrends} from 'redux/actions/trendsActions';
 import Button from '../Gui/Button';
@@ -26,7 +25,7 @@ const propTypes = {
   }
 ], mapStateToProps)
 
-class HomePage extends Component {
+class TrendsPage extends Component {
   constructor(props) {
     super(props);
 
@@ -108,7 +107,7 @@ class HomePage extends Component {
   }
 }
 
-HomePage.propTypes = propTypes;
+TrendsPage.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const {pending, loading, response} = state.trends.toJS();
@@ -118,4 +117,4 @@ function mapStateToProps(state) {
   return {pending, loading, loaded, response, userSignedIn};
 }
 
-export default HomePage;
+export default TrendsPage;

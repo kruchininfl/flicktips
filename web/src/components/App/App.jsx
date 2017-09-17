@@ -9,7 +9,6 @@ import LoadingBar from 'react-redux-loading-bar';
 
 import './App.scss';
 import {connect} from 'react-redux';
-import HeaderNotifications from '../../partitions/HeaderNotifications/HeaderNotifications';
 import YaMetrica from './YaMetrica';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
@@ -33,9 +32,13 @@ class App extends Component {
       <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
         <Helmet>
           <title>FlickTips — фильмы, друзья, лайки</title>
-          <meta name="description" content="Теперь находить лучшие фильмы и сриалы намного проще.
+          <meta name="description" content="Теперь находить лучшие фильмы и сериалы намного проще.
           Благодаря нашему сервису кино и сериалы можно выбирать не на основе обложки и краткого
           описания или рецензий неизвестных вам критиков, а по оценкам друзей."/>
+
+          <meta property="og:title" content="FlickTips — Делись впечатлениями о фильмах и сериалах с друзьями.
+        Узнай какие фильмы им понравились, а какие нет!" />
+          <meta property="og:image" content="https://flick.tips/public/img/logo/150x150.png" />
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
@@ -44,7 +47,6 @@ class App extends Component {
 
             <div className="header__right">
               <HeaderSearch />
-              <HeaderNotifications />
               <SignInButton />
               <HeaderProfile />
             </div>

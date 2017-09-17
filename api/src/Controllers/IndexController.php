@@ -292,13 +292,12 @@ class IndexController
 
         $user = $app['user.repository']->getByCredentials($uid, $token);
 
-//        if (!$user) {
-//            return $app->json([
-//                'success' => false,
-//                'msg' => 'authorization required'
-//            ], 401);
-//        }
-        $user = ['id' => 1];
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
 
         $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
         $totalSth->execute(['uid' => $user['id']]);

@@ -1,7 +1,7 @@
 import React from 'react';
 import {IndexRoute, Route}  from 'react-router';
 import App from 'components/App';
-import HomePage from 'components/HomePage';
+import LastGradedPage from 'components/LastGradedPage';
 import LayoutPage from 'components/LayoutPage';
 import SignInPage from 'components/SignInPage';
 import {ProfilePage, ProfileFriendsPage, ProfileBookmarksPage} from 'components/ProfilePage';
@@ -28,7 +28,7 @@ export default function routes(storeRef) {
 
   return (
     <Route component={App} path="/">
-      <IndexRoute component={HomePage}/>
+      <IndexRoute component={LastGradedPage}/>
       <Route component={LayoutPage} path="layout"/>
       <Route component={AboutPage} path="about"/>
       <Route component={SignInPage} path="signin"/>

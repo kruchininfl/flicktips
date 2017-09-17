@@ -70,7 +70,7 @@ class HeaderSearch extends Component {
       return response.results.map((entity, key) => {
         return (
           <div onClick={this.handleCloseSearch} key={key} className="header-search__result-item">
-            <MoviePreview movie={entity} />
+            <MoviePreview votesFilter={0} movie={entity} />
           </div>
         );
       });

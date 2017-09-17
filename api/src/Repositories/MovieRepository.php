@@ -268,11 +268,11 @@ class MovieRepository {
             'genre_id' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'id', 'type' => 'int'],
             'genre_name' => ['group' => 'genres', 'group_id_field' => 'genre_id', 'rename' => 'name'],
 
-            'friends_votes_user_id' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_id', 'type' => 'int'],
-            'friends_votes_user_name' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_name'],
-            'friends_votes_user_avatar' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_avatar'],
-            'friends_votes_val' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote', 'type' => 'int'],
-            'friends_votes_timestamp' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote_timestamp', 'type' => 'int']
+            'friends_votes_user_id' => ['group' => 'votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_id', 'type' => 'int'],
+            'friends_votes_user_name' => ['group' => 'votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_name'],
+            'friends_votes_user_avatar' => ['group' => 'votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_avatar'],
+            'friends_votes_val' => ['group' => 'votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'value', 'type' => 'int'],
+            'friends_votes_timestamp' => ['group' => 'votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'timestamp', 'type' => 'int']
         ]);
 
         if ($userId) {
@@ -414,10 +414,15 @@ class MovieRepository {
 
         $query .= ' LEFT JOIN movie ON movie.id = mv.movie_id
         LEFT JOIN movie_genre ON movie_genre.movie_id=movie.id
-        LEFT JOIN genre ON genre.id=movie_genre.genre_id
-        
-        LEFT JOIN movie_vote AS votes ON votes.movie_id = mv.movie_id
-        LEFT JOIN `user` ON `user`.id = votes.user_id';
+        LEFT JOIN genre ON genre.id=movie_genre.genre_id';
+
+        if ($onlyFriends) {
+            $query .= ' LEFT JOIN (SELECT movie_vote.* FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid)) votes ON votes.movie_id = mv.movie_id
+            LEFT JOIN `user` ON `user`.id = votes.user_id';
+        } else {
+            $query .= ' LEFT JOIN movie_vote AS votes ON votes.movie_id = mv.movie_id
+            LEFT JOIN `user` ON `user`.id = votes.user_id';
+        }
 
         if ($userId) {
             $query .= ' LEFT JOIN movie_vote AS my_mote ON my_mote.movie_id=movie.id AND my_mote.user_id=:uid

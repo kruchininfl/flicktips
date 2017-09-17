@@ -177,6 +177,10 @@ export default {
     return this._fetch('get_trends/', {page}, undefined, true);
   },
 
+  getLastGraded(page = 1, onlyFriends = false) {
+    return this._fetch(onlyFriends ? 'get_last_graded_films_friends/' : 'get_last_graded_films/', {page}, undefined, true);
+  },
+
   toggleVote(entityId, vote) {
     return this._fetch('user/vote/', {
       id: entityId,

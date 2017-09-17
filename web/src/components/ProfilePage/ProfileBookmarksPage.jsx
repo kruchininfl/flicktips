@@ -58,6 +58,7 @@ class ProfileBookmarksPage extends ProfileLayout {
           key={key}
           className={'profile__bookmarks-item' + (entity.inBookmarks ? '' : ' m-inactive')}
           movie={entity}
+          votesFilter={0}
         />
       );
     });

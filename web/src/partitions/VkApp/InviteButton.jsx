@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import Button from '../../components/Gui/Button';
+import {ShareButtons} from 'react-share';
 
 const propTypes = {
   dispatch: PropTypes.func,
-  isVkApp: PropTypes.bool
+  isVkApp : PropTypes.bool
 };
 
 class InviteButton extends Component {
@@ -23,7 +24,33 @@ class InviteButton extends Component {
     const {isVkApp} = this.props;
 
     if (!isVkApp) {
-      return false;
+      const {
+        FacebookShareButton,
+        VKShareButton
+      } = ShareButtons;
+
+      const url = 'https://flick.tips';
+
+      return (
+        <div className="share-buttons">
+          <VKShareButton url={url}>
+            <Button
+              additionClass="invite-btn p-signin__btn p-signin__btn_vk"
+              icn="soc_vk"
+            >
+              Рассказать во Вконтакте
+            </Button>
+          </VKShareButton>
+          <FacebookShareButton url={url}>
+            <Button
+              additionClass="invite-btn p-signin__btn p-signin__btn_fb"
+              icn="soc_fb"
+            >
+              Рассказать в Facebook
+            </Button>
+          </FacebookShareButton>
+        </div>
+      );
     }
 
     return (

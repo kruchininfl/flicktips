@@ -18,7 +18,7 @@ import Helmet from 'react-helmet';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050/' : '';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 
 app.use(cookieParser());
 

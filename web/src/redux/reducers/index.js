@@ -7,14 +7,16 @@ import {authStateReducer} from 'redux-oauth';
 import {reducer as reduxAsyncConnect} from 'redux-connect';
 import feedReducer from './feedReducer';
 import profileBookmarksReducer from './profileBookmarksReducer';
-import trendsReducer from './trendsReducer';
+// import trendsReducer from './trendsReducer';
+import lastGradedReducer from './lastGraded';
 import movieReducer from './movieReducer';
 import {loadingBarReducer} from 'react-redux-loading-bar';
 
 export default combineReducers({
   app          : appReducer,
   feed         : feedReducer,
-  trends       : trendsReducer,
+  // trends       : trendsReducer,
+  lastGraded   : lastGradedReducer,
   auth         : authStateReducer,
   search       : searchReducer,
   profile      : profileReducer,

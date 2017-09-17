@@ -86,7 +86,7 @@ class ProfilePage extends ProfileLayout {
               : ''
           }
           <div className={'profile__votes-item' + inactiveClass}>
-            <MoviePreview movie={entity} />
+            <MoviePreview votesFilter={0} movie={entity} />
           </div>
         </div>
       );
@@ -104,10 +104,10 @@ class ProfilePage extends ProfileLayout {
     let placeholder;
 
     if (isMyPage) {
-      placeholder = 'Вы пока ничего не оценивали';
+      placeholder = 'У вас пока нет оценок';
     } else {
       placeholder = (`${user.username || 'Пользователь'} 
-      пока ничего не ${pluralGender(user.gender, ['оценил', 'оценила', 'оценил(а)'])}`);
+      пока не ${pluralGender(user.gender, ['ставил', 'ставила', 'ставил(а)'])} оценок`);
     }
 
     return (
@@ -122,8 +122,8 @@ class ProfilePage extends ProfileLayout {
           </div>)
         }
 
-        {votes.total && votes.pages > votes.page ?
-          <Button onClick={this.handleLoadData} loading={loading} additionClass="btn_more">Показать еще</Button>
+        {votes.total && votes.pages > votes.page
+          ? <Button onClick={this.handleLoadData} loading={loading} additionClass="btn_more">Показать еще</Button>
           : ''
         }
       </div>

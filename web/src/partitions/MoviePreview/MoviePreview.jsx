@@ -10,10 +10,12 @@ import './MoviePreview.scss';
 import {getVoteIconClassById} from '../../helpers';
 import {Link} from 'react-router';
 import MovieBookmark from '../MovieBookmark/MovieBookmark';
-import MovieFriendsVotes from '../MovieFiendsVotes/MovieFriendsVotes';
+import MovieVotes from '../MovieVotes';
 
 const propTypes = {
-  movie  : PropTypes.any
+  movie      : PropTypes.any,
+  className  : PropTypes.string,
+  votesFilter: PropTypes.bool
 };
 
 class MoviePreview extends Component {
@@ -22,14 +24,16 @@ class MoviePreview extends Component {
   }
 
   render() {
-    const {movie} = this.props;
+    const {movie, votesFilter, className} = this.props;
 
     movie.genres = movie.genres ? movie.genres.map((el) => el.name || el) : [];
     movie.date = movie.release_date || movie.first_air_date;
 
     return (
-      <div className="movie-prev">
+      <div className={'movie-prev ' + (className ? className : '')}>
         <Link to={'/movie/' + movie.id} className="movie-prev__link">подробнее</Link>
+
+        <MovieVotes filter={votesFilter} className="movie-prev__friends-votes" votes={movie.votes} />
 
         <div className="movie-cover movie-cover__prev">
           {movie.tmdb_poster_path
@@ -86,8 +90,6 @@ class MoviePreview extends Component {
             <MovieStat {...movie} />
           </div>
         </div>
-
-        <MovieFriendsVotes className="movie-prev__friends-votes" votes={movie.friend_votes} />
       </div>
     );
   }

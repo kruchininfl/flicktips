@@ -10,7 +10,7 @@ import 'moment/locale/ru';
 import 'moment-duration-format';
 import MovieStat from '../../partitions/MovieStat/MovieStat';
 import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
-import MovieFriendsVotes from '../../partitions/MovieFiendsVotes/MovieFriendsVotes';
+import MovieVotes from '../../partitions/MovieVotes';
 import {Helmet} from 'react-helmet';
 
 const propTypes = {
@@ -212,7 +212,7 @@ class MoviePage extends Component {
         </div>
 
         <div className="movie__friends-votes">
-          <MovieFriendsVotes votes={movie.friend_votes} />
+          <MovieVotes votes={movie.friend_votes} />
         </div>
 
         {movie.descr

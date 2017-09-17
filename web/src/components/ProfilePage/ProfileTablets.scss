@@ -24,4 +24,13 @@
         vertical-align: top;
         width: 33.33%;
     }
+
+    .friend__name {
+        text-overflow: ellipsis;
+        padding-right: 0;
+
+        &:after {
+            display: none;
+        }
+    }
 }

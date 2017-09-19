@@ -175,7 +175,7 @@ async function requestGet(url, headers = {}) {
   return body;
 }
 
-async function search(query, year) {
+async function search(query, querySecond, year, type) {
   // return Promise.resolve(4541);
 
   const body = await requestGet('https://www.kinopoisk.ru/search/suggest/?value=' + encodeURI(query), {
@@ -187,21 +187,24 @@ async function search(query, year) {
 
   const result = JSON.parse(toUTF8(body));
 
-  if (!result.page.suggest.items || !result.page.suggest.items.movies || !result.page.suggest.items.movies.length) {
-    return null;
-  }
-
-  if (!year) {
-    return result.page.suggest.items.movies[0].id;
-  }
-
   let id = null;
-  result.page.suggest.items.movies.some((movie) => {
-    if (Math.abs(movie.year - year) <= 1) {
-      id = movie.id;
-      return true;
-    }
-  });
+
+  if (result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
+    result.page.suggest.items.movies.some((movie) => {
+      if (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle)) {
+        return false;
+      }
+
+      if (Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
+        id = movie.id;
+        return true;
+      }
+    });
+  }
+
+  if (id === null && querySecond) {
+    return await search(querySecond, null, year, type);
+  }
 
   return id;
 }
@@ -221,6 +224,8 @@ async function getFilm(id) {
     title         : null,
     original_title: null,
     year          : null,
+    start_year    : null,
+    finish_year   : null,
     countries     : [],
     genres        : [],
     release_date  : null,
@@ -232,7 +237,18 @@ async function getFilm(id) {
     description   : null
   };
 
-  film.title = $('h1[itemprop=name]').text() || null;
+  const $years = $('h1[itemprop=name] span');
+
+  if ($years.length) {
+    const yearsMatch = $years.text().match(/\(сериал (.+?)\s–\s(.+?)\)$/);
+    if (yearsMatch) {
+      film.start_year = +yearsMatch[1];
+      film.finish_year = yearsMatch[2] === '...' ? null : +yearsMatch[2];
+    }
+  }
+
+  $years.remove();
+  film.title = $('h1[itemprop=name]').remove('span').text().trim() || null;
 
   film.original_title = $('span[itemprop=alternativeHeadline]').text() || null;
 

@@ -9,6 +9,7 @@ const MAX_DIFF_CHECKING_DAY = 7;
 
 const mysqlConfig = {
   host    : 'localhost',
+  // host    : '185.117.155.141',
   user    : 'flicktips',
   password: 'Aing6si',
   database: 'flicktips'
@@ -19,7 +20,7 @@ const selectMovie = async () => {
 
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
-    movie.id, movie.title, movie.kp_id, movie.original_title,
+    movie.id, movie.title, movie.kp_id, movie.original_title, movie.type,
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 
@@ -35,7 +36,7 @@ const selectMovie = async () => {
 
   if (!rows || !rows.length) {
     [rows] = await connection.execute(`SELECT
-      id, (likes + dislikes + neutral) AS votes, original_title, 
+      id, (likes + dislikes + neutral) AS votes, original_title, title, type, 
       CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
       FROM movie 
       WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
@@ -125,6 +126,10 @@ const updateFilm = async (film) => {
   try {
     await connection.beginTransaction();
 
+    await connection.query('DELETE FROM `movie_country` WHERE movie_id = ?', film.my_id);
+    await connection.query('DELETE FROM `movie_kp-genre` WHERE movie_id = ?', film.my_id);
+    await connection.query('DELETE FROM `movie_people` WHERE movie_id = ?', film.my_id);
+
     film.countries && film.countries.length
     && await connection.query('INSERT IGNORE `movie_country` (movie_id, country_id) VALUES ?', [film.countries.map(country => [film.my_id, country.id])]);
 
@@ -137,6 +142,8 @@ const updateFilm = async (film) => {
     await connection.query('UPDATE movie SET ? WHERE id = ?', [{
       kp_id              : film.id,
       kp_title           : film.title,
+      kp_start_year      : film.start_year,
+      kp_finish_year     : film.finish_year,
       kp_overview        : film.description,
       kp_duration        : film.duration,
       kp_release_date    : film.release_date,
@@ -165,7 +172,10 @@ const updateFilm = async (film) => {
 const insertError = async (filmId, error) => {
   const connection = await mysql.createConnection(mysqlConfig);
 
-  await connection.query('UPDATE movie SET ? WHERE id = ?', [{kp_error: error, kp_check_date: new Date()}, filmId]);
+  await connection.query('UPDATE movie SET ? WHERE id = ?', [{
+    kp_error: error,
+    kp_check_date: new Date()
+  }, filmId]);
 
   connection.end();
 
@@ -182,9 +192,9 @@ const worker = (mainResolve) => {
         return false;
       }
 
-      const {id, original_title, year, kp_id: dbKpId} = result[0];
+      const {id, original_title, title, type, year, kp_id: dbKpId} = result[0];
 
-      kpSearch(original_title, year).then(kpId => {
+      kpSearch(original_title, title, year, type).then(kpId => {
         if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))

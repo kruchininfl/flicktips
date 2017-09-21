@@ -71,24 +71,17 @@ class ProfilePage extends ProfileLayout {
       const duration = moment(entity.timestamp * 1000)
         .from((global ? new Date().getTime() : window.SERVER_TIMESTAMP));
 
-      let group = null;
+      let isGroupUnique = null;
 
       if (durations.indexOf(duration) === -1) {
-        group = duration;
+        isGroupUnique = true;
         durations.push(duration);
       }
 
       return (
-        <div key={key}>
-          {
-            group ?
-              <div className="profile__votes-group">{group}</div>
-              : ''
-          }
-          <div className={'profile__votes-item' + inactiveClass}>
-            <MoviePreview votesFilter={0} movie={entity} />
-          </div>
-        </div>
+        <MoviePreview key={key} votesFilter={0} movie={entity} className={'profile__votes-item' + inactiveClass}>
+          <div className={'profile__votes-group ' + (isGroupUnique ? 'm-unique' : '')}>{duration}</div>
+        </MoviePreview>
       );
     });
   }
@@ -115,7 +108,7 @@ class ProfilePage extends ProfileLayout {
         {super.render()}
 
         {votes.total
-          ? <div className="profile__votes">{this.renderVotes(votes)}</div>
+          ? <div className="profile__votes movie-prev-list">{this.renderVotes(votes)}</div>
           : (<div className="page-ph">
             <div className="page-ph__icn"><i className="icn icn_star" /></div>
             <div className="page-ph__text">{placeholder}</div>

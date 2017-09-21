@@ -13,9 +13,10 @@ import MovieBookmark from '../MovieBookmark/MovieBookmark';
 import MovieVotes from '../MovieVotes';
 
 const propTypes = {
+  children   : PropTypes.node,
   movie      : PropTypes.any,
   className  : PropTypes.string,
-  votesFilter: PropTypes.bool
+  votesFilter: PropTypes.number
 };
 
 class MoviePreview extends Component {
@@ -31,6 +32,8 @@ class MoviePreview extends Component {
 
     return (
       <div className={'movie-prev ' + (className ? className : '')}>
+        {this.props.children}
+
         <Link to={'/movie/' + movie.id} className="movie-prev__link">подробнее</Link>
 
         <MovieVotes filter={votesFilter} className="movie-prev__friends-votes" votes={movie.votes} />
@@ -56,7 +59,7 @@ class MoviePreview extends Component {
 
         <div className="movie-prev__content">
           {movie.title
-            ? <div className="movie-title" title={movie.title}>{movie.title}</div>
+            ? <div className="movie-title" title={movie.title}>{movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}</div>
             : ''
           }
 

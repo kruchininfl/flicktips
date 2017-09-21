@@ -178,7 +178,7 @@ export default {
   },
 
   getLastGraded(page = 1, onlyFriends = false) {
-    return this._fetch(onlyFriends ? 'get_last_graded_films_friends/' : 'get_last_graded_films/', {page}, undefined, true);
+    return this._fetch(onlyFriends ? 'get_last_graded_films_friends/' : 'get_last_graded_films/', {page});
   },
 
   toggleVote(entityId, vote) {

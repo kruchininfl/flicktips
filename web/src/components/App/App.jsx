@@ -20,6 +20,10 @@ const propTypes = {
 
 class App extends Component {
   componentDidMount() {
+    if (window) {
+      window.props = this.props;
+    }
+
     if (this.props.isVkApp) {
       VK.init(() => {
         VK.callMethod('resizeWindow', '100%', 'auto');

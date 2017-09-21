@@ -40,7 +40,7 @@ export function addLastGraded(page = 1, onlyFriends = false) {
   return (dispatch) => {
     dispatch(addStart());
 
-    dispatch(api.getTrends(page, onlyFriends))
+    dispatch(api.getLastGraded(page, onlyFriends))
       .then((response) => dispatch(addFinish(response.body)));
   };
 }

@@ -31,6 +31,7 @@ class HeaderSearch extends Component {
     this.handleQueryChange = this.handleQueryChange.bind(this);
     this.handleOpenSearch = this.handleOpenSearch.bind(this);
     this.handleCloseSearch = this.handleCloseSearch.bind(this);
+    this.handleCloseSearchForce = this.handleCloseSearchForce.bind(this);
 
     this.state = {
       opened : this.props.opened,
@@ -44,7 +45,14 @@ class HeaderSearch extends Component {
     this._input.focus();
   }
 
-  handleCloseSearch() {
+  handleCloseSearch(e) {
+    if (e === true || e.target.nodeName !== 'A') {
+      return false;
+    }
+    this.handleCloseSearchForce();
+  }
+
+  handleCloseSearchForce() {
     this.setState({opened: false});
     this.props.dispatch(searchRequestClear());
     this._input.value = '';
@@ -69,7 +77,7 @@ class HeaderSearch extends Component {
     if (response && response.total) {
       return response.results.map((entity, key) => {
         return (
-          <div onClick={this.handleCloseSearch} key={key} className="header-search__result-item">
+          <div onClick={(e) => this.handleCloseSearch(e)} key={key} className="header-search__result-item">
             <MoviePreview votesFilter={0} movie={entity} />
           </div>
         );
@@ -100,10 +108,10 @@ class HeaderSearch extends Component {
               />
               <Spinner additionClass="header-search__head-spinner" active={pending} size="small"/>
               <span className="header-search__head-icn icn icn_loupe"/>
-              <span onClick={this.handleCloseSearch} className="header-search__head-cross icn icn_cross"/>
+              <span onClick={this.handleCloseSearchForce} className="header-search__head-cross icn icn_cross"/>
             </div>
 
-            <div onClick={this.handleCloseSearch} className="header-search__result-wrap overlay">
+            <div onClick={this.handleCloseSearchForce} className="header-search__result-wrap overlay">
               <div onClick={(e) => e.stopPropagation()} className="header-search__result">
                 {this.renderResults(response)}
               </div>

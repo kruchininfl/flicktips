@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './MoviePage.scss';
 import {asyncConnect}  from 'redux-connect';
@@ -10,8 +11,8 @@ import 'moment/locale/ru';
 import 'moment-duration-format';
 import MovieStat from '../../partitions/MovieStat/MovieStat';
 import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
-import MovieVotes from '../../partitions/MovieVotes';
 import {Helmet} from 'react-helmet';
+import LazyLoad from 'react-lazy-load';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -43,6 +44,12 @@ class MoviePage extends Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
+
+    ReactDOM.findDOMNode(this).parentNode.classList.add('m-movie');
+  }
+
+  componentWillUnmount() {
+    ReactDOM.findDOMNode(this).parentNode.classList.remove('m-movie');
   }
 
   handleToggleDesc() {
@@ -65,7 +72,7 @@ class MoviePage extends Component {
               <div key={key} className="movie-person movie-person_details">
                 <div className="movie-person__photo">
                   {person.photo
-                    ? <div
+                    ? <LazyLoad><div
                       style={{backgroundImage: `url(${person.photo})`}}
                       className="movie-person__photo-inn"
                     >
@@ -73,7 +80,7 @@ class MoviePage extends Component {
                         src={person.photo}
                         alt={person.name || person.original_name}
                       />
-                    </div>
+                    </div></LazyLoad>
                     : ''
                   }
                 </div>
@@ -145,6 +152,10 @@ class MoviePage extends Component {
               imdbValue={movie.imdb_rating_value}
               additionClass="m-details"
             />
+
+            <div className="movie__votes">
+              <MovieStat {...movie} />
+            </div>
           </div>
 
           <div className="movie__head-data">
@@ -152,7 +163,9 @@ class MoviePage extends Component {
               ? <div
                 className="movie__head-row"
               >
-                <div className="movie-title" title={movie.title}>{movie.title}</div>
+                <div className="movie-title" title={movie.title}>
+                  {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
+                </div>
               </div>
               : ''
             }
@@ -204,16 +217,9 @@ class MoviePage extends Component {
               </div>
               : ''
             }
-
-            <div className="movie__votes">
-              <MovieStat {...movie} />
-            </div>
           </div>
         </div>
 
-        <div className="movie__friends-votes">
-          <MovieVotes votes={movie.friend_votes} />
-        </div>
 
         {movie.descr
           ? <div

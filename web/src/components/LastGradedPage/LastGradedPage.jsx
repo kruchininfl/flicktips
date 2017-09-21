@@ -60,13 +60,13 @@ class LastGradedPage extends Component {
   }
 
   handleLoadData() {
-    const {response, loading} = this.props;
+    const {response, loading, onlyFriends} = this.props;
 
     if (loading) {
       return false;
     }
 
-    this.props.dispatch(addLastGraded(response.results.page + 1));
+    this.props.dispatch(addLastGraded(response.results.page + 1, onlyFriends));
   }
 
   handleFilter(onlyFriends) {
@@ -143,7 +143,7 @@ class LastGradedPage extends Component {
   }
 
   render() {
-    const {response, onlyFriends} = this.props;
+    const {response, onlyFriends, loading} = this.props;
 
     return (
       <div className="home-page">
@@ -168,6 +168,10 @@ class LastGradedPage extends Component {
           : this.renderEmptyPage()
         }
 
+        {response.results.page < response.results.pages
+          ? <Button onClick={this.handleLoadData} loading={loading} additionClass="btn_more">Показать еще</Button>
+          : ''
+        }
       </div>
     );
   }

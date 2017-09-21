@@ -261,6 +261,9 @@ class IndexController
 
         $user = $app['user.repository']->getByCredentials($uid, $token);
 
+        $page = $request->get('page') ? $request->get('page') : 1;
+        $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
+
         $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id DESC) mv');
         $total = intval($totalSth->fetch()['num']);
 
@@ -269,17 +272,21 @@ class IndexController
                 'success' => true,
                 'results' => [
                     'total' => $total,
+                    'page' => (int) $page,
+                    'pages' => ceil($total / HOME_LIST_SIZE),
                     'entities' => []
                 ]
             ]);
         }
 
-        $movies = $app['movie.repository']->getFilmsOrderedByVotes(HOME_LIST_SIZE, $user ? $user['id'] : null);
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user ? $user['id'] : null);
 
         return $app->json([
             'success' => true,
             'results' => [
                 'total' => $total,
+                'page' => (int) $page,
+                'pages' => ceil($total / HOME_LIST_SIZE),
                 'entities' => $movies
             ]
         ]);
@@ -299,6 +306,9 @@ class IndexController
             ], 401);
         }
 
+        $page = $request->get('page') ? $request->get('page') : 1;
+        $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
+
         $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
         $totalSth->execute(['uid' => $user['id']]);
         $total = intval($totalSth->fetch()['num']);
@@ -308,17 +318,21 @@ class IndexController
                 'success' => true,
                 'results' => [
                     'total' => $total,
+                    'page' => (int) $page,
+                    'pages' => ceil($total / HOME_LIST_SIZE),
                     'entities' => []
                 ]
             ]);
         }
 
-        $movies = $app['movie.repository']->getFilmsOrderedByVotes(HOME_LIST_SIZE, $user ? $user['id'] : null, true);
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user ? $user['id'] : null, true);
 
         return $app->json([
             'success' => true,
             'results' => [
                 'total' => $total,
+                'page' => (int) $page,
+                'pages' => ceil($total / HOME_LIST_SIZE),
                 'entities' => $movies
             ]
         ]);

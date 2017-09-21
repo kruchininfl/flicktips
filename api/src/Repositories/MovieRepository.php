@@ -22,15 +22,15 @@ class MovieRepository {
         $query = 'SELECT 
             movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked,
             country.name AS country_name, country.id AS country_id,
-            CONCAT_WS(\'_\', people.id, `group`.id) AS people_field_group, people.id AS people_id, people.name AS people_name, people.original_name AS people_original_name, people.kp_photo AS people_photo, movie_people.order AS people_order, movie_people.description AS people_description, `group`.type AS people_group_type, `group`.title AS people_group_title';
+            CONCAT_WS(\'_\', people.id, `group`.id) AS people_field_group, people.id AS people_id, people.name AS people_name, people.original_name AS people_original_name, people.kp_photo AS people_photo, movie_people.order AS people_order, movie_people.description AS people_description, `group`.type AS people_group_type, `group`.title AS people_group_title,
+            UNIX_TIMESTAMP(votes.timestamp) as vote_timestamp,
+            votes.vote as vote_val,
+            `user`.id as vote_user_id,
+            `user`.username as vote_user_username,
+            `user`.avatar as vote_user_avatar,
+            CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
         if ($userId) {
-            $query .= ', friend_votes.vote AS friends_votes_val,
-            friend.id AS friends_votes_user_id,
-            friend.username AS friends_votes_user_name,
-            friend.avatar AS friends_votes_user_avatar,
-            UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp,
-            IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
-            IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+            $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
             IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
             IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
@@ -45,12 +45,14 @@ class MovieRepository {
             
             LEFT JOIN movie_people ON movie_people.movie_id=movie.id 
             LEFT JOIN people ON people.id=movie_people.people_id
-            LEFT JOIN `group` ON `group`.id=movie_people.group_id';
+            LEFT JOIN `group` ON `group`.id=movie_people.group_id
+            
+            LEFT JOIN movie_vote AS votes ON votes.movie_id = movie.id
+            LEFT JOIN `user` ON `user`.id = votes.user_id';
         if ($userId) {
-            $query .= ' LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
-            LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)
-            LEFT JOIN movie_vote AS friend_votes ON friend_votes.movie_id = movie.id AND friend_votes.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ' . $userId . ' AND user_friends.subscribed = 1)
-            LEFT JOIN `user` AS friend ON friend.id = friend_votes.user_id';
+            $query .= ' 
+            LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
+            LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
         }
         $query .= ' WHERE movie.id = ' . $id;
 
@@ -61,7 +63,6 @@ class MovieRepository {
         if (!count($rows)) {
             return null;
         }
-
 
         $movie = $this->app['mapper']->group($rows, 'id', [
             'id' => ['type' => 'int'],
@@ -94,11 +95,11 @@ class MovieRepository {
             'people_group_type' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'group_type'],
             'people_group_title' => ['group' => 'staff', 'group_id_field' => 'people_field_group', 'rename' => 'group_title'],
 
-            'friends_votes_user_id' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_id', 'type' => 'int'],
-            'friends_votes_user_name' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_name'],
-            'friends_votes_user_avatar' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'user_avatar'],
-            'friends_votes_val' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote', 'type' => 'int'],
-            'friends_votes_timestamp' => ['group' => 'friend_votes', 'group_id_field' => 'friends_votes_group_id', 'rename' => 'vote_timestamp', 'type' => 'int']
+            'vote_timestamp' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'timestamp', 'type' => 'int'],
+            'vote_val' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'value', 'type' => 'int'],
+            'vote_user_id' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_id', 'type' => 'int'],
+            'vote_user_username' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_name'],
+            'vote_user_avatar' => ['group' => 'votes', 'group_id_field' => 'votes_field_group', 'rename' => 'user_avatar']
         ])[0];
 
         unset($movie['kp_check_date']);
@@ -130,6 +131,12 @@ class MovieRepository {
         if ($userId && isset($movie['friend_votes']) && count($movie['friend_votes'])) {
             usort($movie['friend_votes'], function($a, $b) {
                 return $b['vote_timestamp'] - $a['vote_timestamp'];
+            });
+        }
+
+        if (isset($movie['votes']) && count($movie['votes'])) {
+            usort($movie['votes'], function($a, $b) {
+                return $b['timestamp'] - $a['timestamp'];
             });
         }
 
@@ -375,6 +382,7 @@ class MovieRepository {
 
         $query = 'SELECT 
         movie.id as movie_id,
+        movie.type as movie_type,
         movie.title AS movie_title, 
         movie.original_title AS movie_original_title, 
         movie.tmdb_poster_path AS movie_tmdb_poster_path, 
@@ -439,6 +447,7 @@ class MovieRepository {
 
         $movies = $this->app['mapper']->group($rows, 'movie_id', [
             'movie_id' => ['type' => 'int', 'rename' => 'id'],
+            'movie_type' => ['type' => 'int', 'rename' => 'type'],
             'movie_title' => ['rename' => 'title'],
             'movie_original_title' => ['rename' => 'original_title'],
             'movie_tmdb_poster_path' => ['rename' => 'tmdb_poster_path'],

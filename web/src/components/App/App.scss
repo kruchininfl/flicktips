@@ -572,6 +572,10 @@ html, body, .react-view, .layout {
     display: flex;
     flex-direction: column;
 
+    &.m-movie {
+        padding-bottom: 94px;
+    }
+
     .layout.m-vk-app & {
         max-width: 807px;
         min-height: 0;
@@ -679,6 +683,10 @@ html, body, .react-view, .layout {
         color: #333b41;
         border-top: 1px solid #e7e8ec;
     }
+
+    .container.m-movie ~ & {
+        margin-top: -94px;
+    }
 }
 .footer__copy {
     float: left;
@@ -715,7 +723,7 @@ html, body, .react-view, .layout {
     margin-bottom: 20px;
 }
 .static-page {
-    padding: 0 20px;
+    padding: 5px 20px;
     text-align: justify;
 }
 

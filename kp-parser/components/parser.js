@@ -189,13 +189,13 @@ async function search(query, querySecond, year, type) {
 
   let id = null;
 
-  if (result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
+  if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {
       if (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle)) {
         return false;
       }
 
-      if (Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
+      if (movie.year && Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
         id = movie.id;
         return true;
       }

@@ -172,7 +172,24 @@ const updateFilm = async (film) => {
 const insertError = async (filmId, error) => {
   const connection = await mysql.createConnection(mysqlConfig);
 
+  await connection.query('DELETE FROM `movie_country` WHERE movie_id = ?', filmId);
+  await connection.query('DELETE FROM `movie_kp-genre` WHERE movie_id = ?', filmId);
+  await connection.query('DELETE FROM `movie_people` WHERE movie_id = ?', filmId);
+
   await connection.query('UPDATE movie SET ? WHERE id = ?', [{
+    kp_id              : null,
+    kp_title           : null,
+    kp_start_year      : null,
+    kp_finish_year     : null,
+    kp_overview        : null,
+    kp_duration        : null,
+    kp_release_date    : null,
+    kp_release_date_dvd: null,
+    kp_release_date_rus: null,
+    kp_rating_value    : null,
+    kp_rating_count    : null,
+    imdb_rating_value  : null,
+    imdb_rating_count  : null,
     kp_error: error,
     kp_check_date: new Date()
   }, filmId]);

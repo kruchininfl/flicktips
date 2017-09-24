@@ -3,7 +3,8 @@ import {createReducer} from 'redux-immutablejs';
 
 import {
   MOVIE_LOADING_START,
-  MOVIE_LOADING_FINISH
+  MOVIE_LOADING_FINISH,
+  MOVIE_LOADING_ERROR
 } from 'redux/actions/movieActions';
 
 import {VOTE_REQUEST_FINISHED} from 'redux/actions/voteActions';
@@ -26,6 +27,14 @@ export default createReducer(initialState, {
     errors  : null,
     response: action.response
   }),
+
+  [MOVIE_LOADING_ERROR]: (state, action) => {
+    return state.merge({
+      pending : false,
+      errors  : action.err,
+      response: null
+    });
+  },
 
   [VOTE_REQUEST_FINISHED]: (state, action) => {
     const movie = state.getIn(['response', 'movie']);

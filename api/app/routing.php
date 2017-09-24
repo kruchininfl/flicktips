@@ -7,6 +7,7 @@ $app->get('/api/', '\Controllers\IndexController::index');
 $app->get('/api/search/{query}', '\Controllers\IndexController::search')->value('query', false);
 $app->get('/api/get_trends/', '\Controllers\IndexController::getTrends');
 $app->get('/api/get_film/{mid}', '\Controllers\IndexController::getFilm');
+$app->get('/api/get_person/{pid}', '\Controllers\IndexController::getPerson');
 $app->get('/api/get_last_graded_films/', '\Controllers\IndexController::getLastGradedFilms');
 $app->get('/api/get_last_graded_films_friends/', '\Controllers\IndexController::getLastGradedFilmsFriends');
 

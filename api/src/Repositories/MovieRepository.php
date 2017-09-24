@@ -447,7 +447,7 @@ class MovieRepository {
 
         $movies = $this->app['mapper']->group($rows, 'movie_id', [
             'movie_id' => ['type' => 'int', 'rename' => 'id'],
-            'movie_type' => ['type' => 'int', 'rename' => 'type'],
+            'movie_type' => ['rename' => 'type'],
             'movie_title' => ['rename' => 'title'],
             'movie_original_title' => ['rename' => 'original_title'],
             'movie_tmdb_poster_path' => ['rename' => 'tmdb_poster_path'],

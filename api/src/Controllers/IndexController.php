@@ -161,6 +161,37 @@ class IndexController
         ]);
     }
 
+    public function getPerson(Request $request, Application $app)
+    {
+        $pid = $request->get('pid');
+
+        if (!isset($pid)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'Not found'
+            ], 404);
+        }
+
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        $person = $app['person.repository']->getPerson($pid, $user ? $user['id'] : null);
+
+        if (!$person) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'Not found'
+            ], 404);
+        }
+
+        return $app->json([
+            'success' => true,
+            'movie' => $person
+        ]);
+    }
+
     public function getVotes(Request $request, Application $app)
     {
         $uid = $request->get('uid');

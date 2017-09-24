@@ -15,12 +15,15 @@ import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
 import Helmet from 'react-helmet';
+import socketio from 'socket.io';
+import cors from 'cors';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
 
 app.use(cookieParser());
+app.use(cors({credentials: true, origin: 'https://flicktips.local:3001'}));
 
 app.set('view engine', 'ejs');
 
@@ -95,6 +98,12 @@ app.use((req, res) => {
 
         loadOnServer({...renderProps, store})
           .then(() => {
+            const state = store.getState();
+
+            if (state.app.get('notFound')) {
+              return res.status(404).send('Not found');
+            }
+
             const componentHTML = ReactDom.renderToString(
               <Provider store={store}>
                 <RouterContext {...renderProps} />
@@ -102,8 +111,6 @@ app.use((req, res) => {
             );
 
             const helmet = Helmet.renderStatic();
-
-            const state = store.getState();
 
             res.cookie('authHeaders', JSON.stringify(getHeaders(state)), {maxAge: 3600 * 24 * 30 * 1000});
 
@@ -128,10 +135,10 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+let server;
+
 if (process.env.NODE_ENV === 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server listening on: ${PORT}`);
-  });
+  server = http.createServer(app);
 } else {
   const httpsOptions = {
     key             : fs.readFileSync('./src/flicktips.local.key').toString(),
@@ -141,13 +148,21 @@ if (process.env.NODE_ENV === 'production') {
     secureProtocol  : 'TLSv1_2_method'
   };
 
-  https.createServer(httpsOptions, app).listen(PORT, () => {
-    console.log(`Server listening on: ${PORT}`);
-  });
-  // http.createServer(app).listen(PORT, () => {
-  //   console.log(`Server listening on: ${PORT}`);
-  // });
+  // server = http.createServer(app);
+  server = https.createServer(httpsOptions, app);
 }
+
+const io = socketio(server);
+
+io.on('connection', function (socket) {
+  socket.on('php-chanel-55e3a007b26c5adc2362edf6a50f18e6', function (params) {
+    io.emit(params.chanel, params.data);
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Server listening on: ${PORT}`);
+});
 
 process.on('unhandledRejection', function (reason, p) {
   console.log('Unhandled Rejection:', reason.stack);

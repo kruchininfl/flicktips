@@ -45,11 +45,19 @@ class MoviePage extends Component {
   componentDidMount() {
     window.scrollTo(0, 0);
 
-    ReactDOM.findDOMNode(this).parentNode.classList.add('m-movie');
+    const node = ReactDOM.findDOMNode(this);
+
+    if (node) {
+      node.parentNode.classList.add('m-movie');
+    }
   }
 
   componentWillUnmount() {
-    ReactDOM.findDOMNode(this).parentNode.classList.remove('m-movie');
+    const node = ReactDOM.findDOMNode(this);
+
+    if (node) {
+      node.parentNode.classList.remove('m-movie');
+    }
   }
 
   handleToggleDesc() {
@@ -72,15 +80,17 @@ class MoviePage extends Component {
               <div key={key} className="movie-person movie-person_details">
                 <div className="movie-person__photo">
                   {person.photo
-                    ? <LazyLoad><div
-                      style={{backgroundImage: `url(${person.photo})`}}
-                      className="movie-person__photo-inn"
-                    >
-                      <img
-                        src={person.photo}
-                        alt={person.name || person.original_name}
-                      />
-                    </div></LazyLoad>
+                    ? <LazyLoad>
+                      <div
+                        style={{backgroundImage: `url(${person.photo})`}}
+                        className="movie-person__photo-inn"
+                      >
+                        <img
+                          src={person.photo}
+                          alt={person.name || person.original_name}
+                        />
+                      </div>
+                    </LazyLoad>
                     : ''
                   }
                 </div>

@@ -19,7 +19,23 @@ class Mapper
                 $newFieldName = isset($fieldOptions['rename']) ? $fieldOptions['rename'] : $field;
 
                 if (isset($fieldOptions['group'])) {
-                    $groupId = $row[$fieldOptions['group_id_field']];
+                    if (is_array($fieldOptions['group_id_field'])) {
+                        $filtered = array_filter ( $fieldOptions['group_id_field'], function ($v) use ($row) {
+                            return isset($row[$v]) && $row[$v] != '';
+                        });
+
+                        if (count($filtered) == count($fieldOptions['group_id_field'])) {
+                            $mapped = array_map(function ($v) use ($row) {
+                                return $row[$v];
+                            }, $fieldOptions['group_id_field']);
+                            $groupId = implode('_', $mapped);
+                        } else {
+                            $groupId = null;
+                        }
+                    } else {
+                        $groupId = $row[$fieldOptions['group_id_field']];
+                    }
+
                     if (isset($groupId) && $groupId != '') {
                         @$result[$row[$key]][$fieldOptions['group']][$groupId][$newFieldName] = $value;
                     }

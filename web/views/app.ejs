@@ -26,11 +26,12 @@
         window.REDUX_INITIAL_STATE = <%- JSON.stringify(initialState) %>;
         window.SERVER_TIMESTAMP = <%- new Date().getTime() %>;
 	</script>
+
+	<% if (isVkApp) { %>
+	<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+	<% } %>
 </head>
 <body>
-<% if (isVkApp) { %>
-<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
-<% } %>
 
 <% if (process.env.NODE_ENV === 'development') { %>
 <div id="dev-tools"></div>

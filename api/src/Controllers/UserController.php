@@ -337,7 +337,7 @@ class UserController
         ]);
         $entityData = $entitySth->fetch();
 
-        return $app->json([
+        $response = [
             'success' => true,
             'data' => [
                 'id' => intval($entityData['id']),
@@ -348,7 +348,19 @@ class UserController
                 'isNeutral' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 1,
                 'isDisliked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 0,
             ]
+        ];
+
+        $app['socket']->send('vote-changed', [
+            'success' => true,
+            'data' => [
+                'id' => intval($entityData['id']),
+                'likes' => intval($entityData['likes']),
+                'neutral' => intval($entityData['neutral']),
+                'dislikes' => intval($entityData['dislikes'])
+            ]
         ]);
+
+        return  $app->json($response);
     }
 
     public function toggleBookmark(Request $request, Application $app)

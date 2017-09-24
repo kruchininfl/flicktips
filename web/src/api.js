@@ -4,7 +4,7 @@ import superagentJsonapify from 'superagent-jsonapify';
 import keys from 'lodash/keys';
 import assign from 'lodash/assign';
 import Cookies from 'js-cookie';
-import {openSignInPopup} from 'redux/actions/appActions';
+import {openSignInPopup, setAsNotFound} from 'redux/actions/appActions';
 
 function getTokenFormat(state) {
   const ret = {};
@@ -138,7 +138,7 @@ function evalHeader(expression, headers) {
 superagentJsonapify(request);
 
 export default {
-  _fetch(url, data = {}, method = 'GET', skipAuthCheck = false) {
+  _fetch(url, data = {}, method = 'GET', skipAuthCheck = false, skipNotFoundCheck = false) {
     return (dispatch, getState) => {
       const state = getState();
       const {tokenFormat} = getTokenFormat(state);
@@ -150,6 +150,10 @@ export default {
         .on('error', (err) => {
           if (err.status === 401 && !skipAuthCheck) {
             dispatch(openSignInPopup());
+          }
+
+          if (err.status === 404 && !skipNotFoundCheck) {
+            dispatch(setAsNotFound());
           }
         });
 

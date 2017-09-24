@@ -10,25 +10,33 @@ import LoadingBar from 'react-redux-loading-bar';
 import './App.scss';
 import {connect} from 'react-redux';
 import YaMetrica from './YaMetrica';
+import {socketConnect} from 'socket.io-react';
+import {voteUpdateCounters} from '../../redux/actions/voteActions';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
 const propTypes = {
+  dispatch: PropTypes.func,
+  socket  : PropTypes.any,
   children: PropTypes.node,
   isVkApp : PropTypes.bool
 };
 
 class App extends Component {
-  componentDidMount() {
-    if (window) {
-      window.props = this.props;
-    }
+  constructor(props) {
+    super(props);
+  }
 
+  componentDidMount() {
     if (this.props.isVkApp) {
       VK.init(() => {
         VK.callMethod('resizeWindow', '100%', 'auto');
       });
     }
+
+    this.props.socket.on('vote-changed', (data) => {
+      this.props.dispatch(voteUpdateCounters(data));
+    });
   }
 
   render() {
@@ -38,7 +46,7 @@ class App extends Component {
           <title>FlickTips — фильмы, друзья, лайки</title>
           <meta name="description" content="Теперь находить лучшие фильмы и сериалы намного проще.
           Благодаря нашему сервису кино и сериалы можно выбирать не на основе обложки и краткого
-          описания или рецензий неизвестных вам критиков, а по оценкам друзей."/>
+          описания или рецензий неизвестных вам критиков, а по оценкам друзей." />
 
           <meta property="og:title" content="FlickTips — Делись впечатлениями о фильмах и сериалах с друзьями.
         Узнай какие фильмы им понравились, а какие нет!" />
@@ -86,4 +94,4 @@ function mapStateToProps(state) {
   return {isVkApp};
 }
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps)(socketConnect(App));

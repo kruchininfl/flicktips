@@ -39,11 +39,15 @@ $app['user.repository'] = new Repositories\UserRepository($app);
 
 $app['movie.repository'] = new Repositories\MovieRepository($app);
 
+$app['person.repository'] = new Repositories\PersonRepository($app);
+
 $app['guzzle'] = new \GuzzleHttp\Client();
 
 $app['tmdb'] = new \Services\TMDBServiceProvider($app);
 
 $app['mapper'] = new \Services\Mapper();
+
+$app['socket'] = new \Services\Socket();
 
 $app->register(new Silex\Provider\RoutingServiceProvider());
 

@@ -9,6 +9,8 @@ import DevTools from './components/DevTools';
 import {ReduxAsyncConnect} from 'redux-connect';
 import {initialize} from 'redux-oauth';
 import config from './config';
+import {SocketProvider} from 'socket.io-react';
+import io from 'socket.io-client';
 
 const initialState = window.REDUX_INITIAL_STATE || {};
 const store = configureStore(initialState);
@@ -23,12 +25,16 @@ if (process.env.NODE_ENV === 'cordova') {
   appHistory = useRouterHistory(createHashHistory)({queryKey: false});
 }
 
+const socket = io.connect('https://flick.tips');
+
 const component = (
-  <Provider store={store}>
-    <Router history={appHistory} render={asyncRender}>
-      {routes(store)}
-    </Router>
-  </Provider>
+  <SocketProvider socket={socket}>
+    <Provider store={store}>
+      <Router history={appHistory} render={asyncRender}>
+        {routes(store)}
+      </Router>
+    </Provider>
+  </SocketProvider>
 );
 
 if (process.env.NODE_ENV === 'cordova') {

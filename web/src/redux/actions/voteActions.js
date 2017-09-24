@@ -34,3 +34,9 @@ export function voteRequest(entityId, vote) {
       .catch((err) => dispatch(voteRequestError(err)));
   };
 }
+
+export function voteUpdateCounters(data) {
+  return (dispatch) => {
+    return dispatch(voteRequestFinished(data));
+  };
+}

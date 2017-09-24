@@ -145,6 +145,8 @@ class LastGradedPage extends Component {
   render() {
     const {response, onlyFriends, loading} = this.props;
 
+    // return this.renderEmptyPage();
+
     return (
       <div className="home-page">
         {this.renderAdv()}

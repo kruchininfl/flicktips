@@ -8,6 +8,7 @@
     "build-cordova": "set NODE_ENV=cordova&& webpack -w",
     "webpack-devserver": "set NODE_ENV=development&& webpack-dev-server --debug --hot --devtool source-map --output-pathinfo --watch --colors --inline --content-base public --port 8050 --host 0.0.0.0 --public flicktips.local:8050 --https",
     "nodemon": "set NODE_ENV=development&& set NODE_PATH=./src&& nodemon server.js",
+    "server-debug": "set NODE_ENV=development&& set NODE_PATH=./src&& node %NODE_DEBUG_OPTION% server.js",
     "server": "NODE_PATH=./src NODE_ENV='production' node server.js"
   },
   "repository": {
@@ -70,6 +71,7 @@
     "redux-immutablejs": "0.0.8",
     "redux-oauth": "^2.0.5",
     "redux-thunk": "^2.2.0",
+    "sitemap-generator": "^7.3.0",
     "socket.io": "^2.0.3",
     "socket.io-react": "^1.2.0",
     "superagent": "^3.5.2",

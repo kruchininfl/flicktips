@@ -28,7 +28,7 @@
   float: none;
 }
 .movie__head-data {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 0 10px;
   display: flex;
   flex-direction: column;
@@ -92,6 +92,7 @@
 .movie__staff-group-list {
   white-space: nowrap;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 .movie__staff-group-title {
   margin-bottom: 10px;

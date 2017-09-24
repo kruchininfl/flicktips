@@ -134,7 +134,7 @@ class MoviePage extends Component {
     const title = movie.title + ' (' + moment(movie.date).format('YYYY') + ')' + ' — FlickTips';
 
     return (
-      <div className="movie">
+      <div className="content movie">
         <Helmet>
           <title>{title}</title>
           <meta name="description" content={movie.descr} />

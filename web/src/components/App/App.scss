@@ -557,14 +557,28 @@ textarea {
 /* </editor-fold> */
 
 /* <editor-fold desc="Layout"> */
-html, body, .react-view, .layout {
+//html, body, .react-view, .layout {
+//    height: 100%;
+//}
+html, body {
     height: 100%;
 }
+.react-view, .layout {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
 
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: stretch;
+    flex: 1;
+}
 .container {
+    min-height: 100%;
+    flex: 1;
+    width: 100%;
     max-width: 1024px;
     margin: 0 auto;
-    min-height: 100%;
     box-sizing: border-box;
     padding-top: 70px;
     padding-bottom: 50px;
@@ -589,6 +603,12 @@ html, body, .react-view, .layout {
         bottom: 50px;
         padding: 10px 20px;
     }
+}
+
+.content {
+    flex: 1;
+    padding: 10px;
+    background: #ffffff;
 }
 
 .wrapper {
@@ -725,6 +745,7 @@ html, body, .react-view, .layout {
 .static-page {
     padding: 5px 20px;
     text-align: justify;
+    flex: 1;
 }
 
 @import "AppTablets";

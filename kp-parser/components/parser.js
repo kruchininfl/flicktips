@@ -193,7 +193,8 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
 
   if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {
-      const stringSimilarityK = stringSimilarity.compareTwoStrings(movie.originalTitle, query);
+      const titles = [movie.originalTitle || null, movie.displayTitle || null].filter(t => t !== null);
+      const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
 
       if (
         (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle))

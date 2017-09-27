@@ -6,6 +6,7 @@ cs(console, '[HH:MM:ss.l]');
 
 const MAX_WORKERS = 1;
 const MAX_DIFF_CHECKING_DAY = 7;
+const MIN_STRING_SIMILARITY_K = 0.5;
 
 const mysqlConfig = {
   host    : 'localhost',
@@ -154,7 +155,8 @@ const updateFilm = async (film) => {
       imdb_rating_value  : film.imdb_rating.value,
       imdb_rating_count  : film.imdb_rating.count,
       kp_error           : null,
-      kp_check_date      : new Date()
+      kp_check_date      : new Date(),
+      kp_title_similarity: film.similarity
     }, film.my_id]);
 
     await connection.commit();
@@ -191,7 +193,8 @@ const insertError = async (filmId, error) => {
     imdb_rating_value  : null,
     imdb_rating_count  : null,
     kp_error: error,
-    kp_check_date: new Date()
+    kp_check_date: new Date(),
+    kp_title_similarity: null
   }, filmId]);
 
   connection.end();
@@ -211,13 +214,13 @@ const worker = (mainResolve) => {
 
       const {id, original_title, title, type, year, kp_id: dbKpId} = result[0];
 
-      kpSearch(original_title, title, year, type).then(kpId => {
+      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity}) => {
         if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
         } else {
-          Promise.all([id, getFilm(kpId || dbKpId), getFilmStaff(kpId || dbKpId)]).then(([my_id, film, staff]) => {
+          Promise.all([id, getFilm(kpId || dbKpId), getFilmStaff(kpId || dbKpId), similarity]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
 
             const countriesReady = insertCountries(film.countries);
@@ -229,6 +232,7 @@ const worker = (mainResolve) => {
                 film.countries = countries || null;
                 film.genres = genres || null;
                 film.staff = people || null;
+                film.similarity = similarity;
 
                 updateFilm(film).then(() => worker(mainResolve)).catch(err => console.error(err));
               }).catch(err => console.error(err));

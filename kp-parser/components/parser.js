@@ -4,6 +4,7 @@ import Iconv from '../node_modules/iconv-lite';
 import httpRequest from '../node_modules/request';
 import cheerio from '../node_modules/cheerio';
 import HttpsProxyAgent from '../node_modules/https-proxy-agent';
+import stringSimilarity from '../node_modules/string-similarity';
 
 String.prototype.dateFormat = function () {
   let str = this.length === 8 ? this : (this.length === 6 ? this + '00' : (this.length === 6 ? this + '0000' : null));
@@ -175,7 +176,7 @@ async function requestGet(url, headers = {}) {
   return body;
 }
 
-async function search(query, querySecond, year, type) {
+async function search(query, querySecond, year, type, minStringSimilarityK = 0) {
   // return Promise.resolve(4541);
 
   const body = await requestGet('https://www.kinopoisk.ru/search/suggest/?value=' + encodeURI(query), {
@@ -188,25 +189,32 @@ async function search(query, querySecond, year, type) {
   const result = JSON.parse(toUTF8(body));
 
   let id = null;
+  let similarity = 0;
 
   if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {
-      if (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle)) {
+      const stringSimilarityK = stringSimilarity.compareTwoStrings(movie.originalTitle, query);
+
+      if (
+        (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle))
+        || minStringSimilarityK > stringSimilarityK
+      ) {
         return false;
       }
 
       if (movie.year && Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
         id = movie.id;
+        similarity = stringSimilarityK;
         return true;
       }
     });
   }
 
   if (id === null && querySecond) {
-    return await search(querySecond, null, year, type);
+    return await search(querySecond, null, year, type, minStringSimilarityK);
   }
 
-  return id;
+  return {id, similarity};
 }
 
 async function getFilm(id) {

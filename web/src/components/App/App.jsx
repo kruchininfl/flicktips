@@ -48,9 +48,8 @@ class App extends Component {
           Благодаря нашему сервису кино и сериалы можно выбирать не на основе обложки и краткого
           описания или рецензий неизвестных вам критиков, а по оценкам друзей." />
 
-          <meta property="og:title" content="FlickTips — Делись впечатлениями о фильмах и сериалах с друзьями.
-        Узнай какие фильмы им понравились, а какие нет!" />
-          <meta property="og:image" content="https://flick.tips/public/img/logo/150x150.png" />
+          <meta property="og:title" content="FlickTips — Делитесь впечатлениями о просмотренных фильмах с друзьями." />
+          <meta property="og:image" content="https://flick.tips/public/img/logo/1024x1024.png" />
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />

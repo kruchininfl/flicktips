@@ -50,11 +50,12 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     font-weight: 600;
+    font-size: 1em;
+    margin: 0;
 }
 .movie-ot,
 .movie-y {
-    display: inline-block;
-    vertical-align: middle;
+    display: inline;
 }
 .movie-ot {
     max-width: calc(100% - 50px);
@@ -77,6 +78,9 @@
 .movie-genres {
     margin: .25em 0;
     color: #c0c0c0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .movie-duration {
@@ -114,4 +118,19 @@
         opacity: 0;
         visibility: hidden;
     }
+}
+
+.person__head-data {
+    margin-left: 105px;
+}
+
+.person__title {
+    font-weight: 600;
+    font-size: 1.25em;
+    margin: 0;
+}
+.person__subtitle {
+    font-weight: 400;
+    font-size: 1em;
+    margin: 0.25em 0;
 }

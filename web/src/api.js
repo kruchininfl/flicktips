@@ -222,5 +222,9 @@ export default {
 
   getMovie(id) {
     return this._fetch('get_film/' + id);
+  },
+
+  getPerson(id) {
+    return this._fetch('get_person/' + id);
   }
 };

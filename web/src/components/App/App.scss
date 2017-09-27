@@ -154,6 +154,17 @@ body {
 /* </editor-fold> */
 
 /* <editor-fold desc="React Modal"> */
+.ReactModal__Overlay {
+    background: rgba(#18476d, .9) !important;
+}
+.ReactModal__Content {
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
 .ReactModalPortal > div {
     opacity: 0;
     z-index: 11;

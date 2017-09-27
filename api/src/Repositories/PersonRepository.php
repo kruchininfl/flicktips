@@ -29,7 +29,8 @@ class PersonRepository {
         }
 
         $queryMovie = 'SELECT
-        `group`.`type` AS movie_group_type,
+        `group`.id AS movie_group_id,
+        `group`.title_singular AS movie_group_title,
         movie_people.movie_id as movie_id,
         movie.id AS movie_id,
         movie.type AS movie_type,
@@ -53,10 +54,10 @@ class PersonRepository {
         `user`.avatar as vote_user_avatar';
 
         if ($userId) {
-            $queryMovie .= ', IF (my_movie_vote.vote = \'2\', true, false) AS isLiked,
-            IF (my_movie_vote.vote = \'1\', true, false) AS isNeutral,
-            IF (my_movie_vote.vote = \'0\', true, false) AS isDisliked,
-            IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
+            $queryMovie .= ', IF (my_movie_vote.vote = \'2\', true, false) AS movie_isLiked,
+            IF (my_movie_vote.vote = \'1\', true, false) AS movie_isNeutral,
+            IF (my_movie_vote.vote = \'0\', true, false) AS movie_isDisliked,
+            IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks';
         }
 
         $queryMovie .= ' FROM movie_people 
@@ -80,8 +81,10 @@ class PersonRepository {
             return null;
         }
 
-        $movies = $this->app['mapper']->group($rows, 'movie_id', [
+        $movies = $this->app['mapper']->group($rows, ['movie_id', 'movie_group_id'], [
             'movie_id' => ['type' => 'int', 'rename' => 'id'],
+            'movie_group_id' => ['type' => 'int', 'rename' => 'group_id'],
+            'movie_group_title' => ['type' => 'string', 'rename' => 'group_title'],
             'movie_type' => ['rename' => 'type'],
             'movie_title' => ['rename' => 'title'],
             'movie_original_title' => ['rename' => 'original_title'],

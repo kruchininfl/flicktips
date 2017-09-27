@@ -9,6 +9,7 @@ $font-verdana: 'Verdana', 'Geneva CY', 'DejaVu Sans', sans-serif;
 
 $color-blue: #1586d5;
 $color-gray: #666666;
+$color-orange: #fc6d24;
 
 @mixin multiLineEllipsis($lineHeight: 1.2em, $linesNum: 1, $bgColor: #ffffff) {
     position: relative;

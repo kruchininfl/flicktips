@@ -188,7 +188,7 @@ class IndexController
 
         return $app->json([
             'success' => true,
-            'movie' => $person
+            'person' => $person
         ]);
     }
 

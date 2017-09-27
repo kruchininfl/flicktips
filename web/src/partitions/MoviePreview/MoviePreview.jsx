@@ -59,7 +59,7 @@ class MoviePreview extends Component {
 
         <div className="movie-prev__content">
           {movie.title
-            ? <div className="movie-title" title={movie.title}>{movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}</div>
+            ? <h2 className="movie-title" title={movie.title}>{movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}</h2>
             : ''
           }
 
@@ -70,7 +70,7 @@ class MoviePreview extends Component {
                 : ''
               }
 
-              {movie.date
+              {movie.date && moment(movie.date).isValid()
                 ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
                 : ''
               }

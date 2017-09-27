@@ -131,7 +131,9 @@ class MoviePage extends Component {
     movie.date = movie.release_date || movie.first_air_date;
     movie.descr = movie.tmdb_overview || movie.kp_overview;
 
-    const title = movie.title + ' (' + moment(movie.date).format('YYYY') + ')' + ' — FlickTips';
+    const title = movie.title +
+      (moment(movie.date).isValid() ? ' (' + moment(movie.date).format('YYYY') + ')' : '') +
+      ' — FlickTips';
 
     return (
       <div className="content movie">
@@ -173,9 +175,9 @@ class MoviePage extends Component {
               ? <div
                 className="movie__head-row"
               >
-                <div className="movie-title" title={movie.title}>
+                <h1 className="movie-title" title={movie.title}>
                   {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
-                </div>
+                </h1>
               </div>
               : ''
             }
@@ -190,7 +192,7 @@ class MoviePage extends Component {
                     : ''
                   }
 
-                  {movie.date
+                  {movie.date && moment(movie.date).isValid()
                     ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
                     : ''
                   }
@@ -221,6 +223,7 @@ class MoviePage extends Component {
                     className="movie-duration"
                   >
                     {moment.duration(+movie.kp_duration, 'minutes').format('HH:mm')}
+                    {+movie.kp_duration < 60 ? ' мин.' : ''}
                   </span>
                   : ''
                 }

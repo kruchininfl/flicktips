@@ -13,7 +13,7 @@ import {OAUTH_SIGN_IN_COMPLETE} from 'redux-oauth';
 const initialState = Immutable.fromJS({
   signInPopupOpen: false,
   isVkApp: false,
-  notFound: false,
+  notFound: false
 });
 
 export default createReducer(initialState, {

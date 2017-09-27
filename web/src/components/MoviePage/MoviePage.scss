@@ -5,6 +5,13 @@
   display: flex;
   flex-direction: row;
   align-items: stretch;
+
+  .movie-countries,
+  .movie-duration,
+  .movie-genres {
+    white-space: normal;
+    overflow: visible;
+  }
 }
 .movie__head-left {
   width: 95px;

@@ -4,10 +4,18 @@ namespace Services;
 
 class Mapper
 {
-    static function group(array $rows, $key, array $fieldsOptions)
+    static function group(array $rows, $keys, array $fieldsOptions)
     {
         $result = [];
         foreach ($rows as $row) {
+            if (is_array($keys)) {
+                $key = implode('_', array_map(function ($k) use ($row) {
+                    return $row[$k];
+                }, $keys));
+            } else {
+                $key = $row[$keys];
+            }
+
             foreach ($row as $field => $value) {
 
                 $fieldOptions = @$fieldsOptions[$field];
@@ -37,10 +45,10 @@ class Mapper
                     }
 
                     if (isset($groupId) && $groupId != '') {
-                        @$result[$row[$key]][$fieldOptions['group']][$groupId][$newFieldName] = $value;
+                        @$result[$key][$fieldOptions['group']][$groupId][$newFieldName] = $value;
                     }
                 } else {
-                    @$result[$row[$key]][$newFieldName] = $value;
+                    @$result[$key][$newFieldName] = $value;
                 }
             }
         }

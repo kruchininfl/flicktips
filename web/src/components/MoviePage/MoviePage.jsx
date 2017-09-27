@@ -13,6 +13,7 @@ import MovieStat from '../../partitions/MovieStat/MovieStat';
 import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
 import {Helmet} from 'react-helmet';
 import LazyLoad from 'react-lazy-load';
+import {Link} from 'react-router';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -77,7 +78,7 @@ class MoviePage extends Component {
         {
           group.people.map((person, key) => {
             return (
-              <div key={key} className="movie-person movie-person_details">
+              <Link to={'/person/' + person.id} key={key} className="movie-person movie-person_details">
                 <div className="movie-person__photo">
                   {person.photo
                     ? <LazyLoad>
@@ -111,7 +112,7 @@ class MoviePage extends Component {
                   >{person.description}</div>
                   : ''
                 }
-              </div>
+              </Link>
             );
           })
         }

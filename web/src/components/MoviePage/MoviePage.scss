@@ -110,6 +110,7 @@
 .movie-person_details {
   width: 90px;
   white-space: normal;
+  text-decoration: none;
 
   .movie__staff-group-list & {
     display: inline-block;
@@ -118,6 +119,16 @@
 
     &:last-child {
       margin-right: 0;
+    }
+  }
+
+  .movie-person__photo-inn {
+    transition: filter 200ms;
+  }
+
+  &:hover {
+    .movie-person__photo-inn {
+      filter: brightness(120%);
     }
   }
 }

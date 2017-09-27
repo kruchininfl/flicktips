@@ -5,7 +5,6 @@ import {asyncConnect}  from 'redux-connect';
 import {getPerson} from 'redux/actions/personActions';
 import {Helmet} from 'react-helmet';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
-import {Link} from 'react-router';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -97,7 +96,7 @@ class PersonPage extends Component {
 
           <div className="person__head-data">
             {person.name
-              ? <Link to="/person/2"><h1 className="person__title">{person.name}</h1></Link>
+              ? <h1 className="person__title">{person.name}</h1>
               : ''
             }
 

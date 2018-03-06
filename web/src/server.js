@@ -160,7 +160,7 @@ io.on('connection', function (socket) {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, (process.env.NODE_ENV === 'production' ? 'localhost' : '0.0.0.0'), () => {
   console.log(`Server listening on: ${PORT}`);
 });
 

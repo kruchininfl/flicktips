@@ -65,9 +65,9 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'scope' => array('friends'),
             'user_endpoint' => function ($token) {
                 if (isset($token) && $userId = $token->getAccessToken()->getExtraParams()['user_id']) {
-                    return 'https://api.vk.com/method/users.get?fields=photo_max_orig,photo_400_orig,sex&user_ids=' . $userId;
+                    return 'https://api.vk.com/method/users.get?v=3.0&fields=photo_max_orig,photo_400_orig,sex&user_ids=' . $userId;
                 }
-                return 'https://api.vk.com/method/users.get?fields=photo_max_orig,photo_400_orig,sex';
+                return 'https://api.vk.com/method/users.get?v=3.0&fields=photo_max_orig,photo_400_orig,sex';
             }
         )
     )

@@ -6,3 +6,4 @@ Disallow: /user
 Disallow: /404
 
 Host: https://flick.tips
+Sitemap: https://flick.tips/sitemaps/sitemap.xml

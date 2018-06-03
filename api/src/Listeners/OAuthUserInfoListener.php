@@ -110,13 +110,13 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                     return isset($info['photo_400_orig']) ? $info['photo_400_orig'] : isset($info['photo_max_orig']) ? $info['photo_max_orig'] : null;
                 }
             }),
-            'friends' => array(function ($info, $serviceName) {
+            'friends' => array(function ($info, $serviceName, $accesToken) {
                 if ($serviceName == 'facebook') {
                     return isset($info['friends']) && count($info['friends']['data']) ? array_map(function ($el) {
                         return $el['id'];
                     }, $info['friends']['data']) : null;
                 } else if ($serviceName == 'vkontakte') {
-                    $response = json_decode($this->app['guzzle']->request('GET', 'https://api.vk.com/method/friends.get?v=3.0&user_id=' . $info['uid'])->getBody());
+                    $response = json_decode($this->app['guzzle']->request('GET', 'https://api.vk.com/method/friends.get?v=3.0&user_id=' . $info['uid'] . '&access_token=' . $accesToken)->getBody());
                     return $response->response;
                 }
             }),
@@ -126,7 +126,7 @@ class OAuthUserInfoListener implements EventSubscriberInterface
             $userInfo[$key] = null;
             foreach ($fields as $field) {
                 if (is_callable($field)) {
-                    $userInfo[$key] = $field($rawUserInfo, $serviceName);
+                    $userInfo[$key] = $field($rawUserInfo, $serviceName, $token->getCredentials());
                     break;
                 }
                 if (isset($rawUserInfo[$field])) {

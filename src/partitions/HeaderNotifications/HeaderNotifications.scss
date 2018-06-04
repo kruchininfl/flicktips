@@ -1,0 +1,28 @@
+@import "../../components/base";
+
+.header-notifications__toggle {
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+}
+
+.header-notifications__num {
+    position: absolute;
+    top: -8px;
+    left: 100%;
+    background: #ed6767;
+    font-size: 10px;
+    line-height: 9px;
+    padding: 2px 3px 3px;
+    border-radius: 3px;
+}
+
+.header-notifications__list {
+    .friend-vote {
+        border-bottom: 1px solid #f1f1f1;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}

@@ -1,0 +1,74 @@
+@import "../../components/base";
+
+.profile {
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+.profile__user {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #f1f1f1;
+}
+.profile__user-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+.profile__votes-group {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 0 10px;
+    background: #f1f1f1;
+    margin: -10px -10px 10px;
+    display: none;
+
+    &.m-unique {
+        display: block;
+    }
+}
+.profile__votes-item {
+    transition: opacity 300ms;
+
+    &.m-inactive {
+        opacity: .7;
+    }
+}
+
+.profile__friends {
+    font-size: 0;
+}
+.friend {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    width: 33.3333%;
+    text-align: center;
+    font-size: 12px;
+
+    .profile__friends & {
+        margin: 20px 0;
+    }
+}
+.friend__name {
+    font-weight: 600;
+    margin: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    @include multiLineEllipsis(1.2em, 1);
+}
+.friend__button {
+    margin: 10px 0 0;
+}
+
+.profile__bookmarks-item {
+    border-bottom: 1px solid #f1f1f1;
+
+    &.m-inactive {
+        opacity: .7;
+    }
+}
+
+@import "ProfileTablets";

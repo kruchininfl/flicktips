@@ -1,0 +1,65 @@
+@import "../base";
+@import "../Common/Movie";
+
+.person__head {
+    overflow: hidden;
+    padding: 10px;
+}
+
+.person__head-photo-wrap {
+    float: left;
+    width: 95px;
+}
+.person__head-photo {
+    background: {
+        image: url(../../img/ph-people.svg);
+        size: 50% auto;
+        position: 50% 50%;
+        color: #d9e1ea;
+        repeat: no-repeat;
+    };
+    position: relative;
+    padding-top: 158%;
+}
+.person__head-photo-inn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: {
+        size: cover;
+        repeat: no-repeat;
+        position: 50% 50%;
+    };
+
+    > img {
+        display: none;
+    }
+}
+
+.person__dl {
+    overflow: hidden;
+
+    > dt {
+        float: left;
+        color: $color-orange;
+        width: 60px;
+        padding-right: 20px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    > dd {
+        margin-left: 80px;
+    }
+}
+
+.person__group-title {
+    margin: 20px 10px 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+@import "PersonPageTablets";

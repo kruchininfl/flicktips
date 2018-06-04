@@ -1,0 +1,23 @@
+@import "../../components/base";
+
+@media screen and (min-width: 768px) {
+    .movie-user-votes {
+        padding: 12px 10px 7px;
+        background: #ffffff;
+    }
+
+    .movie-user-votes__item {
+        &:first-child {
+            max-width: 100%;
+        }
+
+        &:nth-child(2) {
+            padding-left: 18px;
+            border-left: 1px solid #f1f1f1;
+        }
+    }
+
+    .movie-user-votes__item-content {
+        max-width: calc(100% - 60px);
+    }
+}

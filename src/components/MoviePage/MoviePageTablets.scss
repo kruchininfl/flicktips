@@ -1,0 +1,31 @@
+@import "../base";
+
+@media screen and (min-width: 768px) {
+    .movie__head-left,
+    .movie__cover {
+        width: 185px;
+    }
+    .movie-eStat.m-details {
+        .movie-eStat__item {
+            font-size: 18px;
+            margin: 0;
+            width: 50%;
+            background: #f1f1f1;
+        }
+        .movie-eStat__item-icn {
+            margin-right: 15px;
+            width: 32px;
+            height: 32px;
+            background-size: 32px 32px;
+        }
+    }
+    .movie__votes {
+        position: relative;
+        padding: 10px 0 0;
+        background: transparent;
+
+        .movie-vote__counter {
+            color: inherit;
+        }
+    }
+}

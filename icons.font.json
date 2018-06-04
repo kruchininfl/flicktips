@@ -1,0 +1,8 @@
+{
+  "fontName": "Icons",
+  "files": [
+    "./src/icons/*.svg"
+  ],
+  "baseClass": "icn",
+  "classPrefix": "icn_"
+}

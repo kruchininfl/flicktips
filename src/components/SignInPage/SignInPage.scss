@@ -1,0 +1,82 @@
+@import "../base";
+
+.p-signin {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 99;
+
+    &:before {
+        content: '';
+        display: inline-block;
+        vertical-align: middle;
+        width: 0;
+        height: 100%;
+        margin-right: -4px;
+    }
+}
+.p-signin__inn {
+    display: inline-block;
+    vertical-align: middle;
+    background: #ffffff;
+    white-space: normal;
+    padding: 20px;
+}
+.p-signin__close {
+    font-size: 26px;
+    cursor: pointer;
+    position: absolute;
+    top: 25px;
+    right: 25px;
+}
+.p-signin__logo {
+    color: $color-blue;
+    font-size: 36px;
+    line-height: 0;
+    margin-bottom: 50px;
+}
+.p-signin__slogan {
+    color: $color-gray;
+    margin: 50px 0;
+}
+.p-signin__btn {
+    .btn__inn {
+        border-radius: 0;
+        margin: 15px 0 0;
+        padding: 0;
+        width: 220px;
+        text-align: center;
+        height: 40px;
+        line-height: 38px;
+        color: #ffffff !important;
+        border-color: transparent !important;
+    }
+
+    .btn__text {
+        font-size: 14px;
+    }
+
+    &_fb {
+        .btn__inn {
+            background: #3b5998;
+
+            &:hover {
+                background: darken(#3b5998, 10);
+            }
+        }
+    }
+    &_vk {
+        .btn__inn {
+            background: #507299;
+
+            &:hover {
+                background: darken(#507299, 10);
+            }
+        }
+    }
+}

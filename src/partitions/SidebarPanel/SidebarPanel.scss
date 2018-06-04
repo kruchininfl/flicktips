@@ -1,0 +1,132 @@
+@import "../../components/base";
+
+.sidepanel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: {
+        property: opacity, visibility;
+        delay: 300ms;
+    };
+
+    &.m-opened {
+        opacity: 1;
+        visibility: visible;
+        transition: {
+            property: opacity, visibility;
+            delay: 0ms;
+        };
+    }
+}
+.sidepanel__overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: {
+        property: opacity;
+        duration: 100ms;
+        delay: 200ms;
+    };
+
+    .sidepanel.m-opened & {
+        opacity: 1;
+        visibility: visible;
+        transition: {
+            property: opacity;
+            duration: 200ms;
+            delay: 0ms;
+        };
+    }
+}
+.sidepanel__wrap {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+    width: 375px;
+    max-width: 100%;
+}
+.sidepanel__inn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -375px;
+    background: #ffffff;
+    width: 375px;
+    max-width: 100%;
+    box-shadow: 0 0 10px 0 rgba(#000000, .2);
+    transition: {
+        property: transform;
+        duration: 200ms;
+        delay: 0ms;
+    };
+
+    .sidepanel.m-opened & {
+        transform: translateX(-375px);
+        transition: {
+            property: transform;
+            duration: 300ms;
+            delay: 200ms;
+        };
+    }
+}
+.sidepanel__content {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+
+    .page-ph {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+.sidepanel__head {
+    position: relative;
+    height: 70px;
+    border-bottom: 1px solid #f1f1f1;
+    box-sizing: border-box;
+    color: #333b41;
+}
+.sidepanel__head-title {
+    position: absolute;
+    border: 1px solid #333b41;
+    padding: 4px 10px;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    margin: auto;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    height: 20px;
+    line-height: 20px;
+}
+.sidepanel__head-close {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 20px;
+    cursor: pointer;
+    margin: auto;
+}

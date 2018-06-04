@@ -1,0 +1,136 @@
+@import "../base";
+
+.movie-cover {
+    float: left;
+    position: relative;
+    &:before {
+        content: '';
+        display: block;
+        padding-top: 150%;
+        background: {
+            image: url(../../img/ph-movie.svg);
+            size: 50% auto;
+            position: 50% 50%;
+            color: #d9e1ea;
+            repeat: no-repeat;
+        };
+    }
+}
+.movie-cover-inn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: {
+        size: cover;
+        repeat: no-repeat;
+        position: 50% 50%;
+    };
+
+    img {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+.movie-vote-icn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    line-height: 26px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 3px 0 rgba(#000000, .8);
+}
+.movie-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    font-size: 1em;
+    margin: 0;
+}
+.movie-ot,
+.movie-y {
+    display: inline;
+}
+.movie-ot {
+    max-width: calc(100% - 50px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.movie-y {
+    position: relative;
+    color: #c0c0c0;
+
+    .movie-ot + & {
+        &:before {
+            content: ', ';
+        }
+    }
+}
+.movie-countries,
+.movie-duration,
+.movie-genres {
+    margin: .25em 0;
+    color: #c0c0c0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.movie-duration {
+    .movie-countries + & {
+        &:before {
+            content: ', ';
+        }
+    }
+}
+
+.movie-person__photo {
+    background: {
+        image: url(../../img/ph-people.svg);
+        size: 50% auto;
+        position: 50% 50%;
+        color: #d9e1ea;
+        repeat: no-repeat;
+    };
+    position: relative;
+    padding-top: 158%;
+}
+.movie-person__photo-inn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: {
+        size: cover;
+        repeat: no-repeat;
+        position: 50% 50%;
+    };
+
+    img {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.person__head-data {
+    margin-left: 105px;
+}
+
+.person__title {
+    font-weight: 600;
+    font-size: 1.25em;
+    margin: 0;
+}
+.person__subtitle {
+    font-weight: 400;
+    font-size: 1em;
+    margin: 0.25em 0;
+}

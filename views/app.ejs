@@ -1,0 +1,54 @@
+<% if (process.env.NODE_ENV === 'cordova') {
+	var assetUrl = htmlWebpackPlugin.options.assetUrl;
+	var initialState = htmlWebpackPlugin.options.initialState;
+	var componentHTML = htmlWebpackPlugin.options.componentHTML;
+	var isVkApp = false;
+} %>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+	<% if (process.env.NODE_ENV === 'cordova') { %>
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'"/>
+	<% } %>
+	<% if (helmet) { %>
+	<%- helmet.title.toString(); %>
+	<%- helmet.meta.toString(); %>
+	<% } %>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,700&amp;subset=cyrillic" rel="stylesheet">
+	<link rel="stylesheet" href="/public/icons/style.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
+	<link rel="stylesheet" href="<%= assetUrl %>/public/assets/styles.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
+	<link rel="shortcut icon" href="/public/favicon.ico?3" type="image/x-icon" />
+	<link rel="icon" href="/public/favicon.ico?3" type="image/x-icon">
+	<script type="application/javascript">
+        window.REDUX_INITIAL_STATE = <%- JSON.stringify(initialState) %>;
+        window.SERVER_TIMESTAMP = <%- new Date().getTime() %>;
+	</script>
+
+	<% if (isVkApp) { %>
+	<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+	<% } %>
+</head>
+<body>
+
+<% if (process.env.NODE_ENV === 'development') { %>
+<div id="dev-tools"></div>
+<% } %>
+
+<% if (process.env.NODE_ENV === 'cordova') { %>
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="cordova_plugins.js"></script>
+<script type="text/javascript">
+  document.addEventListener('deviceready', onDeviceReady, false);
+  function onDeviceReady() {
+    window.open = cordova.InAppBrowser.open;
+  }
+</script>
+<% } %>
+
+<div class="react-view" id="react-view"><%- componentHTML %></div>
+<script type="application/javascript" src="<%= assetUrl %>/public/assets/bundle.js<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>"></script>
+</body>
+</html>

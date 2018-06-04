@@ -1,0 +1,45 @@
+@import "../base";
+
+@media screen and (min-width: 768px) {
+    .container {
+        background: transparent;
+        padding-left: 20px;
+        padding-right: 20px;
+
+        &.m-movie {
+            padding-bottom: 50px;
+        }
+    }
+    .content {
+        padding: 20px;
+        margin: 0 -20px;
+    }
+    .title {
+        background: transparent;
+        font-size: 18px;
+        text-transform: none;
+        text-align: left;
+        color: #000000;
+    }
+
+    .footer {
+        .container.m-movie ~ & {
+            margin-top: -50px;
+        }
+    }
+
+    .static-page {
+        max-width: 768px;
+        border-radius: 10px;
+        background: #ffffff;
+        margin: 20px auto;
+        box-sizing: border-box;
+    }
+
+    /* <editor-fold desc="About block"> */
+    .about-ttip {
+        padding: 10px 0;
+        background: transparent;
+    }
+    /* </editor-fold> */
+}

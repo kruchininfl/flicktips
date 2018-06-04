@@ -1,0 +1,71 @@
+@import "../../components/base";
+
+@media screen and (min-width: 768px) {
+    .movie-prev-list {
+        margin: -10px;
+        padding-bottom: 20px;
+
+        .movie-prev {
+            display: inline-block;
+            vertical-align: top;
+            width: 33.33%;
+            box-sizing: border-box;
+            background: transparent;
+            transition: all 300ms;
+        }
+        .movie-cover.movie-cover__prev {
+            float: none;
+            width: 100%;
+
+            .movie-cover-inn {
+                transition: all 300ms;
+            }
+        }
+        .movie-prev__content {
+            display: block;
+            margin: 0;
+            padding: 15px 10px 5px;
+            background: #ffffff;
+            border-top: 1px solid #f1f1f1;
+
+            .movie-votes {
+                text-align: center;
+            }
+
+            .movie-eStat {
+                position: absolute;
+                top: -32px;
+                left: 0;
+                right: 0;
+                text-align: center;
+                margin: 0;
+            }
+            .movie-eStat__item {
+                padding: 3px 5px;
+                background: rgba(#ffffff, .9);
+                border-radius: 3px;
+            }
+        }
+
+        .movie-prev__votes {
+            background: #ffffff;
+            padding: 10px;
+            margin-top: 1px;
+        }
+
+        .movie-prev__link:hover {
+            & ~ .movie-cover .movie-cover-inn {
+                filter: brightness(120%);
+            }
+
+            &:after {
+                position: absolute;
+                top: 10px;
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                box-shadow: 0 0 5px 0 rgba(#18476d, .2);
+            }
+        }
+    }
+}

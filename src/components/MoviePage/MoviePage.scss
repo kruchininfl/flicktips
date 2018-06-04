@@ -1,0 +1,158 @@
+@import "../base";
+@import "../Common/Movie";
+
+.movie__head {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+
+  .movie-countries,
+  .movie-duration,
+  .movie-genres {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+.movie__head-left {
+  width: 95px;
+
+  .movie-eStat__item {
+    margin-right: 7px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .movie-eStat__item-icn {
+    margin-right: 5px;
+  }
+  .movie-eStat__item-val.m-na {
+    font-size: 12px;
+  }
+}
+.movie__cover {
+  width: 95px;
+  float: none;
+}
+.movie__head-data {
+  flex: 1 1 auto;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  max-width: calc(100% - 105px);
+
+  .movie-title,
+  .movie-ot {
+    overflow: auto;
+    white-space: normal;
+  }
+  .movie-ot {
+    display: inline;
+  }
+}
+.movie__votes {
+  padding: 10px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: rgba(#000000, .9);
+
+  .movie-votes {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .movie-vote {
+      margin: 0 5px;
+    }
+  }
+
+  .movie-vote__counter {
+    color: #ffffff;
+  }
+}
+
+.movie__friends-votes {
+  margin: 10px -10px -10px;
+  padding: 15px 10px;
+  border-top: 1px solid #f1f1f1;
+}
+
+.movie__descr {
+  font-size: 14px;
+  text-align: justify;
+  margin: 10px -10px;
+  padding: 15px 10px;
+  border-top: 1px solid #f1f1f1;
+  border-bottom: 1px solid #f1f1f1;
+  position: relative;
+  line-height: 1.4em;
+}
+
+.movie__staff-group {
+  margin: 20px 0;
+}
+.movie__staff-group-list {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.movie__staff-group-title {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.movie-person_details {
+  width: 90px;
+  white-space: normal;
+  text-decoration: none;
+
+  .movie__staff-group-list & {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .movie-person__photo-inn {
+    transition: filter 200ms;
+  }
+
+  &:hover {
+    .movie-person__photo-inn {
+      filter: brightness(120%);
+    }
+  }
+}
+
+.movie-person__name,
+.movie-person__original-name,
+.movie-person__descr {
+  @include multiLineEllipsis(1.2em, 3);
+}
+.movie-person__name {
+  font-size: 14px;
+  margin-top: 5px;
+  font-weight: 600;
+}
+.movie-person__original-name,
+.movie-person__descr {
+  font-size: 12px;
+  margin-top: 2px;
+}
+.movie-person__original-name {
+  color: #666666;
+}
+.movie-person__descr {
+  color: #f0be0f;
+}
+
+@import "MoviePageTablets";

@@ -1,0 +1,30 @@
+@import "../../components/base";
+
+@media screen and (min-width: 768px) {
+    .profile {
+        background: transparent;
+        padding-bottom: 20px;
+    }
+
+    .profile__votes-group {
+        display: block;
+        background: #ffffff;
+        margin: 0;
+        padding: 10px;
+    }
+
+    .profile__bookmarks-item {
+        display: inline-block;
+        vertical-align: top;
+        width: 33.33%;
+    }
+
+    .friend__name {
+        text-overflow: ellipsis;
+        padding-right: 0;
+
+        &:after {
+            display: none;
+        }
+    }
+}

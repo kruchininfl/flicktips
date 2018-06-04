@@ -1,0 +1,58 @@
+@import "../../components/base";
+@import "../../components/Common/Movie";
+
+.movie-prev {
+    background: #ffffff;
+    color: #666666;
+    overflow: hidden;
+    position: relative;
+    padding: 10px;
+
+    .movie-prev-list & {
+        border-bottom: 3px solid #f1f1f1;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+.movie-cover__prev {
+    width: 90px;
+}
+.movie-prev__content {
+    min-height: 135px;
+    margin-left: 110px;
+    padding-right: 10px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.movie-prev__votes {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.movie-prev__link {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    font-size: 0;
+
+    &:after {
+        content: '';
+        box-shadow: none;
+        transition: box-shadow 300ms;
+    }
+}
+.movie-prev__friends-votes {
+    position: relative;
+    z-index: 1;
+}
+
+@import "MoviePreviewTablets";

@@ -1,0 +1,125 @@
+@import "../../components/base";
+
+.header-search__container {
+    position: absolute;
+    z-index: 1;
+    top: -101%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: #ffffff;
+    transition: top 300ms;
+
+    &.m-opened {
+        top: 0;
+    }
+}
+.header-search__toggle {
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 0;
+
+    &:hover {
+        color: #ffffff;
+
+        .layout.m-vk-app & {
+            color: #18476d;
+        }
+    }
+}
+.header-search__head {
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid #f1f1f1;
+}
+.header-search__head-input {
+    border: none;
+    height: 100%;
+    padding: 0 55px;
+    font-size: 18px;
+}
+.header-search__head-spinner,
+.header-search__head-icn {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: #333b41;
+    margin: auto 0;
+    line-height: 1;
+}
+.header-search__head-icn {
+    opacity: 1;
+    transition: opacity 200ms;
+
+    .spinner_active + & {
+        opacity: 0;
+        transition-duration: 0ms;
+    }
+}
+.header-search__head-cross {
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    margin: auto 0;
+    font-size: 20px;
+    color: #333b41;
+
+    &:hover {
+        opacity: .6;
+    }
+    &:after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+    }
+}
+.header-search__result-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms, top 300ms;
+
+    .header-search__container.m-opened & {
+        visibility: visible;
+        opacity: 1;
+        top: 70px;
+    }
+}
+.header-search__result {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 100ms;
+    overflow-y: auto;
+
+    .header-search__container.m-opened & {
+        max-height: 100%;
+        transition-delay: 200ms;
+        transition-duration: 500ms;
+    }
+}
+.header-search__result-item {
+    border-bottom: 1px solid #f1f1f1;
+}
+.header-search__result-empty {
+    padding: 20px;
+    color: $color-gray;
+    text-align: center;
+    background: #ffffff;
+    border-top: 1px solid #f1f1f1;
+}

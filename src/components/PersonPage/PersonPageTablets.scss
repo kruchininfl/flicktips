@@ -1,0 +1,19 @@
+@import "../base";
+
+@media screen and (min-width: 768px) {
+    .person__head {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .person__head-photo-wrap {
+        width: 185px;
+    }
+    .person__head-data {
+        margin-left: 205px;
+    }
+    .person__group-title {
+        margin-left: 0;
+        margin-right: 0;
+        font-size: 18px;
+    }
+}

@@ -1,0 +1,72 @@
+@import "../../components/base";
+
+.movie-bookmark {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 10px;
+    width: 20px;
+    height: 20px;
+    background: rgba(#bdebf3, .9);
+    z-index: 1;
+    transition: background 200ms;
+
+    &:after,
+    &:before {
+        content: '';
+        position: absolute;
+        top: 100%;
+        transition: border-color 200ms;
+    }
+
+    &:before {
+        left: 0;
+        border-left: 10px solid rgba(#bdebf3, .9);
+        border-bottom: 10px solid transparent;
+        border-right: 10px solid transparent;
+    }
+
+    &:after {
+        right: 0;
+        border-right: 10px solid rgba(#bdebf3, .9);
+        border-bottom: 10px solid transparent;
+        border-left: 10px solid transparent;
+    }
+
+    &.m-active {
+        background: rgba(#ba4b4b, .9);
+
+        &:before {
+            border-left-color: rgba(#ba4b4b, .9);
+        }
+        &:after {
+            border-right-color: rgba(#ba4b4b, .9);
+        }
+    }
+
+    &:hover {
+        opacity: .8;
+    }
+}
+.movie-bookmark__icn {
+    position: absolute;
+    color: #ffffff;
+    text-shadow: 0 1px rgba(#000000, .2);
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+
+    > .icn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: opacity 300ms;
+    }
+}
+
+@import "MovieBookmarkTablets";

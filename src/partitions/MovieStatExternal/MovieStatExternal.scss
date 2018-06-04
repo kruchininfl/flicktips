@@ -1,0 +1,55 @@
+@import "../../components/base";
+
+.movie-eStat.m-prev {
+    margin-top: 7px;
+}
+
+.movie-eStat__item,
+.movie-eStat__item-icn,
+.movie-eStat__item-val {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.movie-eStat__item {
+    margin-right: 15px;
+
+    &:last-child {
+        margin-right: 0;
+    }
+}
+
+.movie-eStat__item-val {
+    font-weight: 600;
+    font-size: 16px;
+
+    &.m-high { color: #33a501; }
+    &.m-medium { color: #cea103; }
+    &.m-low { color: #a90b0b; }
+    &.m-na {
+        color: #c0c0c0;
+        font-weight: normal;
+        font-size: 14px;
+    }
+}
+.movie-eStat__item-icn {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    background: {
+        size: 16px 16px;
+        repeat: no-repeat;
+        position: 50% 50%;
+    };
+
+    &.m-kp {
+        background: {
+            image: url(../../img/kp.png);
+        };
+    }
+    &.m-imdb {
+        background: {
+            image: url(../../img/imdb.png);
+        };
+    }
+}

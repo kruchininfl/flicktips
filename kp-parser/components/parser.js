@@ -131,7 +131,7 @@ async function doRequest(opts) {
       }
 
       if (!/application\/json/.test(res.headers['content-type'])) {
-        const $ = cheerio.load(cpToUTF8(body));
+        const $ = cheerio.load(/charset=windows-1251/.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body));
         const title = $('title').text();
 
         if (title === 'КиноПоиск.ru') {
@@ -197,6 +197,7 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
 
   let id = null;
   let similarity = 0;
+  let slug = 0;
 
   if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {
@@ -213,6 +214,7 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
       if (movie.year && Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
         id = movie.id;
         similarity = stringSimilarityK;
+        slug = movie.slug;
         return true;
       }
     });
@@ -222,14 +224,14 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
     return await search(querySecond, null, year, type, minStringSimilarityK);
   }
 
-  return {id, similarity};
+  return {id, similarity, slug};
 }
 
-async function getFilm(id) {
+async function getFilm(id, slug) {
   // return Promise.resolve({ 'id'            : 4541, 'title'         : 'Шоу Трумана', 'original_title': 'The Truman Show', 'year'          : 1998, 'countries'     : [{'name': 'США', 'id': 1}], 'genres'        : [{'name': 'фантастика', 'id': 2}, {'name': 'драма', 'id': 8}, { 'name': 'комедия', 'id': 6}], 'release_date'  : '1998-06-01', 'release_rus'   : '1998-10-00', 'release_dvd'   : '2009-12-15', 'duration'      : '103', 'kp_rating'     : {'value': 8.3, 'count': 242024}, 'imdb_rating'   : {'value': 8.1, 'count': 721710}, 'description'   : 'Представьте себе, что вы вдруг начинаете понимать, что все вокруг вас — декорации, а люди — актеры, притворяющиеся теми, кем они вам кажутся. Весь ваш мир оказывается большим телесериалом, где вы исполняете главную роль, даже не подозревая об этом. Вся ваша жизнь — результат работы автора телешоу, которое вот уже тридцать лет смотрит вся планета, начиная с момента вашего рождения. В такой ситуации оказался Труман, главный герой картины. Будет ли он продолжать жить в безопасном мире, где, как он теперь знает, у него практически нет свободы выбора, или все-таки выйдет из «игры» и станет сам хозяином своей судьбы, в которой его ждет не запланированная сценарием девушка?'});
 
-  const $ = await requestGet('https://www.kinopoisk.ru/film/' + id + '/?v=' + new Date().getTime(), {
-    'Content-Type': 'text/html; charset=windows-1251',
+  const $ = await requestGet('https://www.kinopoisk.ru/film/' + (slug ? slug + '-' : '') + id + '/?v=' + new Date().getTime(), {
+    'Content-Type': 'text/html',
     'Accept'      : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'User-Agent'  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
   });

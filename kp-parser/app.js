@@ -214,13 +214,13 @@ const worker = (mainResolve) => {
 
       const {id, original_title, title, type, year, kp_id: dbKpId} = result[0];
 
-      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity}) => {
+      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity, slug}) => {
         if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
         } else {
-          Promise.all([id, getFilm(kpId || dbKpId), getFilmStaff(kpId || dbKpId), similarity]).then(([my_id, film, staff, similarity]) => {
+          Promise.all([id, getFilm(kpId || dbKpId, slug), getFilmStaff(kpId || dbKpId), similarity]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
 
             const countriesReady = insertCountries(film.countries);

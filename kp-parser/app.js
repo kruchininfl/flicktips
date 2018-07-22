@@ -1,4 +1,5 @@
-import {search as kpSearch, getFilm, getFilmStaff, sleep} from './components/parser';
+import {search as kpSearch, getFilm, getFilmStaff} from './components/parser';
+import {slugify} from 'transliteration';
 import mysql from 'mysql2/promise';
 import cs from 'console-stamp';
 
@@ -192,8 +193,8 @@ const insertError = async (filmId, error) => {
     kp_rating_count    : null,
     imdb_rating_value  : null,
     imdb_rating_count  : null,
-    kp_error: error,
-    kp_check_date: new Date(),
+    kp_error           : error,
+    kp_check_date      : new Date(),
     kp_title_similarity: null
   }, filmId]);
 
@@ -213,8 +214,9 @@ const worker = (mainResolve) => {
       }
 
       const {id, original_title, title, type, year, kp_id: dbKpId} = result[0];
+      const slug = slugify(title.toLowerCase()) + '-' + year;
 
-      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity, slug}) => {
+      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity}) => {
         if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
@@ -254,3 +256,16 @@ for (let i = 0; i < MAX_WORKERS; i++) {
 //     sleep(1800000);
 //   })();
 // }).catch(err => console.error(err));
+
+// const original_title = 'Enemy of the State';
+// const title = 'Враг государства';
+// const year = 1998;
+// const type = 'movie';
+//
+// kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId}) => {
+//   const slug = slugify(title.toLowerCase()) + '-' + year;
+//
+//   getFilm(kpId, slug).then((...args) => {
+//     console.log(args);
+//   });
+// });

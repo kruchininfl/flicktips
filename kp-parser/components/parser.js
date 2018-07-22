@@ -1,10 +1,9 @@
-// process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-
 import Iconv from '../node_modules/iconv-lite';
 import httpRequest from '../node_modules/request';
 import cheerio from '../node_modules/cheerio';
 import HttpsProxyAgent from '../node_modules/https-proxy-agent';
 import stringSimilarity from '../node_modules/string-similarity';
+import tr from 'tor-request';
 
 String.prototype.dateFormat = function () {
   let str = this.length === 8 ? this : (this.length === 6 ? this + '00' : (this.length === 6 ? this + '0000' : null));
@@ -19,10 +18,11 @@ String.prototype.dateFormat = function () {
 const PROXY_SERVICE = 'http://www.gatherproxy.com/proxylist/anonymity/?t=Transparent';
 // const PROXY_SERVICE = 'http://gimmeproxy.com/api/getProxy?get=true&supportsHttps=true&maxCheckPeriod=3600&minSpeed=50&anonymityLevel&cookies=true';
 
-const ENABLE_PROXY = true;
+const ENABLE_TOR = true;
+const ENABLE_PROXY = false;
 const ENABLE_LOG = false;
 
-const REQUES_TIMEOUT = 15000;
+const REQUEST_TIMEOUT = 15000;
 let requestTimeout;
 
 const j = httpRequest.jar();
@@ -112,7 +112,8 @@ async function doRequest(opts) {
 
   return new Promise((resolve) => {
     log('start request ' + opts.url);
-    const req = request.get(opts, (err, res, body) => {
+    const reqFn = ENABLE_TOR ? tr.request : request.get;
+    const req = reqFn(opts, (err, res, body) => {
       log('finish request ' + opts.url);
 
       clearTimeout(requestTimeout);
@@ -153,7 +154,7 @@ async function doRequest(opts) {
     }).on('abort', () => resolve([new Error(currentProxy + ' : connection timeout'), null]));
 
     clearTimeout(requestTimeout);
-    requestTimeout = setTimeout(req.abort.bind(req), REQUES_TIMEOUT);
+    requestTimeout = setTimeout(req.abort.bind(req), REQUEST_TIMEOUT);
   }).catch((err) => {
     throw err;
   });
@@ -162,13 +163,14 @@ async function doRequest(opts) {
 async function requestGet(url, headers = {}) {
   let args = arguments;
 
-  if (ENABLE_PROXY) {
+  if (ENABLE_PROXY && !ENABLE_TOR) {
     currentProxy = currentProxy || await getProxy();
+    log('Using proxy: ' + currentProxy);
   }
 
   const [error, body] = await doRequest({
     url           : url,
-    agent         : ENABLE_PROXY ? new HttpsProxyAgent(currentProxy) : null,
+    agent         : ENABLE_PROXY && !ENABLE_TOR ? new HttpsProxyAgent(currentProxy) : null,
     headers       : Object.assign({'Connection': 'keep-alive'}, headers),
     timeout       : 5000,
     followRedirect: true,
@@ -197,7 +199,6 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
 
   let id = null;
   let similarity = 0;
-  let slug = 0;
 
   if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {
@@ -214,7 +215,6 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
       if (movie.year && Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
         id = movie.id;
         similarity = stringSimilarityK;
-        slug = movie.slug;
         return true;
       }
     });
@@ -224,13 +224,13 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
     return await search(querySecond, null, year, type, minStringSimilarityK);
   }
 
-  return {id, similarity, slug};
+  return {id, similarity};
 }
 
 async function getFilm(id, slug) {
   // return Promise.resolve({ 'id'            : 4541, 'title'         : 'Шоу Трумана', 'original_title': 'The Truman Show', 'year'          : 1998, 'countries'     : [{'name': 'США', 'id': 1}], 'genres'        : [{'name': 'фантастика', 'id': 2}, {'name': 'драма', 'id': 8}, { 'name': 'комедия', 'id': 6}], 'release_date'  : '1998-06-01', 'release_rus'   : '1998-10-00', 'release_dvd'   : '2009-12-15', 'duration'      : '103', 'kp_rating'     : {'value': 8.3, 'count': 242024}, 'imdb_rating'   : {'value': 8.1, 'count': 721710}, 'description'   : 'Представьте себе, что вы вдруг начинаете понимать, что все вокруг вас — декорации, а люди — актеры, притворяющиеся теми, кем они вам кажутся. Весь ваш мир оказывается большим телесериалом, где вы исполняете главную роль, даже не подозревая об этом. Вся ваша жизнь — результат работы автора телешоу, которое вот уже тридцать лет смотрит вся планета, начиная с момента вашего рождения. В такой ситуации оказался Труман, главный герой картины. Будет ли он продолжать жить в безопасном мире, где, как он теперь знает, у него практически нет свободы выбора, или все-таки выйдет из «игры» и станет сам хозяином своей судьбы, в которой его ждет не запланированная сценарием девушка?'});
 
-  const $ = await requestGet('https://www.kinopoisk.ru/film/' + (slug ? slug + '-' : '') + id + '/?v=' + new Date().getTime(), {
+  const $ = await requestGet('https://www.kinopoisk.ru/film/' + (slug ? slug + '-' : '') + id + '/', {
     'Content-Type': 'text/html',
     'Accept'      : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'User-Agent'  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',

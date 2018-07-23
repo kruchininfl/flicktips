@@ -44,4 +44,9 @@ class TMDBServiceProvider
     {
         return $this->_call('/genre/tv/list');
     }
+
+    public function getMovie($id)
+    {
+        return $this->_call('/' . str_replace('_', '/', $id), ['append_to_response' => 'videos']);
+    }
 }

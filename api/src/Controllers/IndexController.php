@@ -11,7 +11,7 @@ class IndexController
 {
     public function index(Request $request, Application $app)
     {
-        return $app->json(['version'=>'0.0.1']);
+        return $app->json(['version' => '0.0.1']);
     }
 
     public function search(Request $request, Application $app)
@@ -155,6 +155,31 @@ class IndexController
             ], 404);
         }
 
+        if (is_null($movie['tmdb_trailers'])) {
+            $tmdb = $app['tmdb'];
+            $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
+
+            $mapTrailers = function ($trailer) {
+                return $trailer->site . '-' . $trailer->key;
+            };
+
+            $movie['tmdb_trailers'] = array_map($mapTrailers, $tmdbResponse->videos->results);
+
+            /**
+             * @var $pdo \PDO
+             */
+            $pdo = $app['pdo'];
+
+            $sthMovie = $pdo->prepare('UPDATE movie SET `tmdb_trailers`=:trailers WHERE `id`=:id;');
+
+            $sthMovie->execute([
+                'id' => $movie['id'],
+                'trailers' => json_encode($movie['tmdb_trailers'])
+            ]);
+        } else {
+            $movie['tmdb_trailers'] = json_decode($movie['tmdb_trailers']);
+        }
+
         return $app->json([
             'success' => true,
             'movie' => $movie
@@ -234,7 +259,7 @@ class IndexController
                 'success' => true,
                 'results' => [
                     'total' => $total,
-                    'page' => (int) $page,
+                    'page' => (int)$page,
                     'pages' => ceil($total / $size),
                     'entities' => []
                 ]
@@ -244,8 +269,8 @@ class IndexController
         return $app->json([
             'success' => true,
             'results' => [
-                'total' => (int) $total,
-                'page' => (int) $page,
+                'total' => (int)$total,
+                'page' => (int)$page,
                 'pages' => ceil($total / $size),
                 'entities' => $app['movie.repository']->findByUserId($requesterUid, $uid, $size, ($page - 1) * $size)
             ]
@@ -303,7 +328,7 @@ class IndexController
                 'success' => true,
                 'results' => [
                     'total' => $total,
-                    'page' => (int) $page,
+                    'page' => (int)$page,
                     'pages' => ceil($total / HOME_LIST_SIZE),
                     'entities' => []
                 ]
@@ -316,7 +341,7 @@ class IndexController
             'success' => true,
             'results' => [
                 'total' => $total,
-                'page' => (int) $page,
+                'page' => (int)$page,
                 'pages' => ceil($total / HOME_LIST_SIZE),
                 'entities' => $movies
             ]
@@ -349,7 +374,7 @@ class IndexController
                 'success' => true,
                 'results' => [
                     'total' => $total,
-                    'page' => (int) $page,
+                    'page' => (int)$page,
                     'pages' => ceil($total / HOME_LIST_SIZE),
                     'entities' => []
                 ]
@@ -362,7 +387,7 @@ class IndexController
             'success' => true,
             'results' => [
                 'total' => $total,
-                'page' => (int) $page,
+                'page' => (int)$page,
                 'pages' => ceil($total / HOME_LIST_SIZE),
                 'entities' => $movies
             ]

@@ -160,7 +160,7 @@ class IndexController
             $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
 
             $mapTrailers = function ($trailer) {
-                return $trailer->site . '-' . $trailer->key;
+                return $trailer->site . ':' . $trailer->key;
             };
 
             $movie['tmdb_trailers'] = array_map($mapTrailers, $tmdbResponse->videos->results);

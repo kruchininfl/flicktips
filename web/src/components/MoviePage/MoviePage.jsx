@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './MoviePage.scss';
-import {asyncConnect}  from 'redux-connect';
+import {asyncConnect} from 'redux-connect';
 import {getFilm} from 'redux/actions/movieActions';
 import MovieStatExternal from '../../partitions/MovieStatExternal/MovieStatExternal';
 import config from '../../config';
@@ -14,6 +14,7 @@ import MovieBookmark from '../../partitions/MovieBookmark/MovieBookmark';
 import {Helmet} from 'react-helmet';
 import LazyLoad from 'react-lazy-load';
 import {Link} from 'react-router';
+import MovieTrailer from './MovieTrailer';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -231,6 +232,8 @@ class MoviePage extends Component {
               </div>
               : ''
             }
+
+            <MovieTrailer trailers={movie.tmdb_trailers} />
           </div>
         </div>
 
@@ -259,6 +262,10 @@ MoviePage.propTypes = propTypes;
 function mapStateToProps(state) {
   const {pending, response} = state.movie.toJS();
   const loaded = state.reduxAsyncConnect.loadState.movie && state.reduxAsyncConnect.loadState.movie.loaded;
+
+  response.movie.tmdb_trailers = response.movie.tmdb_trailers
+    .filter(t => t.split(':')[0] === 'YouTube')
+    .map(t => t.split(':')[1]);
 
   return {pending, loaded, response};
 }

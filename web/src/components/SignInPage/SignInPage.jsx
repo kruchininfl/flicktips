@@ -37,8 +37,8 @@ class SignInPage extends Component {
       <div className="p-signin">
         {
           handleCrossClick
-            ? <span onClick={handleCrossClick} className="icn icn_cross p-signin__close" />
-            : <Link to="/" className="icn icn_cross p-signin__close"/>
+            ? <span onClick={handleCrossClick} className="icn icn_cross ReactModal__Close" />
+            : <Link to="/" className="icn icn_cross ReactModal__Close" />
         }
 
         <div className="p-signin__inn">

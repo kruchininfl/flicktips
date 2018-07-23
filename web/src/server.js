@@ -1,6 +1,6 @@
-import express  from 'express';
+import express from 'express';
 import config from 'config';
-import React    from 'react';
+import React from 'react';
 import ReactDom from 'react-dom/server';
 import {match, RouterContext} from 'react-router';
 import routes from './routes';
@@ -137,20 +137,7 @@ const PORT = process.env.PORT || 3001;
 
 let server;
 
-if (process.env.NODE_ENV === 'production') {
-  server = http.createServer(app);
-} else {
-  const httpsOptions = {
-    key             : fs.readFileSync('./src/flicktips.local.key').toString(),
-    cert            : fs.readFileSync('./src/flicktips.local.crt').toString(),
-    ciphers         : 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-SHA384',
-    honorCipherOrder: true,
-    secureProtocol  : 'TLSv1_2_method'
-  };
-
-  // server = http.createServer(app);
-  server = https.createServer(httpsOptions, app);
-}
+server = http.createServer(app);
 
 const io = socketio(server);
 

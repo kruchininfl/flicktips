@@ -5,6 +5,8 @@ import HttpsProxyAgent from '../node_modules/https-proxy-agent';
 import stringSimilarity from '../node_modules/string-similarity';
 import tr from 'tor-request';
 
+tr.TorControlPort.password = 'my_secret_pass';
+
 String.prototype.dateFormat = function () {
   let str = this.length === 8 ? this : (this.length === 6 ? this + '00' : (this.length === 6 ? this + '0000' : null));
   if (str) {
@@ -45,6 +47,10 @@ function cpToUTF8(body) {
 
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function newTorSession() {
+  return new Promise(resolve => tr.newTorSession(resolve));
 }
 
 const requestDuration = 3000;
@@ -136,7 +142,7 @@ async function doRequest(opts) {
         const title = $('title').text();
 
         if (title === 'КиноПоиск.ru') {
-          resolve([new Error('Proxy server ' + currentProxy + ' banned.'), body]);
+          resolve([new Error('Proxy server ' + (ENABLE_PROXY ? currentProxy : '') + ' banned.'), body]);
           return false;
         }
 
@@ -145,7 +151,7 @@ async function doRequest(opts) {
         const result = JSON.parse(toUTF8(body));
 
         if (result.type && result.type === 'captcha') {
-          resolve([new Error('Proxy server ' + currentProxy + ' banned.'), body]);
+          resolve([new Error('Proxy server ' + (ENABLE_PROXY ? currentProxy : '') + ' banned.'), body]);
           return false;
         }
 
@@ -180,7 +186,15 @@ async function requestGet(url, headers = {}) {
 
   if (error) {
     console.log(error.message);
-    currentProxy = null;
+
+    if (ENABLE_PROXY) {
+      currentProxy = null;
+    }
+
+    if (ENABLE_TOR) {
+      await newTorSession();
+    }
+
     return await requestGet.apply(this, args);
   }
 

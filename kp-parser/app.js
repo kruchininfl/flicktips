@@ -250,12 +250,12 @@ for (let i = 0; i < MAX_WORKERS; i++) {
   workers.push(worker());
 }
 
-Promise.all(workers).then(() => {
-  (async function () {
-    console.log('end');
-    sleep(1800000);
-  })();
-}).catch(err => console.error(err));
+// Promise.all(workers).then(() => {
+//   (async function () {
+//     console.log('end');
+//     await (1800000);
+//   })();
+// }).catch(err => console.error(err));
 
 // const original_title = 'Enemy of the State';
 // const title = 'Враг государства';

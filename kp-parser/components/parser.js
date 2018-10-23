@@ -53,7 +53,7 @@ async function newTorSession() {
   return new Promise(resolve => tr.newTorSession(resolve));
 }
 
-const requestDuration = 3000;
+const requestDelay = 1000;
 let proxies = [];
 let currentProxy = null;
 let lastRequestTime;
@@ -109,8 +109,8 @@ async function getProxy() {
 }
 
 async function doRequest(opts) {
-  if (lastRequestTime && (new Date().getTime() - lastRequestTime) < requestDuration) {
-    const duration = requestDuration - (new Date().getTime() - lastRequestTime);
+  if (lastRequestTime && (new Date().getTime() - lastRequestTime) < requestDelay) {
+    const duration = requestDelay - (new Date().getTime() - lastRequestTime);
     await sleep(duration);
   }
 
@@ -174,6 +174,8 @@ async function requestGet(url, headers = {}) {
     log('Using proxy: ' + currentProxy);
   }
 
+  console.log('request: ' + url);
+
   const [error, body] = await doRequest({
     url           : url,
     agent         : ENABLE_PROXY && !ENABLE_TOR ? new HttpsProxyAgent(currentProxy) : null,
@@ -213,6 +215,11 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
 
   let id = null;
   let similarity = 0;
+
+  if (!result.page) {
+    console.log(result);
+    console.log(query);
+  }
 
   if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
     result.page.suggest.items.movies.some((movie) => {

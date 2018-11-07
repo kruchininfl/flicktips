@@ -54,7 +54,7 @@ class MovieRepository {
             LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
             LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
         }
-        $query .= ' WHERE movie.id = ' . $id;
+        $query .= ' WHERE movie.id = ' . $id . ' AND people.suspend = "0"';
 
         $sth = $this->pdo->prepare($query);
         $sth->execute();

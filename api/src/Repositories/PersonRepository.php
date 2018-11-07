@@ -24,7 +24,7 @@ class PersonRepository {
         $sth->execute(['id' => $id]);
         $person = $sth->fetch();
 
-        if (!count($person)) {
+        if (!count($person) || $person['suspend'] == 1) {
             return null;
         }
 

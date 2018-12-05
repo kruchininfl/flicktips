@@ -44,7 +44,7 @@ class MovieRepository {
             LEFT JOIN country ON country.id=movie_country.country_id
             
             LEFT JOIN movie_people ON movie_people.movie_id=movie.id 
-            LEFT JOIN people ON people.id=movie_people.people_id
+            LEFT JOIN people ON people.id=movie_people.people_id  AND people.suspend = "0"
             LEFT JOIN `group` ON `group`.id=movie_people.group_id
             
             LEFT JOIN movie_vote AS votes ON votes.movie_id = movie.id
@@ -54,7 +54,7 @@ class MovieRepository {
             LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
             LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
         }
-        $query .= ' WHERE movie.id = ' . $id . ' AND people.suspend = "0"';
+        $query .= ' WHERE movie.id = ' . $id;
 
         $sth = $this->pdo->prepare($query);
         $sth->execute();

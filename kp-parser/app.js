@@ -5,6 +5,8 @@ import cs from 'console-stamp';
 
 cs(console, '[HH:MM:ss.l]');
 
+let connection;
+
 const MAX_WORKERS = 1;
 const MAX_DIFF_CHECKING_DAY = 7;
 const MIN_STRING_SIMILARITY_K = 0.5;
@@ -18,8 +20,6 @@ const mysqlConfig = {
 };
 
 const selectMovie = async () => {
-  const connection = await mysql.createConnection(mysqlConfig);
-
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
     movie.id, movie.title, movie.kp_id, movie.original_title, movie.type,
@@ -45,8 +45,6 @@ const selectMovie = async () => {
       ORDER BY votes DESC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
   }
 
-  connection.end();
-
   return rows;
 };
 
@@ -55,12 +53,8 @@ const insertCountries = async (countries) => {
     return false;
   }
 
-  const connection = await mysql.createConnection(mysqlConfig);
-
   await connection.query('INSERT IGNORE `country` (kp_id, name) VALUES ?', [countries.map(country => [country.id, country.name])]);
   const [rows] = await connection.query('SELECT id FROM `country` WHERE kp_id IN (?)', [countries.map(country => [country.id])]);
-
-  connection.end();
 
   return rows;
 };
@@ -70,12 +64,8 @@ const insertGenres = async (genres) => {
     return false;
   }
 
-  const connection = await mysql.createConnection(mysqlConfig);
-
   await connection.query('INSERT IGNORE `kp-genre` (kp_id, name) VALUES ?', [genres.map(genre => [genre.id, genre.name])]);
   const [rows] = await connection.query('SELECT id FROM `kp-genre` WHERE kp_id IN (?)', [genres.map(genre => [genre.id])]);
-
-  connection.end();
 
   return rows;
 };
@@ -84,8 +74,6 @@ const insertPeople = async (people) => {
   if (!people || !people.length) {
     return false;
   }
-
-  const connection = await mysql.createConnection(mysqlConfig);
 
   const mappedGroups = people.reduce(function (result, item) {
     result.set(item.group.type, item.group.title);
@@ -102,8 +90,6 @@ const insertPeople = async (people) => {
 
   await connection.query('INSERT IGNORE `people` (kp_id, name, original_name, kp_photo) VALUES ?', [Array.from(uniquePeople.values())]);
   const [staff] = await connection.query('SELECT id, kp_id FROM `people` WHERE kp_id IN (?)', [Array.from(uniquePeople.keys())]);
-
-  connection.end();
 
   return people.map(person => {
     const id = staff.find(p => {
@@ -123,8 +109,6 @@ const insertPeople = async (people) => {
 };
 
 const updateFilm = async (film) => {
-  const connection = await mysql.createConnection(mysqlConfig);
-
   try {
     await connection.beginTransaction();
 
@@ -162,19 +146,14 @@ const updateFilm = async (film) => {
 
     await connection.commit();
 
-    connection.end();
-
     console.log('film "' + film.title + ' - ' + film.my_id + '" updated');
   } catch (err) {
     await connection.rollback();
-    connection.end();
     console.log(err);
   }
 };
 
 const insertError = async (filmId, error) => {
-  const connection = await mysql.createConnection(mysqlConfig);
-
   await connection.query('DELETE FROM `movie_country` WHERE movie_id = ?', filmId);
   await connection.query('DELETE FROM `movie_kp-genre` WHERE movie_id = ?', filmId);
   await connection.query('DELETE FROM `movie_people` WHERE movie_id = ?', filmId);
@@ -197,8 +176,6 @@ const insertError = async (filmId, error) => {
     kp_check_date      : new Date(),
     kp_title_similarity: null
   }, filmId]);
-
-  connection.end();
 
   console.log('film "' + filmId + ' error: ' + error);
 };
@@ -245,10 +222,15 @@ const worker = (mainResolve) => {
   }).catch(err => console.error(err));
 };
 
-let workers = [];
-for (let i = 0; i < MAX_WORKERS; i++) {
-  workers.push(worker());
-}
+(async function () {
+  connection = await mysql.createConnection(mysqlConfig);
+
+  let workers = [];
+  for (let i = 0; i < MAX_WORKERS; i++) {
+    workers.push(worker());
+  }
+})();
+
 
 // Promise.all(workers).then(() => {
 //   (async function () {

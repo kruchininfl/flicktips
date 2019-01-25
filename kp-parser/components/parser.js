@@ -21,7 +21,7 @@ const PROXY_SERVICE = 'http://www.gatherproxy.com/proxylist/anonymity/?t=Transpa
 // const PROXY_SERVICE = 'http://gimmeproxy.com/api/getProxy?get=true&supportsHttps=true&maxCheckPeriod=3600&minSpeed=50&anonymityLevel&cookies=true';
 
 const ENABLE_TOR = true;
-const ENABLE_TOR_LOG_IP = true;
+const ENABLE_TOR_LOG_IP = false;
 const ENABLE_PROXY = false;
 const ENABLE_LOG = false;
 
@@ -54,7 +54,7 @@ async function newTorSession() {
   return new Promise(resolve => tr.newTorSession(resolve));
 }
 
-const requestDelay = 1000;
+const requestDelay = 5000;
 let proxies = [];
 let currentProxy = null;
 let lastRequestTime;
@@ -115,12 +115,12 @@ async function doRequest(opts) {
     await sleep(duration);
   }
 
-  lastRequestTime = new Date().getTime();
-
   return new Promise((resolve) => {
+    lastRequestTime = new Date().getTime();
     log('start request ' + opts.url);
     const reqFn = ENABLE_TOR ? tr.request : request.get;
     const req = reqFn(opts, (err, res, body) => {
+      lastRequestTime = new Date().getTime();
       log('finish request ' + opts.url);
 
       clearTimeout(requestTimeout);

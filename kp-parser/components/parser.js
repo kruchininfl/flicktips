@@ -21,6 +21,7 @@ const PROXY_SERVICE = 'http://www.gatherproxy.com/proxylist/anonymity/?t=Transpa
 // const PROXY_SERVICE = 'http://gimmeproxy.com/api/getProxy?get=true&supportsHttps=true&maxCheckPeriod=3600&minSpeed=50&anonymityLevel&cookies=true';
 
 const ENABLE_TOR = true;
+const ENABLE_TOR_LOG_IP = true;
 const ENABLE_PROXY = false;
 const ENABLE_LOG = false;
 
@@ -195,6 +196,16 @@ async function requestGet(url, headers = {}) {
 
     if (ENABLE_TOR) {
       await newTorSession();
+
+      if (ENABLE_TOR_LOG_IP) {
+        console.log(await doRequest({
+          url           : 'https://api.ipify.org?format=json',
+          headers       : Object.assign({'Connection': 'keep-alive'}, headers),
+          timeout       : 5000,
+          followRedirect: true,
+          encoding      : 'binary',
+        }));
+      }
     }
 
     return await requestGet.apply(this, args);

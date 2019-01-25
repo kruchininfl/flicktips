@@ -195,16 +195,28 @@ async function requestGet(url, headers = {}) {
     }
 
     if (ENABLE_TOR) {
-      await newTorSession();
-
       if (ENABLE_TOR_LOG_IP) {
-        console.log(await doRequest({
+        const [, {ip: prevIp}] = await doRequest({
           url           : 'https://api.ipify.org?format=json',
           headers       : Object.assign({'Connection': 'keep-alive'}, headers),
           timeout       : 5000,
           followRedirect: true,
           encoding      : 'binary',
-        }));
+        });
+        console.log('Previous IP', prevIp);
+      }
+
+      await newTorSession();
+
+      if (ENABLE_TOR_LOG_IP) {
+        const [, {ip: newIp}] = await doRequest({
+          url           : 'https://api.ipify.org?format=json',
+          headers       : Object.assign({'Connection': 'keep-alive'}, headers),
+          timeout       : 5000,
+          followRedirect: true,
+          encoding      : 'binary',
+        });
+        console.log('New IP', newIp);
       }
     }
 

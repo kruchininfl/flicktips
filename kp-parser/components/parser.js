@@ -23,7 +23,7 @@ const PROXY_SERVICE = 'http://www.gatherproxy.com/proxylist/anonymity/?t=Transpa
 const ENABLE_TOR = true;
 const ENABLE_TOR_LOG_IP = false;
 const ENABLE_PROXY = false;
-const ENABLE_LOG = false;
+const ENABLE_LOG = true;
 
 const REQUEST_TIMEOUT = 15000;
 let requestTimeout;
@@ -31,11 +31,11 @@ let requestTimeout;
 const j = httpRequest.jar();
 const request = httpRequest.defaults({jar: j});
 
-function log(msg) {
+function log() {
   if (!ENABLE_LOG) {
     return false;
   }
-  console.log(msg);
+  console.log.apply(console, arguments);
 }
 
 function toUTF8(body) {
@@ -139,7 +139,7 @@ async function doRequest(opts) {
       }
 
       if (!/application\/json/.test(res.headers['content-type'])) {
-        const $ = cheerio.load(/charset=windows-1251/.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body));
+        const $ = cheerio.load(/charset=windows-1251/gi.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body));
         const title = $('title').text();
 
         if (title === 'КиноПоиск.ru') {
@@ -175,8 +175,6 @@ async function requestGet(url, headers = {}) {
     log('Using proxy: ' + currentProxy);
   }
 
-  console.log('request: ' + url);
-
   const [error, body] = await doRequest({
     url           : url,
     agent         : ENABLE_PROXY && !ENABLE_TOR ? new HttpsProxyAgent(currentProxy) : null,
@@ -188,7 +186,11 @@ async function requestGet(url, headers = {}) {
   });
 
   if (error) {
-    console.log(error.message);
+    if (error.message === 'response status code:503') {
+      return {
+        skip: true
+      }
+    }
 
     if (ENABLE_PROXY) {
       currentProxy = null;
@@ -228,13 +230,16 @@ async function requestGet(url, headers = {}) {
 
 async function search(query, querySecond, year, type, minStringSimilarityK = 0) {
   // return Promise.resolve(4541);
-
   const result = await requestGet('https://www.kinopoisk.ru/search/suggest/?value=' + encodeURI(query), {
     'Accept'          : 'application/json',
     'Content-Type'    : 'application/json',
     'x-requested-with': 'XMLHttpRequest',
     'User-Agent'      : 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
   });
+
+  if (result.skip) {
+    return {};
+  }
 
   let id = null;
   let similarity = 0;

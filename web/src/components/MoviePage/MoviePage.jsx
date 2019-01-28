@@ -15,12 +15,14 @@ import {Helmet} from 'react-helmet';
 import LazyLoad from 'react-lazy-load';
 import {Link} from 'react-router';
 import MovieTrailer from './MovieTrailer';
+import MovieVotes from './MovieVotes';
 
 const propTypes = {
-  dispatch: PropTypes.func,
-  pending : PropTypes.bool,
-  loaded  : PropTypes.bool,
-  response: PropTypes.any
+  dispatch    : PropTypes.func,
+  pending     : PropTypes.bool,
+  pendingVotes: PropTypes.bool,
+  loaded      : PropTypes.bool,
+  response    : PropTypes.any
 };
 
 @asyncConnect([
@@ -137,6 +139,8 @@ class MoviePage extends Component {
       (moment(movie.date).isValid() ? ' (' + moment(movie.date).format('YYYY') + ')' : '') +
       ' — FlickTips';
 
+    const totalVotes = movie.neutral + movie.dislikes + movie.likes;
+
     return (
       <div className="content movie">
         <Helmet>
@@ -173,80 +177,93 @@ class MoviePage extends Component {
           </div>
 
           <div className="movie__head-data">
-            {movie.title
-              ? <div
-                className="movie__head-row"
-              >
-                <h1 className="movie-title" title={movie.title}>
-                  {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
-                </h1>
-              </div>
-              : ''
-            }
+            <div className="movie__head-data__inn">
+              {movie.title
+                ? <div
+                  className="movie__head-row"
+                >
+                  <h1 className="movie-title" title={movie.title}>
+                    {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
+                  </h1>
+                </div>
+                : ''
+              }
 
-            {movie.original_title || movie.date
-              ? <div
-                className="movie__head-row"
-              >
-                <div className="movie-ot-y">
-                  {movie.original_title
-                    ? <div className="movie-ot">{movie.original_title}</div>
+              {movie.original_title || movie.date
+                ? <div
+                  className="movie__head-row"
+                >
+                  <div className="movie-ot-y">
+                    {movie.original_title
+                      ? <div className="movie-ot">{movie.original_title}</div>
+                      : ''
+                    }
+
+                    {movie.date && moment(movie.date).isValid()
+                      ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
+                      : ''
+                    }
+                  </div>
+                </div>
+                : ''
+              }
+
+              {movie.genres && movie.genres.length
+                ? <div
+                  className="movie__head-row"
+                >
+                  <div className="movie-genres">{movie.genres.map(g => g.name).join(', ')}</div>
+                </div>
+                : ''
+              }
+
+              {(movie.countries && movie.countries.length) || movie.kp_duration
+                ? <div
+                  className="movie__head-row movie-c-d"
+                >
+                  {movie.countries.length
+                    ? <span className="movie-countries">{movie.countries.map(c => c.name).join(', ')}</span>
                     : ''
                   }
-
-                  {movie.date && moment(movie.date).isValid()
-                    ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
+                  {movie.kp_duration
+                    ? (
+                      <span className="movie-duration">
+                        {moment.duration(+movie.kp_duration, 'minutes').format('HH:mm')}
+                        {+movie.kp_duration < 60 ? ' мин.' : ''}
+                      </span>
+                    )
                     : ''
                   }
                 </div>
-              </div>
-              : ''
-            }
+                : ''
+              }
 
-            {movie.genres && movie.genres.length
-              ? <div
-                className="movie__head-row"
-              >
-                <div className="movie-genres">{movie.genres.map(g => g.name).join(', ')}</div>
-              </div>
-              : ''
-            }
+              <div className="movie__head-row m-buttons">
+                <MovieVotes
+                  movieId={movie.id}
+                  total={totalVotes}
+                  loading={this.props.pendingVotes}
+                  allVotes={movie.allVotes || []}
+                />
 
-            {(movie.countries && movie.countries.length) || movie.kp_duration
-              ? <div
-                className="movie__head-row movie-c-d"
-              >
-                {movie.countries.length
-                  ? <span className="movie-countries">{movie.countries.map(c => c.name).join(', ')}</span>
-                  : ''
-                }
-                {movie.kp_duration
-                  ? <span
-                    className="movie-duration"
-                  >
-                    {moment.duration(+movie.kp_duration, 'minutes').format('HH:mm')}
-                    {+movie.kp_duration < 60 ? ' мин.' : ''}
-                  </span>
-                  : ''
-                }
+                <MovieTrailer trailers={movie.tmdb_trailers} />
               </div>
-              : ''
-            }
+            </div>
 
-            <MovieTrailer trailers={movie.tmdb_trailers} />
+            {movie.descr ? (
+              <div className="movie__head-row m-desc">
+                <div
+                  onClick={this.handleToggleDesc}
+                  className={'movie__descr' + (this.state.openedDesc ? ' m-open' : '')}
+                >
+                  {movie.descr}
+                </div>
+              </div>
+            ) : null}
+
           </div>
         </div>
 
-
-        {movie.descr
-          ? <div
-            onClick={this.handleToggleDesc}
-            className={'movie__descr' + (this.state.openedDesc ? ' m-open' : '')}
-          >
-            {movie.descr}
-          </div>
-          : ''
-        }
 
         {movie.staff && movie.staff.length
           ? movie.staff.map((group, key) => this.renderStaffGroup(group, key))
@@ -260,14 +277,14 @@ class MoviePage extends Component {
 MoviePage.propTypes = propTypes;
 
 function mapStateToProps(state) {
-  const {pending, response} = state.movie.toJS();
+  const {pending, pendingVotes, response} = state.movie.toJS();
   const loaded = state.reduxAsyncConnect.loadState.movie && state.reduxAsyncConnect.loadState.movie.loaded;
 
   response.movie.tmdb_trailers = response.movie.tmdb_trailers
     .filter(t => t.split(':')[0] === 'YouTube')
     .map(t => t.split(':')[1]);
 
-  return {pending, loaded, response};
+  return {pending, pendingVotes, loaded, response};
 }
 
 export default MoviePage;

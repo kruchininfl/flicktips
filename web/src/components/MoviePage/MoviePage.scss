@@ -50,6 +50,31 @@
         display: inline;
     }
 }
+.movie__head-data__inn {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+}
+.movie__head-row {
+    margin: 5px 0;
+
+    &.m-buttons {
+        margin-top: auto;
+        margin-left: -105px;
+
+        .btn {
+            margin: 10px 15px 0 0;
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+
+    &.m-desc {
+        margin-left: -95px;
+    }
+}
 .movie__votes {
     padding: 10px;
     position: fixed;
@@ -78,8 +103,6 @@
     margin-top: 20px;
 
     .btn__inn {
-        color: $color-blue;
-        border-color: $color-blue;
         padding-right: 35px;
 
         &:after {
@@ -100,9 +123,6 @@
 
     &:hover {
         .btn__inn {
-            color: #0f6099;
-            border-color: #0f6099;
-
             &:after {
                 border-left-color: #0f6099;
             }
@@ -186,18 +206,8 @@
 /* <editor-fold desc="Popup trailer"> */
 .p-trailer {
     height: 100%;
-
     display: flex;
     align-items: center;
-
-    .ReactModal__Close {
-        color: #ffffff;
-        transition: opacity 200ms;
-
-        &:hover {
-            opacity: .5;
-        }
-    }
 }
 .p-trailer__content {
     width: 100%;
@@ -214,7 +224,7 @@
     padding-top: 56.25%;
     position: relative;
 
-    > span > iframe {
+    > * > iframe {
         position: absolute;
         top: 0;
         left: 0;
@@ -250,6 +260,22 @@
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+    }
+}
+/* </editor-fold> */
+
+/* <editor-fold desc="Popup votes"> */
+.p-votes__content {
+    width: 600px;
+    max-width: 100%;
+    background: #ffffff;
+    margin: 0 auto;
+    padding: 30px 20px;
+    box-sizing: border-box;
+
+    .vote-details {
+        box-sizing: border-box;
+        padding: 20px;
     }
 }
 /* </editor-fold> */

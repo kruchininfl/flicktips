@@ -8,6 +8,18 @@ export function pluralGender(gender, phrases) {
   return phrases[2];
 }
 
+export function getTextByVoteId(id) {
+  const icons = ['Не понравился', 'Средне', 'Понравился'];
+
+  return icons[id];
+}
+
+export function getStringByVoteId(id) {
+  const icons = ['dislike', 'neutral', 'like'];
+
+  return icons[id];
+}
+
 export function getVoteIconClassById(id, filled = false) {
   const icons = ['icn_heart-dislike', 'icn_heart-neutral', 'icn_heart-like'];
 

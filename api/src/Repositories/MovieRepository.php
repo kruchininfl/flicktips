@@ -143,6 +143,50 @@ class MovieRepository {
         return $movie;
     }
 
+    public function getFilmVotes($id, $userId = null) {
+        $query = 'SELECT 
+            mv.id, mv.vote, mv.timestamp, mv.user_id, 
+            u.avatar AS user_avatar, u.gender AS user_gender, u.username AS user_username,';
+        if ($userId) {
+            $query .= 'IF (uf.user_1 is NULL, false, true) AS user_isFriend';
+        } else {
+            $query .= '0 AS user_isFriend';
+        }
+
+        $query .= ' FROM movie_vote AS mv
+            LEFT JOIN user u ON u.id=mv.user_id';
+
+        if ($userId) {
+            $query .= ' LEFT JOIN user_friends uf ON uf.user_1=' . $userId . ' AND uf.user_2=u.id';
+        }
+
+        $query .= ' WHERE mv.movie_id = ' . $id;
+        $query .= ' ORDER BY mv.timestamp DESC';
+
+        $sth = $this->pdo->prepare($query);
+        $sth->execute();
+        $rows = $sth->fetchAll();
+
+        if (!count($rows)) {
+            return [];
+        }
+
+        $votes = $this->app['mapper']->group($rows, 'id', [
+            'id' => ['type' => 'int'],
+            'vote' => ['type' => 'int'],
+            'user_id' => ['group' => 'user', 'group_id_field' => 'user_id', 'rename' => 'id', 'type' => 'int'],
+            'user_avatar' => ['group' => 'user', 'group_id_field' => 'user_id', 'rename' => 'avatar', 'type' => 'string'],
+            'user_gender' => ['group' => 'user', 'group_id_field' => 'user_id', 'rename' => 'gender', 'type' => 'string'],
+            'user_username' => ['group' => 'user', 'group_id_field' => 'user_id', 'rename' => 'username', 'type' => 'string'],
+            'user_isFriend' => ['group' => 'user', 'group_id_field' => 'user_id', 'rename' => 'isFriend', 'type' => 'bool']
+        ]);
+
+        return array_map(function($vote) {
+            $vote['user'] = $vote['user'][0];
+            return $vote;
+        }, $votes);
+    }
+
     public function findByUserId($requesterUid, $uid, $limit, $offset)
     {
         $query = 'SELECT id FROM movie_vote WHERE user_id = :uid ORDER BY movie_vote.timestamp DESC LIMIT :limit OFFSET :offset';

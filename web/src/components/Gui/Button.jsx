@@ -15,7 +15,8 @@ const propTypes = {
   additionClass : PropTypes.string,
   color         : PropTypes.string,
   icn           : PropTypes.string,
-  size          : PropTypes.string
+  size          : PropTypes.string,
+  style         : PropTypes.string
 };
 
 const defaultProps = {
@@ -27,7 +28,7 @@ const defaultProps = {
 
 class Button extends Component {
   render() {
-    const {dfClass, disabled, loading, color, size, componentClass, additionClass, icn, ...props} = this.props;
+    const {dfClass, disabled, loading, color, size, style, componentClass, additionClass, icn, ...props} = this.props;
     let className = dfClass;
 
     className += additionClass ? ' ' + additionClass : '';
@@ -35,6 +36,7 @@ class Button extends Component {
     className += loading ? ' ' + dfClass + '_loading' : '';
     className += color ? ' ' + dfClass + '_color_' + color : '';
     className += size ? ' ' + dfClass + '_size_' + size : '';
+    className += style ? ' ' + dfClass + '_style_' + style : '';
 
     const Node = props.to ? Link : componentClass;
 

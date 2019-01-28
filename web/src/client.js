@@ -5,15 +5,17 @@ import {createHashHistory} from 'history';
 import routes from './routes';
 import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
-import DevTools from './components/DevTools';
 import {ReduxAsyncConnect} from 'redux-connect';
 import {initialize} from 'redux-oauth';
 import config from './config';
 import {SocketProvider} from 'socket.io-react';
 import io from 'socket.io-client';
+import Modal from 'react-modal';
 
 const initialState = window.REDUX_INITIAL_STATE || {};
 const store = configureStore(initialState);
+
+Modal.setAppElement('#react-view');
 
 function asyncRender(props) {
   return <ReduxAsyncConnect {...props} />;
@@ -43,15 +45,11 @@ if (process.env.NODE_ENV === 'cordova') {
     cookies        : document.cookie
   }))).then(
     () => {
-      ReactDOM.render(component, document.getElementById('react-view'));
+      ReactDOM.hydrate(component, document.getElementById('react-view'));
     }
   );
 } else {
-  ReactDOM.render(component, document.getElementById('react-view'));
-}
-
-if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'cordova') {
-  ReactDOM.render(<DevTools store={store}/>, document.getElementById('dev-tools'));
+  ReactDOM.hydrate(component, document.getElementById('react-view'));
 }
 
 if (module.hot) {

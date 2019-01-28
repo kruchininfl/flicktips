@@ -42,4 +42,21 @@
         background: transparent;
     }
     /* </editor-fold> */
+
+    /* <editor-fold desc="React Modal"> */
+    .ReactModal__Content {
+        background: transparent;
+    }
+
+    .ReactModal__Close {
+        &.m-white {
+            color: #ffffff;
+            transition: opacity 200ms;
+
+            &:hover {
+                opacity: .5;
+            }
+        }
+    }
+    /* </editor-fold> */
 }

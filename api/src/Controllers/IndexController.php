@@ -186,6 +186,31 @@ class IndexController
         ]);
     }
 
+    public function getFilmVotes(Request $request, Application $app)
+    {
+        $mid = $request->get('mid');
+
+        if (!isset($mid)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'Not found'
+            ], 404);
+        }
+
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        $votes = $app['movie.repository']->getFilmVotes($mid, $user ? $user['id'] : null);
+
+        return $app->json([
+            'success' => true,
+            'movie_id' => intval($mid),
+            'votes' => $votes
+        ]);
+    }
+
     public function getPerson(Request $request, Application $app)
     {
         $pid = $request->get('pid');

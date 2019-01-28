@@ -8,15 +8,15 @@ body {
 .icn {
     &_heart-like,
     &_heart-like-fill {
-        color: #ed6767;
+        color: $color-like;
     }
     &_heart-neutral,
     &_heart-neutral-fill {
-        color: #818181;
+        color: $color-neutral;
     }
     &_heart-dislike,
     &_heart-dislike-fill {
-        color: #2950b4;
+        color: $color-dislike;
     }
 }
 .link {
@@ -95,6 +95,7 @@ body {
         background: rgba(#818181, .6);
     }
 }
+
 /* <editor-fold desc="About block"> */
 @keyframes heartbeat {
     0%, 28%, 70% {
@@ -161,6 +162,9 @@ body {
     right: 0 !important;
     border: none !important;
     border-radius: 0 !important;
+    position: absolute !important;
+    overflow-y: auto !important;
+    background: #ffffff;
 }
 .ReactModalPortal > div {
     opacity: 0;
@@ -178,7 +182,7 @@ body {
 .ReactModal__Close {
     font-size: 26px;
     cursor: pointer;
-    position: absolute;
+    position: fixed;
     top: 25px;
     right: 25px;
 }
@@ -199,8 +203,8 @@ body {
         position: 50% 50%;
         size: 50% 50%;
         repeat: no-repeat;
-    }
-;
+    };
+    box-sizing: border-box;
 
     > span {
         position: absolute;
@@ -220,6 +224,7 @@ body {
     &_size_big {
         width: 90px;
         height: 90px;
+        border-width: 3px;
     }
 }
 /* </editor-fold> */
@@ -376,6 +381,7 @@ textarea {
     white-space: nowrap;
     text-align: center;
     font-size: 0;
+    transition: all 300ms;
 
     &_more {
         display: block;
@@ -421,6 +427,16 @@ textarea {
             background: #49555e;
         }
     }
+    .btn_color_gray.btn_style_border & {
+        background: transparent;
+        border-color: #5d6c78;
+        color: #5d6c78;
+
+        &:hover {
+            border-color: #49555e;
+            color: #49555e;
+        }
+    }
 
     .btn_color_green & {
         background: #37a949;
@@ -429,6 +445,16 @@ textarea {
 
         &:hover {
             background: #267331;
+        }
+    }
+    .btn_color_green.btn_style_border & {
+        background: transparent;
+        border-color: #37a949;
+        color: #37a949;
+
+        &:hover {
+            border-color: #267331;
+            color: #267331;
         }
     }
 
@@ -441,6 +467,16 @@ textarea {
             background: #0f6099;
         }
     }
+    .btn_color_blue.btn_style_border & {
+        background: transparent;
+        border-color: $color-blue;
+        color: $color-blue;
+
+        &:hover {
+            border-color: #0f6099;
+            color: #0f6099;
+        }
+    }
 
     .btn_color_light-gray & {
         background: #f2f2f2;
@@ -449,6 +485,16 @@ textarea {
 
         &:hover {
             background: darken(#f2f2f2, 20);
+        }
+    }
+    .btn_color_light-gray.btn_style_border & {
+        background: transparent;
+        border-color: #f2f2f2;
+        color: #f2f2f2;
+
+        &:hover {
+            border-color: darken(#f2f2f2, 20);
+            color: darken(#f2f2f2, 20);
         }
     }
 }
@@ -730,6 +776,74 @@ html, body, .react-view, .layout {
     position: relative;
     top: 18px;
     text-decoration: none;
+}
+/* </editor-fold> */
+
+/* <editor-fold desc="Votes Details"> */
+.vote-details {
+    text-align: center;
+}
+.vote-details__user {
+    text-align: center;
+
+    &.m-friend {
+        .userpic {
+            border-color: $color-blue;
+        }
+    }
+}
+.vote-details__user__name {
+    margin: 5px 0;
+}
+.vote-details__value {
+    display: inline-block;
+    padding: 6px 15px 5px;
+    border-radius: 5px;
+    color: #ffffff;
+    text-transform: uppercase;
+    border: 1px solid;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: default;
+
+    &.m-like {
+        border-color: $color-like;
+        color: $color-like;
+    }
+
+    &.m-neutral {
+        border-color: $color-neutral;
+        color: $color-neutral;
+    }
+
+    &.m-dislike {
+        border-color: $color-dislike;
+        color: $color-dislike;
+    }
+
+    > .icn,
+    > span {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    > .icn {
+        margin-right: 5px;
+        position: relative;
+        top: -1px;
+    }
+
+    > span {
+        font-weight: bold;
+        font-size: 11px;
+    }
+}
+
+.vote-details__date {
+    white-space: nowrap;
+    font-size: 12px;
+    color: $color-gray;
+    margin-top: 5px;
 }
 /* </editor-fold> */
 

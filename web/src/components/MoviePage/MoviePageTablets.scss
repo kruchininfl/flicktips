@@ -28,4 +28,46 @@
             color: inherit;
         }
     }
+    .movie__head-data__inn {
+        min-height: 0;
+    }
+    .movie__head-row {
+        &.m-buttons,
+        &.m-desc {
+            margin-left: 0;
+        }
+
+        &.m-buttons {
+            position: static;
+        }
+    }
+    .movie__descr {
+        border: none;
+        padding-top: 0;
+    }
+
+    /* <editor-fold desc="Popup votes"> */
+    .p-votes {
+        text-align: center;
+        white-space: nowrap;
+
+        &:before {
+            content: '';
+            display: inline-block;
+            vertical-align: middle;
+            height: 100%;
+        }
+    }
+    .p-votes__content {
+        white-space: normal;
+        display: inline-block;
+        vertical-align: middle;
+
+        .vote-details {
+            display: inline-block;
+            vertical-align: top;
+            width: 33.3333%;
+        }
+    }
+    /* </editor-fold> */
 }

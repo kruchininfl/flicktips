@@ -186,26 +186,3 @@ dl.unstyled dd {
 .icn {
   text-decoration: none;
 }
-
-/* <editor-fold desc="DevTools"> */
-#dev-tools {
-  ~ .ReactModalPortal {
-    .p-signin {
-      right: 30%;
-    }
-  }
-  ~ .react-view {
-    margin-right: 30%;
-
-    .p-signin,
-    .header,
-    .header-search__result-wrap,
-    .layout.m-vk-app .container,
-    .layout.m-vk-app .footer,
-    .sidepanel .sidepanel__wrap {
-      right: 30%;
-    }
-  }
-
-}
-/* </editor-fold> */

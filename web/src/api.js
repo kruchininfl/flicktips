@@ -224,6 +224,10 @@ export default {
     return this._fetch('get_film/' + id);
   },
 
+  getMovieVotes(id) {
+    return this._fetch('get_film_votes/' + id);
+  },
+
   getPerson(id) {
     return this._fetch('get_person/' + id);
   }

@@ -33,10 +33,6 @@
 </head>
 <body>
 
-<% if (process.env.NODE_ENV === 'development') { %>
-<div id="dev-tools"></div>
-<% } %>
-
 <% if (process.env.NODE_ENV === 'cordova') { %>
 <script type="text/javascript" src="cordova.js"></script>
 <script type="text/javascript" src="cordova_plugins.js"></script>

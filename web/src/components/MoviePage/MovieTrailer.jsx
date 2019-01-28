@@ -39,12 +39,18 @@ class MovieTrailer extends Component {
     const {trailerIndex, isOpen} = this.state;
 
     if (!trailers || !trailers.length) {
-      return false;
+      return null;
     }
 
     return (
-      <div>
-        <Button onClick={this.handleOpenPopup} size="big" additionClass="movie__trailer-btn">Трейлер</Button>
+      <React.Fragment>
+        <Button
+          onClick={this.handleOpenPopup}
+          size="big" color="blue" style="border"
+          additionClass="movie__trailer-btn"
+        >
+          Трейлер
+        </Button>
 
         <Modal
           isOpen={isOpen}
@@ -53,7 +59,7 @@ class MovieTrailer extends Component {
           className="p-trailer"
           contentLabel="Movie trailer"
         >
-          <i onClick={this.handleClosePopup} className="icn icn_cross ReactModal__Close" />
+          <i onClick={this.handleClosePopup} className="icn icn_cross ReactModal__Close m-white" />
 
           <div className="p-trailer__content">
             <div
@@ -82,7 +88,7 @@ class MovieTrailer extends Component {
             ><i className="icn icn_arrow-right" /></div>
           </div>
         </Modal>
-      </div>
+      </React.Fragment>
     );
   }
 }

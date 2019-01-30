@@ -12,14 +12,17 @@ import {connect} from 'react-redux';
 import YaMetrica from './YaMetrica';
 import {socketConnect} from 'socket.io-react';
 import {voteUpdateCounters} from '../../redux/actions/voteActions';
+import {isUserSignedIn} from '../../redux/models/user';
+import Button from '../Gui/Button';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
 const propTypes = {
-  dispatch: PropTypes.func,
-  socket  : PropTypes.any,
-  children: PropTypes.node,
-  isVkApp : PropTypes.bool
+  dispatch    : PropTypes.func,
+  socket      : PropTypes.any,
+  children    : PropTypes.node,
+  isVkApp     : PropTypes.bool,
+  userSignedIn: PropTypes.bool
 };
 
 class App extends Component {
@@ -37,6 +40,31 @@ class App extends Component {
     this.props.socket.on('vote-changed', (data) => {
       this.props.dispatch(voteUpdateCounters(data));
     });
+  }
+
+  renderAdv() {
+    const {userSignedIn, isVkApp} = this.props;
+
+    if (userSignedIn || isVkApp) {
+      return false;
+    }
+
+    return (
+      <div className="about-ttip">
+        <div className="about-ttip__inn">
+          <div className="about-ttip__title">ЛЮБИШЬ ХОРОШЕЕ КИНО?</div>
+          <div className="about-ttip__icons">
+            <i className="about-ttip__icon icn icn_friends" />
+            <i className="about-ttip__icon icn icn_heart-like-fill" />
+            <i className="about-ttip__icon icn icn_film" />
+          </div>
+          <div className="about-ttip__text">Смотри и оценивай фильмы.<br />
+            Следи за оценками друзей.
+          </div>
+          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" color="blue">Присоединиться</Button>
+        </div>
+      </div>
+    );
   }
 
   render() {
@@ -68,6 +96,7 @@ class App extends Component {
           className="container"
           ref={(ref) => this._container = ref}
         >
+          {this.renderAdv()}
           {this.props.children}
         </div>
 
@@ -89,8 +118,9 @@ App.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const isVkApp = state.app.get('isVkApp');
+  const userSignedIn = isUserSignedIn(state);
 
-  return {isVkApp};
+  return {isVkApp, userSignedIn};
 }
 
 export default connect(mapStateToProps)(socketConnect(App));

@@ -43,7 +43,6 @@ class LastGradedPage extends Component {
     super(props);
 
     this.renderEmptyPage = this.renderEmptyPage.bind(this);
-    this.renderAdv = this.renderAdv.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
     this.handleSignIn = this.handleSignIn.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
@@ -89,31 +88,6 @@ class LastGradedPage extends Component {
     });
   }
 
-  renderAdv() {
-    const {userSignedIn} = this.props;
-
-    if (userSignedIn) {
-      return false;
-    }
-
-    return (
-      <div className="about-ttip">
-        <div className="about-ttip__inn">
-          <div className="about-ttip__title">ЛЮБИШЬ ХОРОШЕЕ КИНО?</div>
-          <div className="about-ttip__icons">
-            <i className="about-ttip__icon icn icn_friends" />
-            <i className="about-ttip__icon icn icn_heart-like-fill" />
-            <i className="about-ttip__icon icn icn_film" />
-          </div>
-          <div className="about-ttip__text">Смотри и оценивай фильмы.<br />
-            Следи за оценками друзей.
-          </div>
-          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" color="blue">Присоединиться</Button>
-        </div>
-      </div>
-    );
-  }
-
   renderEmptyPage() {
     const {onlyFriends, isVkApp} = this.props;
 
@@ -149,7 +123,6 @@ class LastGradedPage extends Component {
 
     return (
       <div className="home-page">
-        {this.renderAdv()}
         <div className="lg-header">
           <span
             onClick={() => this.handleFilter(false)}

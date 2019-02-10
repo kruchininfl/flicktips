@@ -422,7 +422,8 @@ class MovieRepository {
         return $movies;
     }
 
-    public function getFilmsOrderedByVotes($limit = null, $userId = null, $onlyFriends = false) {
+    public function getFilmsOrderedByVotes($limit = null, $user = null, $onlyFriends = false) {
+        $userId = $user['id'] ? $user['id'] : null;
 
         $query = 'SELECT 
         movie.id as movie_id,
@@ -458,10 +459,21 @@ class MovieRepository {
 
         if ($onlyFriends) {
             $query .= ' FROM (SELECT movie_vote.movie_id FROM movie_vote WHERE movie_vote.user_id IN 
-            (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) 
-            GROUP BY movie_id DESC ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
+                (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC';
+
+            if ($userId && $user['hide_viewed']) {
+                $query .= ' HAVING (SELECT umv.vote FROM movie_vote umv WHERE umv.user_id = :uid AND umv.movie_id = movie_vote.movie_id) IS NULL';
+            }
+
+            $query .= ' ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
         } else {
-            $query .= ' FROM (SELECT movie_vote.movie_id FROM movie_vote GROUP BY movie_id DESC ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
+            $query .= ' FROM (SELECT movie_vote.movie_id FROM movie_vote GROUP BY movie_id DESC';
+
+            if ($userId && $user['hide_viewed']) {
+                $query .= ' HAVING (SELECT umv.vote FROM movie_vote umv WHERE umv.user_id = :uid AND umv.movie_id = movie_vote.movie_id) IS NULL';
+            }
+
+            $query .= ' ORDER BY max(`timestamp`) DESC LIMIT :limit) mv';
         }
 
         $query .= ' LEFT JOIN movie ON movie.id = mv.movie_id

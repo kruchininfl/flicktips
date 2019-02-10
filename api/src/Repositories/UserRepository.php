@@ -14,6 +14,7 @@ class UserRepository {
 
     protected $safety_fields = ['id', 'username', 'avatar', 'gender', 'registration_date'];
 
+
     public function __construct(Application $app)
     {
         $this->app = $app;
@@ -28,7 +29,7 @@ class UserRepository {
 
         $safety_fields = array_map(function ($val) { return '`user`.' . $val; }, $this->safety_fields);
         $safety_fields[] = 'SUM(IF(movie_vote.timestamp > `user`.last_seen_notifications, 1, 0)) AS new_notifications';
-        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ' 
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ', hide_viewed
         FROM user 
         LEFT JOIN `movie_vote` ON `movie_vote`.`user_id` IN (SELECT `user_friends`.`user_2` FROM `user_friends` WHERE `user_friends`.`user_1` = :uid)
         WHERE `user`.id = :uid AND token = :token');
@@ -40,6 +41,10 @@ class UserRepository {
         if (!$user['id']) {
             return null;
         }
+
+        settype($user['id'], 'int');
+        settype($user['hide_viewed'], 'bool');
+        settype($user['new_notifications'], 'int');
 
         return $user;
     }

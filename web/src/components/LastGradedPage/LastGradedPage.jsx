@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import './LastGradedPage.scss';
-import {asyncConnect}  from 'redux-connect';
+import {asyncConnect} from 'redux-connect';
 import {getLastGraded, addLastGraded} from 'redux/actions/lastGradedActions';
 import Button from '../Gui/Button';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
-import {isUserSignedIn} from '../../redux/models/user';
+import {getUserModel, isUserSignedIn} from '../../redux/models/user';
 import {openSignInPopup} from '../../redux/actions/appActions';
 import InviteButton from '../../partitions/VkApp/InviteButton';
 
@@ -15,6 +15,7 @@ const propTypes = {
   loaded      : PropTypes.bool,
   loading     : PropTypes.bool,
   userSignedIn: PropTypes.bool,
+  user        : PropTypes.object,
   response    : PropTypes.any,
   onlyFriends : PropTypes.bool,
   isVkApp     : PropTypes.bool
@@ -53,7 +54,10 @@ class LastGradedPage extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.userSignedIn !== nextProps.userSignedIn) {
+    if (
+      this.props.userSignedIn !== nextProps.userSignedIn
+      || (this.props.user && this.props.user.hide_viewed !== nextProps.user.hide_viewed)
+    ) {
       this.props.dispatch(getLastGraded(1, nextProps.userSignedIn));
     }
   }
@@ -157,10 +161,11 @@ LastGradedPage.propTypes = propTypes;
 function mapStateToProps(state) {
   const {pending, loading, response, onlyFriends} = state.lastGraded.toJS();
   const userSignedIn = isUserSignedIn(state);
+  const user = getUserModel(state).toJS();
   const loaded = state.reduxAsyncConnect.loadState.lastGraded && state.reduxAsyncConnect.loadState.lastGraded.loaded;
   const isVkApp = state.app.get('isVkApp');
 
-  return {pending, loading, loaded, response, userSignedIn, onlyFriends, isVkApp};
+  return {pending, loading, loaded, response, user, userSignedIn, onlyFriends, isVkApp};
 }
 
 export default LastGradedPage;

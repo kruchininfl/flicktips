@@ -220,6 +220,10 @@ export default {
     return this._fetch('user/friends_votes/', {page}, undefined, true);
   },
 
+  updateUser(data) {
+    return this._fetch('user/', {data}, 'PUT');
+  },
+
   getMovie(id) {
     return this._fetch('get_film/' + id);
   },

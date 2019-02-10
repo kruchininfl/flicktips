@@ -1,5 +1,7 @@
 @import "../reset";
 @import "../base";
+@import "~react-tippy/dist/tippy.css";
+
 body {
     font-family: 'Open Sans', $font-arial;
     background: #f1f1f1;
@@ -679,6 +681,29 @@ html, body, .react-view, .layout {
         background: #ffffff;
         color: #333b41;
         border-bottom: 1px solid #e7e8ec;
+    }
+
+    .toggler {
+        > i {
+            width: 34px;
+            height: 19px;
+            background: transparent;
+            border: 1px solid #f1f1f1;
+
+            &:after {
+                width: 16px;
+                height: 16px;
+                background: #f1f1f1;
+            }
+        }
+
+        > input:checked ~ i {
+            background: rgba(#ffffff, .15);
+
+            &:after {
+                left: 17px;
+            }
+        }
     }
 }
 .header__loader {

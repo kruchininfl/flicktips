@@ -1,3 +1,5 @@
+import {AUTHENTICATE_COMPLETE} from 'redux-oauth';
+
 export const PROFILE_LOADING_START = 'PROFILE_LOADING_START';
 export const PROFILE_LOADING_FINISH = 'PROFILE_LOADING_FINISH';
 export const PROFILE_LOADING_ERROR = 'PROFILE_LOADING_ERROR';
@@ -25,6 +27,10 @@ function addVotesStart() {
 
 function addVotesFinish(response) {
   return {type: PROFILE_ADD_VOTES_FINISH, response};
+}
+
+function profileUpdateFinish(user) {
+  return {type: AUTHENTICATE_COMPLETE, user};
 }
 
 export function getProfile(userId) {
@@ -60,5 +66,12 @@ export function loadVotes(userId, page) {
 
     dispatch(api.getUserVotes(userId, page))
       .then((response) => dispatch(addVotesFinish(response.body)));
+  };
+}
+
+export function profileUpdate(data) {
+  return (dispatch) => {
+    dispatch(api.updateUser(data))
+      .then((response) => dispatch(profileUpdateFinish(response.body.data)));
   };
 }

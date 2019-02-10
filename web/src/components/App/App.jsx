@@ -6,14 +6,16 @@ import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
 import HeaderProfile from 'partitions/HeaderProfile';
 import LoadingBar from 'react-redux-loading-bar';
-
 import './App.scss';
 import {connect} from 'react-redux';
 import YaMetrica from './YaMetrica';
 import {socketConnect} from 'socket.io-react';
 import {voteUpdateCounters} from '../../redux/actions/voteActions';
-import {isUserSignedIn} from '../../redux/models/user';
+import {getUserModel, isUserSignedIn} from '../../redux/models/user';
 import Button from '../Gui/Button';
+import Toggler from '../Gui/Forms/Toggler';
+import {profileUpdate} from '../../redux/actions/profileActions';
+import {Tooltip} from 'react-tippy';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
@@ -22,6 +24,7 @@ const propTypes = {
   socket      : PropTypes.any,
   children    : PropTypes.node,
   isVkApp     : PropTypes.bool,
+  user        : PropTypes.object,
   userSignedIn: PropTypes.bool
 };
 
@@ -41,6 +44,12 @@ class App extends Component {
       this.props.dispatch(voteUpdateCounters(data));
     });
   }
+
+  handleToggleViewedFilter = () => {
+    this.props.dispatch(profileUpdate({
+      hide_viewed: !this.props.user.hide_viewed
+    }));
+  };
 
   renderAdv() {
     const {userSignedIn, isVkApp} = this.props;
@@ -85,6 +94,22 @@ class App extends Component {
             <IndexLink to="/" className="header__logo"><span className="icn icn_logo" /></IndexLink>
 
             <div className="header__right">
+              {this.props.userSignedIn ? (
+                <Tooltip
+                  title={this.props.user.hide_viewed ? 'Показать просмотренные' : 'Скрыть просмотренные'}
+                  position="bottom"
+                  trigger="mouseenter"
+                  arrow
+                  distance={20}
+                  delay={300}
+                  hideDelay={100}
+                >
+                  <Toggler
+                    checked={this.props.user.hide_viewed}
+                    onChange={this.handleToggleViewedFilter}
+                  />
+                </Tooltip>
+              ) : null}
               <HeaderSearch />
               <SignInButton />
               <HeaderProfile />
@@ -118,9 +143,10 @@ App.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const isVkApp = state.app.get('isVkApp');
+  const user = getUserModel(state).toJS();
   const userSignedIn = isUserSignedIn(state);
 
-  return {isVkApp, userSignedIn};
+  return {isVkApp, user, userSignedIn};
 }
 
 export default connect(mapStateToProps)(socketConnect(App));

@@ -20,10 +20,10 @@ import cors from 'cors';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'https://flicktips.local:8050' : '';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
 
 app.use(cookieParser());
-app.use(cors({credentials: true, origin: 'https://flicktips.local:3001'}));
+app.use(cors({credentials: true, origin: 'http://flicktips.local:3001'}));
 
 app.set('view engine', 'ejs');
 
@@ -39,7 +39,7 @@ app.use((req, res) => {
 
   if (referer && referer.indexOf(config.vkAppUrl) === 0) {
     const {auth_key, viewer_id: user_id} = req.query;
-    const auth_origin_url = 'https://' + req.get('host') + '/';
+    const auth_origin_url = 'http://' + req.get('host') + '/';
 
     if (!auth_key || !user_id) {
       return res.redirect(301, '/');

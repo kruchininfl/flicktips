@@ -404,4 +404,51 @@ class UserController
             ]
         ]);
     }
+
+    public function updateUser(Request $request, Application $app)
+    {
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $allowed = ['hide_viewed'];
+
+        $params = $request->get('data');
+        $setStr = '';
+        $setParams = [];
+
+        foreach ($allowed as $afield) {
+            $param = $params[$afield];
+
+            if (!is_null($param)) {
+                $setStr .= ($setStr !== '' ? ', ' . $afield : $afield) . '=:' . $afield;
+                $setParams[$afield] = $param;
+            }
+        }
+
+        if ($setStr !== '') {
+            $sth = $app['pdo']->prepare('UPDATE user SET ' . $setStr . ' WHERE id=:uid');
+            $sth->execute(array_merge(
+                [
+                    'uid' => $user['id']
+                ],
+                $setParams
+            ));
+
+            $user = $app['user.repository']->getByCredentials($uid, $token);
+        }
+
+        return $app->json([
+            'success' => true,
+            'data' => $user
+        ]);
+    }
 }

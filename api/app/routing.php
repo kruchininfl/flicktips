@@ -24,5 +24,6 @@ $app->get('/api/user/bookmarks/', '\Controllers\UserController::getBookmarks');
 $app->post('/api/user/vote/', '\Controllers\UserController::toggleVote');
 $app->post('/api/user/toggle_subscribe/', '\Controllers\UserController::toggleSubscribe');
 $app->post('/api/user/toggle_bookmark/', '\Controllers\UserController::toggleBookmark');
+$app->put('/api/user/', '\Controllers\UserController::updateUser');
 
 $app->get('/api/updateGenres/', '\Controllers\IndexController::updateGenres');

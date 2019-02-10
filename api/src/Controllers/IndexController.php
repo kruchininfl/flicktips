@@ -345,7 +345,12 @@ class IndexController
         $page = $request->get('page') ? $request->get('page') : 1;
         $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
 
-        $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id DESC) mv');
+        if ($user && $user['hide_viewed']) {
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid GROUP BY movie_id DESC) mv');
+            $totalSth->execute(['uid' => $user['id']]);
+        } else {
+            $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id DESC) mv');
+        }
         $total = intval($totalSth->fetch()['num']);
 
         if ($total == 0) {
@@ -360,7 +365,7 @@ class IndexController
             ]);
         }
 
-        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user ? $user['id'] : null);
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user);
 
         return $app->json([
             'success' => true,
@@ -390,7 +395,12 @@ class IndexController
         $page = $request->get('page') ? $request->get('page') : 1;
         $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
 
-        $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+        if ($user && $user['hide_viewed']) {
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid AND movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+            $totalSth->execute(['uid' => $user['id']]);
+        } else {
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+        }
         $totalSth->execute(['uid' => $user['id']]);
         $total = intval($totalSth->fetch()['num']);
 
@@ -406,7 +416,7 @@ class IndexController
             ]);
         }
 
-        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user ? $user['id'] : null, true);
+        $movies = $app['movie.repository']->getFilmsOrderedByVotes($limit, $user, true);
 
         return $app->json([
             'success' => true,

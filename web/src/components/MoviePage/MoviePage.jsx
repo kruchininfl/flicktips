@@ -149,27 +149,25 @@ class MoviePage extends Component {
     return (
       <div className="content movie">
         <Helmet>
-          <Helmet>
-            <title>{title}</title>
-            <meta name="description" content={description} />
+          <title>{title}</title>
+          <meta name="description" content={description} />
 
-            <meta property="og:type" content="video.movie" />
-            <meta property="ya:ovs:allow_embed" content="true" />
-            <meta property="og:image" content={image} />
-            <meta property="vk:image" content={image} />
-            <meta property="title" content={title} />
-            <meta property="og:title" content={title} />
-            <meta property="twitter:title" content={title} />
-            <meta property="og:url" content={url} />
-            <meta name="mrc__share_title" content={title} />
-            <meta name="mrc__share_description" content={movie.descr} />
-            <meta property="og:site_name" content="FlickTips" />
-            <meta name="description" content={description} />
-            <meta property="og:description" content={description} />
-            <meta property="twitter:description" content={description} />
-            <link rel="image_src" href={image} />
-            <link rel="canonical" href={url} />
-          </Helmet>
+          <meta property="og:type" content="video.movie" />
+          <meta property="ya:ovs:allow_embed" content="true" />
+          <meta property="og:image" content={image} />
+          <meta property="vk:image" content={image} />
+          <meta property="title" content={title} />
+          <meta property="og:title" content={title} />
+          <meta property="twitter:title" content={title} />
+          <meta property="og:url" content={url} />
+          <meta name="mrc__share_title" content={title} />
+          <meta name="mrc__share_description" content={movie.descr} />
+          <meta property="og:site_name" content="FlickTips" />
+          <meta name="description" content={description} />
+          <meta property="og:description" content={description} />
+          <meta property="twitter:description" content={description} />
+          <link rel="image_src" href={image} />
+          <link rel="canonical" href={url} />
         </Helmet>
 
         <div className="movie__head">

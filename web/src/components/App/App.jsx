@@ -81,9 +81,7 @@ class App extends Component {
       <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
         <Helmet>
           <title>FlickTips — фильмы, друзья, лайки</title>
-          <meta name="description" content="Теперь находить лучшие фильмы и сериалы намного проще.
-          Благодаря нашему сервису кино и сериалы можно выбирать не на основе обложки и краткого
-          описания или рецензий неизвестных вам критиков, а по оценкам друзей." />
+          <meta name="description" content="Рейтинг фильмов и сериалов на основе оценок друзей, кинопоиска и imdb." />
 
           <meta property="og:title" content="FlickTips — Делитесь впечатлениями о просмотренных фильмах с друзьями." />
           <meta property="og:image" content="https://flick.tips/public/img/logo/1024x1024.png" />

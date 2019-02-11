@@ -131,32 +131,56 @@ class MoviePage extends Component {
     }
 
     const movie = Object.assign({}, response.movie);
+    const poster = config.tmdb.posterPath185 + movie.tmdb_poster_path;
 
     movie.date = movie.release_date || movie.first_air_date;
     movie.descr = movie.tmdb_overview || movie.kp_overview;
 
-    const title = movie.title +
-      (moment(movie.date).isValid() ? ' (' + moment(movie.date).format('YYYY') + ')' : '') +
-      ' — FlickTips';
+    const name = movie.title +
+      (moment(movie.date).isValid() ? ' (' + moment(movie.date).format('YYYY') + ')' : '');
+    const title = name + ' — FlickTips';
+    const description = `Все о ${movie.isTv ? 'сериале' : 'фильме'} ${name}: оценки друзей, рейтинги 
+    кинопоиск и имдб, трейлеры, обложка, актеры и режиссеры`;
+    const image = poster || 'https://flick.tips/public/img/logo/1024x1024.png';
+    const url = 'https://flick.tips/movie/' + movie.id;
 
     const totalVotes = movie.neutral + movie.dislikes + movie.likes;
 
     return (
       <div className="content movie">
         <Helmet>
-          <title>{title}</title>
-          <meta name="description" content={movie.descr} />
+          <Helmet>
+            <title>{title}</title>
+            <meta name="description" content={description} />
+
+            <meta property="og:type" content="video.movie" />
+            <meta property="ya:ovs:allow_embed" content="true" />
+            <meta property="og:image" content={image} />
+            <meta property="vk:image" content={image} />
+            <meta property="title" content={title} />
+            <meta property="og:title" content={title} />
+            <meta property="twitter:title" content={title} />
+            <meta property="og:url" content={url} />
+            <meta name="mrc__share_title" content={title} />
+            <meta name="mrc__share_description" content={movie.descr} />
+            <meta property="og:site_name" content="FlickTips" />
+            <meta name="description" content={description} />
+            <meta property="og:description" content={description} />
+            <meta property="twitter:description" content={description} />
+            <link rel="image_src" href={image} />
+            <link rel="canonical" href={url} />
+          </Helmet>
         </Helmet>
 
         <div className="movie__head">
           <div className="movie__head-left">
             <div className="movie-cover movie__cover">
-              {movie.tmdb_poster_path
+              {poster
                 ? <div
-                  style={{backgroundImage: `url(${config.tmdb.posterPath185 + movie.tmdb_poster_path})`}}
+                  style={{backgroundImage: `url(${poster})`}}
                   className="movie-cover-inn"
                 >
-                  <img src={config.tmdb.posterPath185 + movie.tmdb_poster_path}
+                  <img src={poster}
                     alt={movie.title}
                   />
                 </div>
@@ -280,6 +304,7 @@ function mapStateToProps(state) {
   const {pending, pendingVotes, response} = state.movie.toJS();
   const loaded = state.reduxAsyncConnect.loadState.movie && state.reduxAsyncConnect.loadState.movie.loaded;
 
+  response.movie.isTv = /^tv\_/.test(response.movie.tmdb_id);
   response.movie.tmdb_trailers = response.movie.tmdb_trailers
     .filter(t => t.split(':')[0] === 'YouTube')
     .map(t => t.split(':')[1]);

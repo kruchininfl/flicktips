@@ -52,9 +52,6 @@ class PersonPage extends Component {
       metaName = person.original_name;
     }
 
-    const title = metaName + ' — Фильмы — FlickTips';
-    const descr = metaName + '. Фильмография, фото, возраст. Список фильмов.';
-
     const career = [];
 
     const moviesMap = new Map();
@@ -70,11 +67,33 @@ class PersonPage extends Component {
 
     const groupedMovies = new Map([...moviesMap.entries()].sort());
 
+    const title = metaName + ' — FlickTips';
+    const description = metaName + '. ' + (career.length ? career.join(', ') + '. ' : '') + 'Фильмография, фото.';
+    const image = person.kp_photo || 'https://flick.tips/public/img/logo/1024x1024.png';
+    const url = 'https://flick.tips/person/' + person.id;
+
     return (
       <div className="person">
         <Helmet>
           <title>{title}</title>
-          <meta name="description" content={descr} />
+          <meta name="description" content={description} />
+
+          <meta property="og:type" content="video.movie" />
+          <meta property="ya:ovs:allow_embed" content="true" />
+          <meta property="og:image" content={image} />
+          <meta property="vk:image" content={image} />
+          <meta property="title" content={title} />
+          <meta property="og:title" content={title} />
+          <meta property="twitter:title" content={title} />
+          <meta property="og:url" content={url} />
+          <meta name="mrc__share_title" content={title} />
+          <meta name="mrc__share_description" content={description} />
+          <meta property="og:site_name" content="FlickTips" />
+          <meta name="description" content={description} />
+          <meta property="og:description" content={description} />
+          <meta property="twitter:description" content={description} />
+          <link rel="image_src" href={image} />
+          <link rel="canonical" href={url} />
         </Helmet>
 
         <div className="person__head">

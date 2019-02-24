@@ -141,8 +141,8 @@ App.propTypes = propTypes;
 
 function mapStateToProps(state) {
   const isVkApp = state.app.get('isVkApp');
-  const user = getUserModel(state).toJS();
   const userSignedIn = isUserSignedIn(state);
+  const user = userSignedIn && getUserModel(state).toJS();
 
   return {isVkApp, user, userSignedIn};
 }

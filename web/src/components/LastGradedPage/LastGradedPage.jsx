@@ -161,7 +161,7 @@ LastGradedPage.propTypes = propTypes;
 function mapStateToProps(state) {
   const {pending, loading, response, onlyFriends} = state.lastGraded.toJS();
   const userSignedIn = isUserSignedIn(state);
-  const user = getUserModel(state).toJS();
+  const user = userSignedIn && getUserModel(state).toJS();
   const loaded = state.reduxAsyncConnect.loadState.lastGraded && state.reduxAsyncConnect.loadState.lastGraded.loaded;
   const isVkApp = state.app.get('isVkApp');
 

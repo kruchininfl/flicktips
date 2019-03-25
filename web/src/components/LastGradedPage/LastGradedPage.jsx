@@ -6,7 +6,6 @@ import {getLastGraded, addLastGraded} from 'redux/actions/lastGradedActions';
 import Button from '../Gui/Button';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
 import {getUserModel, isUserSignedIn} from '../../redux/models/user';
-import {openSignInPopup} from '../../redux/actions/appActions';
 import InviteButton from '../../partitions/VkApp/InviteButton';
 
 const propTypes = {
@@ -45,7 +44,6 @@ class LastGradedPage extends Component {
 
     this.renderEmptyPage = this.renderEmptyPage.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
-    this.handleSignIn = this.handleSignIn.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
   }
 
@@ -78,10 +76,6 @@ class LastGradedPage extends Component {
     }
 
     this.props.dispatch(getLastGraded(1, onlyFriends));
-  }
-
-  handleSignIn() {
-    this.props.dispatch(openSignInPopup());
   }
 
   renderMovies(entities) {

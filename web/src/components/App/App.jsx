@@ -16,6 +16,7 @@ import Button from '../Gui/Button';
 import Toggler from '../Gui/Forms/Toggler';
 import {profileUpdate} from '../../redux/actions/profileActions';
 import {Tooltip} from 'react-tippy';
+import {openSignInPopup} from '../../redux/actions/appActions';
 
 const VK = typeof window !== 'undefined' ? window.VK : null;
 
@@ -49,6 +50,10 @@ class App extends Component {
     this.props.dispatch(profileUpdate({
       hide_viewed: !this.props.user.hide_viewed
     }));
+  };
+
+  handleSignIn = () => {
+    this.props.dispatch(openSignInPopup());
   };
 
   renderAdv() {
@@ -142,7 +147,7 @@ App.propTypes = propTypes;
 function mapStateToProps(state) {
   const isVkApp = state.app.get('isVkApp');
   const userSignedIn = isUserSignedIn(state);
-  const user = userSignedIn && getUserModel(state).toJS();
+  const user = userSignedIn ? getUserModel(state).toJS() : {};
 
   return {isVkApp, user, userSignedIn};
 }

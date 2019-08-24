@@ -243,7 +243,7 @@ class MoviePage extends Component {
                 ? <div
                   className="movie__head-row movie-c-d"
                 >
-                  {movie.countries.length
+                  {movie.countries && movie.countries.length
                     ? <span className="movie-countries">{movie.countries.map(c => c.name).join(', ')}</span>
                     : ''
                   }

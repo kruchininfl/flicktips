@@ -199,7 +199,10 @@ const worker = (mainResolve) => {
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
         } else {
-          Promise.all([id, getFilm(kpId || dbKpId, slug), getFilmStaff(kpId || dbKpId), similarity]).then(([my_id, film, staff, similarity]) => {
+          Promise.all([
+            id, getFilm(kpId || dbKpId, slug),
+            getFilmStaff(kpId || dbKpId), similarity
+          ]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
 
             const countriesReady = insertCountries(film.countries);
@@ -231,6 +234,11 @@ const worker = (mainResolve) => {
   }
 })();
 
+// (async () => {
+//   const d = await getFilm(464963);
+//
+//   console.log(d);
+// })();
 
 // Promise.all(workers).then(() => {
 //   (async function () {

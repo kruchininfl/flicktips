@@ -51,7 +51,12 @@ export function sleep(ms) {
 }
 
 async function newTorSession() {
-  return new Promise(resolve => tr.newTorSession(resolve));
+  return new Promise(resolve => tr.newTorSession(err => {
+    if (err) {
+      console.error(err);
+    }
+    resolve();
+  }));
 }
 
 const requestDelay = 5000;
@@ -142,7 +147,7 @@ async function doRequest(opts) {
         const $ = cheerio.load(/charset=windows-1251/gi.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body));
         const title = $('title').text();
 
-        if (title === 'КиноПоиск.ru') {
+        if (title === 'КиноПоиск.ru' || title === 'Ой!') {
           resolve([new Error('Proxy server ' + (ENABLE_PROXY ? currentProxy : '') + ' banned.'), body]);
           return false;
         }
@@ -313,33 +318,32 @@ async function getFilm(id, slug) {
     }
   }
 
-  $years.remove();
-  film.title = $('h1[itemprop=name]').remove('span').text().trim() || null;
+  film.title = $('span.moviename-title-wrapper').text().trim() || null;
 
   film.original_title = $('span[itemprop=alternativeHeadline]').text() || null;
 
-  film.year = +$('a[href^="/lists/m_act%5Byear%5D/"]').text() || null;
+  film.year = +$('.info a[href^="/lists/navigator/"]').first().text() || null;
 
   $('.movieFlags').remove();
 
-  const $countries = $('a[href^="/lists/m_act%5Bcountry%5D/"]');
+  const $countries = $('.info a[href^="/lists/navigator/country-"]');
   if ($countries.length) {
     $countries.each((i, el) => {
       const $el = $(el);
       film.countries.push({
         name: $el.text() || 'Unknown',
-        id  : +$el.attr('href').match(/\/lists\/m_act%5Bcountry%5D\/(.+?)\//)[1]
+        id  : +$el.attr('href').match(/\/lists\/navigator\/country-(.+?)\//)[1]
       })
     });
   }
 
-  const $genres = $('a[href^="/lists/m_act%5Bgenre%5D/"]');
+  const $genres = $('span[itemprop=genre] a');
   if ($genres.length) {
     $genres.each((i, el) => {
       const $el = $(el);
       film.genres.push({
         name: $el.text() || 'Unknown',
-        id  : +$el.attr('href').match(/\/lists\/m_act%5Bgenre%5D\/(.+?)\//)[1]
+        id  : $el.attr('href').match(/\/lists\/navigator\/(.+?)\//)[1]
       })
     });
   }

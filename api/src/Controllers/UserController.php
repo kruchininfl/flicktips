@@ -299,7 +299,7 @@ class UserController
                     'userId' => $user['id']
                 ]);
             } else {
-                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote) ON DUPLICATE KEY UPDATE vote=:name')->execute([
+                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote) ON DUPLICATE KEY UPDATE vote=:vote')->execute([
                     'entityId' => $entityId,
                     'userId' => $user['id'],
                     'vote' => $actionId

@@ -82,7 +82,8 @@
     right: 0;
     bottom: 0;
     z-index: 1;
-    background: rgba(#000000, .9);
+    background: #ffffff;
+    box-shadow: 0 0 2px 1px rgba(#000000, .2);
 
     .movie-votes {
         margin: 0;
@@ -96,7 +97,7 @@
     }
 
     .movie-vote__counter {
-        color: #ffffff;
+        color: #000000;
     }
 }
 .movie__trailer-btn {

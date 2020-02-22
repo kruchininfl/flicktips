@@ -281,7 +281,7 @@ class UserController
 
         $entityId = $request->get('id');
         $action = $request->get('vote');
-        $actionId = $action === 'like' ? 2 : ($action === 'dislike' ? 0 : 1);
+        $actionId = Array('super' => 3, 'like' => 2, 'neutral' => 1, 'dislike' => 0)[$action];
 
         $currentVote = $pdo->prepare('SELECT * FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId');
         $currentVote->execute([

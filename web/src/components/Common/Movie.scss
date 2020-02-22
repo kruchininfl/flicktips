@@ -37,13 +37,19 @@
     position: absolute;
     top: 5px;
     right: 5px;
-    width: 22px;
-    height: 22px;
-    text-align: center;
-    line-height: 26px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: #ffffff;
     border-radius: 50%;
     box-shadow: 0 0 3px 0 rgba(#000000, .8);
+
+    > .vote-icn {
+        width: 24px;
+        height: 24px;
+    }
 }
 .movie-title {
     overflow: hidden;

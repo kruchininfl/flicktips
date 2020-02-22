@@ -68,7 +68,7 @@ class FriendsVote extends Component {
 
           <div className="friend-vote__main-text">
             <span className="friend-vote__username link">{user.name}</span>
-            <span className="friend-vote__vote"><i className={'icn ' + getVoteIconClassById(vote, true)} /></span>
+            <span className="friend-vote__vote"><span className={getVoteIconClassById(vote, true)} /></span>
 
             <div className="friend-vote__movie-title movie-prev__title">
               {movie.title

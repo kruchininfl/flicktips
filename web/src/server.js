@@ -10,7 +10,6 @@ import cookieParser from 'cookie-parser';
 import {getHeaders, initialize} from 'redux-oauth';
 import {loadOnServer} from 'redux-connect';
 import request from 'request';
-import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import {setAsVkApp} from './redux/actions/appActions';
@@ -20,10 +19,10 @@ import cors from 'cors';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://flicktips.local:8050' : '';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050' : '';
 
 app.use(cookieParser());
-app.use(cors({credentials: true, origin: 'http://flicktips.local:3001'}));
+app.use(cors({credentials: true, origin: 'http://localhost:3001'}));
 
 app.set('view engine', 'ejs');
 

@@ -51,7 +51,7 @@ class MoviePreview extends Component {
             : ''
           }
           {typeof movie.vote !== 'undefined'
-            ? <div className="movie-vote-icn"><i className={'icn ' + getVoteIconClassById(movie.vote, true)} /></div>
+            ? <div className="movie-vote-icn"><span className={getVoteIconClassById(movie.vote, true)} /></div>
             : ''
           }
           <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />

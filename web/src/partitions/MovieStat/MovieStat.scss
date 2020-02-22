@@ -34,29 +34,8 @@
     font-size: 20px;
     line-height: 0;
 
-    > .icn {
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        width: 22px;
-        height: 20px;
-        margin: auto;
-
-        &:last-child {
-            opacity: 0;
-            visibility: hidden;
-
-            .movie-vote.m-active & {
-                opacity: 1;
-                visibility: visible;
-            }
-        }
-
-        .movie-vote:hover & {
-            animation: movie-votes-hover 1200ms infinite;
-        }
+    &:hover {
+        animation: movie-votes-hover 1200ms infinite;
     }
 }
 .movie-vote__counter {

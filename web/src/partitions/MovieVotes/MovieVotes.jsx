@@ -42,14 +42,14 @@ class MovieVotes extends Component {
         >
           <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
           <div className="movie-user-votes__item-vote">
-            <i className={'icn ' + getVoteIconClassById(value, true)} />
+            <span className={getVoteIconClassById(value, true)} />
           </div>
         </div>
 
         <div className="movie-user-votes__item-content">
           <div className="movie-user-votes__item-head">
             <span>{userName}</span>
-            <i className={'icn ' + getVoteIconClassById(value, true)} />
+            <span className={getVoteIconClassById(value, true)} />
           </div>
           <div className="movie-user-votes__item-date">{time}</div>
         </div>

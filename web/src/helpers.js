@@ -9,19 +9,19 @@ export function pluralGender(gender, phrases) {
 }
 
 export function getTextByVoteId(id) {
-  const icons = ['Не понравился', 'Средне', 'Понравился'];
+  const icons = ['Не понравился', 'Средне', 'Понравился', 'Супер'];
 
   return icons[id];
 }
 
 export function getStringByVoteId(id) {
-  const icons = ['dislike', 'neutral', 'like'];
+  const icons = ['dislike', 'neutral', 'like', 'super'];
 
   return icons[id];
 }
 
 export function getVoteIconClassById(id, filled = false) {
-  const icons = ['icn_heart-dislike', 'icn_heart-neutral', 'icn_heart-like'];
+  const icons = ['dislike', 'neutral', 'like', 'super'];
 
-  return icons[id] + (filled ? '-fill' : '');
+  return `vote-icn vote-icn_${icons[id]} ${filled ? 'm-active' : ''}`;
 }

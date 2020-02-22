@@ -4,6 +4,7 @@ import {voteRequest} from 'redux/actions/voteActions';
 
 import './MovieStat.scss';
 import {connect} from 'react-redux';
+import {getVoteIconClassById} from '../../helpers';
 
 const propTypes = {
   dispatch   : PropTypes.func.isRequired,
@@ -11,6 +12,7 @@ const propTypes = {
   likes      : PropTypes.number,
   dislikes   : PropTypes.number,
   neutral    : PropTypes.number,
+  isSuper    : PropTypes.bool,
   isLiked    : PropTypes.bool,
   isDisliked : PropTypes.bool,
   isNeutral  : PropTypes.bool,
@@ -21,6 +23,7 @@ const defaultProps = {
   likes      : 0,
   dislikes   : 0,
   neutral    : 0,
+  isSuper    : false,
   isLiked    : false,
   isDisliked : false,
   isNeutral  : false,
@@ -42,12 +45,22 @@ class MovieStat extends Component {
     return (
       <div className="movie-votes">
         <div
+          onClick={() => this.handleSendVote(this.props.id, 'super')}
+          className={'movie-vote' + (this.props.isSuper ? ' m-active' : '')}
+        >
+          <div className="movie-vote__icn">
+            <span className={getVoteIconClassById(3, this.props.isSuper)}/>
+          </div>
+
+          <div className="movie-vote__counter">{this.props.super}</div>
+        </div>
+
+        <div
           onClick={() => this.handleSendVote(this.props.id, 'like')}
           className={'movie-vote' + (this.props.isLiked ? ' m-active' : '')}
         >
           <div className="movie-vote__icn">
-            <span className="icn icn_heart-like"/>
-            <span className="icn icn_heart-like-fill"/>
+            <span className={getVoteIconClassById(2, this.props.isLiked)}/>
           </div>
 
           <div className="movie-vote__counter">{this.props.likes}</div>
@@ -58,8 +71,7 @@ class MovieStat extends Component {
           className={'movie-vote' + (this.props.isNeutral ? ' m-active' : '')}
         >
           <div className="movie-vote__icn">
-            <span className="icn icn_heart-neutral"/>
-            <span className="icn icn_heart-neutral-fill"/>
+            <span className={getVoteIconClassById(1, this.props.isNeutral)}/>
           </div>
 
           <div className="movie-vote__counter">{this.props.neutral}</div>
@@ -70,8 +82,7 @@ class MovieStat extends Component {
           className={'movie-vote' + (this.props.isDisliked ? ' m-active' : '')}
         >
           <div className="movie-vote__icn">
-            <span className="icn icn_heart-dislike"/>
-            <span className="icn icn_heart-dislike-fill"/>
+            <span className={getVoteIconClassById(0, this.props.isDisliked)}/>
           </div>
 
           <div className="movie-vote__counter">{this.props.dislikes}</div>

@@ -131,7 +131,7 @@ class MoviePage extends Component {
     }
 
     const movie = Object.assign({}, response.movie);
-    const poster = config.tmdb.posterPath185 + movie.tmdb_poster_path;
+    const poster = config.tmdb.posterPath342 + movie.tmdb_poster_path;
 
     movie.date = movie.release_date || movie.first_air_date;
     movie.descr = movie.tmdb_overview || movie.kp_overview;

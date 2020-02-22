@@ -60,7 +60,7 @@ class ProfilePage extends ProfileLayout {
   }
 
   entityIsActive(entity) {
-    return entity.isLiked || entity.isDisliked || entity.isNeutral;
+    return entity.isSuper || entity.isLiked || entity.isDisliked || entity.isNeutral;
   }
 
   renderVotes(response) {

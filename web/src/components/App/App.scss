@@ -879,4 +879,41 @@ html, body, .react-view, .layout {
     padding: 5px 20px;
     text-align: justify;
 }
+.vote-icn {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.vote-icn_dislike {
+    background-image: url(./images/dislike.svg);
+
+    &.m-active {
+        background-image: url(./images/dislike_fill.svg);
+    }
+}
+.vote-icn_neutral {
+    background-image: url(./images/heart-neutral.svg);
+
+    &.m-active {
+        background-image: url(./images/heart-neutral_fill.svg);
+    }
+}
+.vote-icn_like {
+    background-image: url(./images/heart-like.svg);
+
+    &.m-active {
+        background-image: url(./images/heart-like_fill.svg);
+    }
+}
+.vote-icn_super {
+    background-image: url(./images/super.svg);
+
+    &.m-active {
+        background-image: url(./images/super_fill.svg);
+    }
+}
 @import "AppTablets";

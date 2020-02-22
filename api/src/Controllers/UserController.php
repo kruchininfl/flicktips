@@ -293,19 +293,18 @@ class UserController
         $pdo->beginTransaction();
         $query = null;
         try {
-//            if ($currentVote) {
-//                $pdo->prepare('DELETE FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId')->execute([
-//                    'entityId' => $entityId,
-//                    'userId' => $user['id']
-//                ]);
-//            }
-//            if (!$currentVote || $actionId != $currentVote['vote']) {
-                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote) ON DUPLICATE KEY UPDATE vote=:vote')->execute([
+            if ($currentVote && $actionId == $currentVote['vote']) {
+                $pdo->prepare('DELETE FROM movie_vote WHERE movie_id=:entityId AND user_id=:userId')->execute([
+                    'entityId' => $entityId,
+                    'userId' => $user['id']
+                ]);
+            } else {
+                $pdo->prepare('INSERT INTO movie_vote (`movie_id`, `user_id`, `vote`) VALUES (:entityId, :userId, :vote) ON DUPLICATE KEY UPDATE vote=:name')->execute([
                     'entityId' => $entityId,
                     'userId' => $user['id'],
                     'vote' => $actionId
                 ]);
-//            }
+            }
 
             $query = 'UPDATE movie';
             if ($currentVote) {

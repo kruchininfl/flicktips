@@ -309,11 +309,11 @@ class UserController
 
             $query = 'UPDATE movie';
             if ($currentVote) {
-                $col = $currentVote['vote'] == 2 ? 'likes' : ($currentVote['vote'] == 0 ? 'dislikes' : 'neutral');
+                $col = ['dislikes', 'neutral', 'likes', 'super'][$currentVote['vote']];
                 $query .= ' SET ' . $col . '=' . $col . '-1';
             }
             if (!$currentVote || $actionId != $currentVote['vote']) {
-                $col = $actionId === 2 ? 'likes' : ($actionId === 0 ? 'dislikes' : 'neutral');
+                $col = ['dislikes', 'neutral', 'likes', 'super'][$actionId];
                 $query .= ($currentVote ? ', ' : ' SET ') . $col . '=' . $col . '+1';
             }
             $query .= ' WHERE id=:entityId';
@@ -331,7 +331,7 @@ class UserController
             ], 500);
         }
 
-        $entitySth = $pdo->prepare('SELECT id, likes, dislikes, neutral FROM movie WHERE id=:entityId');
+        $entitySth = $pdo->prepare('SELECT id, super, likes, dislikes, neutral FROM movie WHERE id=:entityId');
         $entitySth->execute([
             'entityId' => $entityId
         ]);
@@ -341,9 +341,11 @@ class UserController
             'success' => true,
             'data' => [
                 'id' => intval($entityData['id']),
+                'super' => intval($entityData['super']),
                 'likes' => intval($entityData['likes']),
                 'neutral' => intval($entityData['neutral']),
                 'dislikes' => intval($entityData['dislikes']),
+                'isSuper' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 3,
                 'isLiked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 2,
                 'isNeutral' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 1,
                 'isDisliked' => (!$currentVote || $currentVote['vote'] != $actionId) && $actionId === 0,
@@ -354,6 +356,7 @@ class UserController
             'success' => true,
             'data' => [
                 'id' => intval($entityData['id']),
+                'super' => intval($entityData['super']),
                 'likes' => intval($entityData['likes']),
                 'neutral' => intval($entityData['neutral']),
                 'dislikes' => intval($entityData['dislikes'])

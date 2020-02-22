@@ -20,7 +20,7 @@ class MovieRepository {
 
     public function getFilm($id, $userId = null) {
         $query = 'SELECT 
-            movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked,
+            movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isSuper, false as isLiked, false as isNeutral, false as isDisliked,
             country.name AS country_name, country.id AS country_id,
             CONCAT_WS(\'_\', people.id, `group`.id) AS people_field_group, people.id AS people_id, people.name AS people_name, people.original_name AS people_original_name, people.kp_photo AS people_photo, movie_people.order AS people_order, movie_people.description AS people_description, `group`.type AS people_group_type, `group`.title AS people_group_title,
             UNIX_TIMESTAMP(votes.timestamp) as vote_timestamp,
@@ -67,9 +67,11 @@ class MovieRepository {
 
         $movie = $this->app['mapper']->group($rows, 'id', [
             'id' => ['type' => 'int'],
+            'super' => ['type' => 'int'],
             'likes' => ['type' => 'int'],
             'neutral' => ['type' => 'int'],
             'dislikes' => ['type' => 'int'],
+            'isSuper' => ['type' => 'bool'],
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
@@ -237,9 +239,11 @@ class MovieRepository {
         $rows = $sth->fetchAll();
         $movies = $this->app['mapper']->group($rows, 'id', [
             'id' => ['type' => 'int'],
+            'super' => ['type' => 'int'],
             'likes' => ['type' => 'int'],
             'neutral' => ['type' => 'int'],
             'dislikes' => ['type' => 'int'],
+            'isSuper' => ['type' => 'bool'],
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
@@ -275,7 +279,7 @@ class MovieRepository {
 
     public function findByTmdbId($tmdbId, $userId = null) {
         $whereInString = '"' . implode('", "', $tmdbId) . '"';
-        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked';
+        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isSuper, false as isLiked, false as isNeutral, false as isDisliked';
         if ($userId) {
             $query .= ', friend_votes.vote AS friends_votes_val,
             friend.id AS friends_votes_user_id,
@@ -307,9 +311,11 @@ class MovieRepository {
 
         $movies = $this->app['mapper']->group($rows, 'id', [
             'id' => ['type' => 'int'],
+            'super' => ['type' => 'int'],
             'likes' => ['type' => 'int'],
             'neutral' => ['type' => 'int'],
             'dislikes' => ['type' => 'int'],
+            'isSuper' => ['type' => 'bool'],
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
@@ -343,7 +349,7 @@ class MovieRepository {
     }
 
     public function getTrends($limit = null, $userId = null) {
-        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isLiked, false as isNeutral, false as isDisliked';
+        $query = 'SELECT movie.*, genre.id AS genre_id, genre.name AS genre_name, false as isSuper, false as isLiked, false as isNeutral, false as isDisliked';
         if ($userId) {
             $query .= ', friend_votes.vote AS friends_votes_val, 
             friend.id AS friends_votes_user_id, 
@@ -390,11 +396,13 @@ class MovieRepository {
 
         $movies = $this->app['mapper']->group($rows, 'id', [
             'id' => ['type' => 'int'],
+            'super' => ['type' => 'int'],
             'likes' => ['type' => 'int'],
             'neutral' => ['type' => 'int'],
             'dislikes' => ['type' => 'int'],
             'isLiked' => ['type' => 'bool'],
             'isNeutral' => ['type' => 'bool'],
+            'isSuper' => ['type' => 'bool'],
             'isDisliked' => ['type' => 'bool'],
             'inBookmarks' => ['type' => 'bool'],
             'tmdb_popularity' => ['type' => 'float'],
@@ -517,11 +525,13 @@ class MovieRepository {
             'movie_tmdb_overview' => ['rename' => 'tmdb_overview'],
             'movie_original_language' => ['rename' => 'original_language'],
             'movie_tmdb_popularity' => ['type' => 'float', 'rename' => 'tmdb_popularity'],
+            'movie_super' => ['type' => 'int', 'rename' => 'super'],
             'movie_likes' => ['type' => 'int', 'rename' => 'likes'],
             'movie_neutral' => ['type' => 'int', 'rename' => 'neutral'],
             'movie_dislikes' => ['type' => 'int', 'rename' => 'dislikes'],
             'movie_kp_rating_value' => ['type' => 'float', 'rename' => 'kp_rating_value'],
             'movie_imdb_rating_value' => ['type' => 'float', 'rename' => 'imdb_rating_value'],
+            'movie_isSuper' => ['type' => 'bool', 'rename' => 'isSuper'],
             'movie_isLiked' => ['type' => 'bool', 'rename' => 'isLiked'],
             'movie_isNeutral' => ['type' => 'bool', 'rename' => 'isNeutral'],
             'movie_isDisliked' => ['type' => 'bool', 'rename' => 'isDisliked'],

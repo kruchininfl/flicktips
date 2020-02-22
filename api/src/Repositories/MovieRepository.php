@@ -448,6 +448,7 @@ class MovieRepository {
         movie.tmdb_overview AS movie_tmdb_overview, 
         movie.original_language AS movie_original_language, 
         movie.tmdb_popularity AS movie_tmdb_popularity, 
+        movie.super AS movie_super, 
         movie.likes AS movie_likes, 
         movie.neutral AS movie_neutral, 
         movie.dislikes AS movie_dislikes,

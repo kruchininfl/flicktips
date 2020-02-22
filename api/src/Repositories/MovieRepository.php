@@ -30,7 +30,8 @@ class MovieRepository {
             `user`.avatar as vote_user_avatar,
             CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
         if ($userId) {
-            $query .= ', IF (movie_vote.vote = \'2\', true, false) AS isLiked,
+            $query .= ', IF (movie_vote.vote = \'3\', true, false) AS isSuper,
+            IF (movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
             IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
             IF (bookmark.timestamp is NULL, false, true) AS inBookmarks';
@@ -210,6 +211,7 @@ class MovieRepository {
             friend.avatar AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp, 
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
+            IF (my_movie_vote.vote = \'3\', true, false) AS isSuper,
             IF (my_movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (my_movie_vote.vote = \'1\', true, false) AS isNeutral,
             IF (my_movie_vote.vote = \'0\', true, false) AS isDisliked,
@@ -281,6 +283,7 @@ class MovieRepository {
             friend.avatar AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp,
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
+            IF (movie_vote.vote = \'3\', true, false) AS isSuper,
             IF (movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
             IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
@@ -348,6 +351,7 @@ class MovieRepository {
             friend.avatar AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp, 
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
+            IF (movie_vote.vote = \'3\', true, false) AS isSuper,
             IF (movie_vote.vote = \'2\', true, false) AS isLiked,
             IF (movie_vote.vote = \'1\', true, false) AS isNeutral,
             IF (movie_vote.vote = \'0\', true, false) AS isDisliked,
@@ -451,7 +455,8 @@ class MovieRepository {
         CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
 
         if ($userId) {
-            $query .= ', IF (my_mote.vote = \'2\', true, false) AS movie_isLiked,
+            $query .= ', IF (my_mote.vote = \'3\', true, false) AS movie_isSuper,
+            IF (my_mote.vote = \'2\', true, false) AS movie_isLiked,
             IF (my_mote.vote = \'1\', true, false) AS movie_isNeutral,
             IF (my_mote.vote = \'0\', true, false) AS movie_isDisliked,
             IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks';

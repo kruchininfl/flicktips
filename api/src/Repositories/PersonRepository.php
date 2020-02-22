@@ -54,7 +54,8 @@ class PersonRepository {
         `user`.avatar as vote_user_avatar';
 
         if ($userId) {
-            $queryMovie .= ', IF (my_movie_vote.vote = \'2\', true, false) AS movie_isLiked,
+            $queryMovie .= ', IF (my_movie_vote.vote = \'3\', true, false) AS movie_isSuper,
+            IF (my_movie_vote.vote = \'2\', true, false) AS movie_isLiked,
             IF (my_movie_vote.vote = \'1\', true, false) AS movie_isNeutral,
             IF (my_movie_vote.vote = \'0\', true, false) AS movie_isDisliked,
             IF (bookmark.timestamp is NULL, false, true) AS movie_inBookmarks';

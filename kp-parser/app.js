@@ -42,7 +42,7 @@ const selectMovie = async () => {
       CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
       FROM movie 
       WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
-      ORDER BY votes DESC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
+      ORDER BY votes DESC, kp_check_date ASC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
   }
 
   return rows;
@@ -201,7 +201,8 @@ const worker = (mainResolve) => {
         } else {
           Promise.all([
             id, getFilm(kpId || dbKpId, slug),
-            getFilmStaff(kpId || dbKpId), similarity
+            getFilmStaff(kpId || dbKpId),
+            similarity
           ]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
 
@@ -259,3 +260,8 @@ const worker = (mainResolve) => {
 //     console.log(args);
 //   });
 // });
+
+process.on('unhandledRejection', function (reason) {
+  console.error('Unhandled Rejection:', reason.stack);
+  process.exit(1);
+});

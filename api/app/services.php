@@ -74,7 +74,10 @@ $app->register(new Services\OAuthServiceProvider(), array(
 ));
 
 $app->register(new Silex\Provider\SessionServiceProvider(), array(
-    'session.storage.save_path' => '/tmp'
+    'session.storage.save_path' => '/tmp',
+    'session.storage.options' => array(
+        'cookie_lifetime' => 31536000
+    )
 ));
 
 $app->register(new Silex\Provider\SecurityServiceProvider(), array(
@@ -88,10 +91,6 @@ $app->register(new Silex\Provider\SecurityServiceProvider(), array(
                 'check_path' => '/auth/{service}/check?auth_origin_url={auth_origin_url}',
                 'with_csrf' => true,
                 'require_previous_session' => false
-            ),
-            'remember_me' => array(
-                'key'                => 'Choosed_A_Unique_Random_Key',
-                'always_remember_me' => true,
             ),
             'logout' => array(
                 'logout_path' => '/logout',

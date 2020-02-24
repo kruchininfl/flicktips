@@ -24,8 +24,8 @@ $app->before(function (Request $request) {
 });
 
 $app['env'] = $_SERVER['HTTP_HOST'] == 'dev.flick.tips:8888' ? 'dev' : 'prod';
-//$app['debug'] = true;
-//ini_set('display_errors', 1);
+$app['debug'] = true;
+ini_set('display_errors', 1);
 
 //register an error handler
 Symfony\Component\Debug\ErrorHandler::register();

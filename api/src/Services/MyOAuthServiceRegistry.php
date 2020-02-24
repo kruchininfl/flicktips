@@ -59,7 +59,8 @@ class MyOAuthServiceRegistry extends OAuthServiceRegistry
             $this->config[$service]['key'],
             $this->config[$service]['secret'],
             $this->urlGenerator->generate($this->options['callback_route'], array(
-                'service' => strtolower($service)
+                'service' => strtolower($service),
+                'auth_origin_url' => $authOriginUrl
             ), $referenceType)
         );
 

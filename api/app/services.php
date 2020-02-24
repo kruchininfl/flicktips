@@ -89,6 +89,10 @@ $app->register(new Silex\Provider\SecurityServiceProvider(), array(
                 'with_csrf' => true,
                 'require_previous_session' => false
             ),
+            'remember_me' => array(
+                'key'                => 'Choosed_A_Unique_Random_Key',
+                'always_remember_me' => true,
+            ),
             'logout' => array(
                 'logout_path' => '/logout',
                 'with_csrf' => true

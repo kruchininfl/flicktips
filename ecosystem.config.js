@@ -19,7 +19,7 @@ module.exports = {
       ref  : 'origin/master',
       repo : 'git@bitbucket.org:infamoustill/flicktips.git',
       path : '/var/www/flick.tips',
-      'post-deploy' : 'npm --prefix /var/www/flick.tips/web install && npm --prefix /var/www/flick.tips/web run build'
+      'post-deploy' : 'npm --prefix /var/www/flick.tips/web install && npm --prefix /var/www/flick.tips/web run build && npm --prefix /var/www/flick.tips/kp-parser run start'
     }
   }
 };

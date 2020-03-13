@@ -10,6 +10,17 @@ module.exports = {
     env_production : {
       NODE_ENV: 'production'
     }
+  }, {
+    name      : 'flicktips-kp-parser',
+    cwd       : '/var/www/flick.tips/kp-parser',
+    script    : 'npm',
+    args      : 'run start',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production : {
+      NODE_ENV: 'production'
+    }
   }],
 
   deploy : {

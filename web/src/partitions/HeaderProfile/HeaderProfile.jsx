@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import {getUserModel} from 'redux/models/user';
 import {Link} from 'react-router';
-import {signOut} from 'redux-oauth';
+import {signOut} from '../../partitions/redux-oauth';
 
 import './HeaderProfile.scss';
 

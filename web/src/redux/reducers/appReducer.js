@@ -8,7 +8,7 @@ import {
   NOT_FOUND
 } from 'redux/actions/appActions';
 
-import {OAUTH_SIGN_IN_COMPLETE} from 'redux-oauth';
+import {OAUTH_SIGN_IN_COMPLETE} from '../../partitions/redux-oauth';
 
 const initialState = Immutable.fromJS({
   signInPopupOpen: false,

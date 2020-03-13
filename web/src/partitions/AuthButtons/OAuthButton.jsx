@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {oAuthSignIn} from 'redux-oauth';
+import {oAuthSignIn} from '../../partitions/redux-oauth';
 import Button from 'components/Gui/Button';
 
 const propTypes = {

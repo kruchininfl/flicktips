@@ -351,16 +351,16 @@ class UserController
             ]
         ];
 
-        $app['socket']->send('vote-changed', [
-            'success' => true,
-            'data' => [
-                'id' => intval($entityData['id']),
-                'super' => intval($entityData['super']),
-                'likes' => intval($entityData['likes']),
-                'neutral' => intval($entityData['neutral']),
-                'dislikes' => intval($entityData['dislikes'])
-            ]
-        ]);
+//        $app['socket']->send('vote-changed', [
+//            'success' => true,
+//            'data' => [
+//                'id' => intval($entityData['id']),
+//                'super' => intval($entityData['super']),
+//                'likes' => intval($entityData['likes']),
+//                'neutral' => intval($entityData['neutral']),
+//                'dislikes' => intval($entityData['dislikes'])
+//            ]
+//        ]);
 
         return  $app->json($response);
     }

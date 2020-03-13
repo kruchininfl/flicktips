@@ -7,7 +7,7 @@ import routes from './routes';
 import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
 import cookieParser from 'cookie-parser';
-import {getHeaders, initialize} from 'redux-oauth';
+import {getHeaders, initialize} from './partitions/redux-oauth';
 import {loadOnServer} from 'redux-connect';
 import request from 'request';
 import http from 'http';

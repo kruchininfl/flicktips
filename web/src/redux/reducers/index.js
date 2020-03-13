@@ -3,7 +3,7 @@ import appReducer from './appReducer';
 import searchReducer from './searchReducer';
 import profileReducer from './profileReducer';
 import profileFriendsReducer from './profileFriendsReducer';
-import {authStateReducer} from 'redux-oauth';
+import {authStateReducer} from '../../partitions/redux-oauth';
 import {reducer as reduxAsyncConnect} from 'redux-connect';
 import feedReducer from './feedReducer';
 import profileBookmarksReducer from './profileBookmarksReducer';

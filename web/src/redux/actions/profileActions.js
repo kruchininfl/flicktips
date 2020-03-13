@@ -1,4 +1,4 @@
-import {AUTHENTICATE_COMPLETE} from 'redux-oauth';
+import {AUTHENTICATE_COMPLETE} from '../../partitions/redux-oauth';
 
 export const PROFILE_LOADING_START = 'PROFILE_LOADING_START';
 export const PROFILE_LOADING_FINISH = 'PROFILE_LOADING_FINISH';

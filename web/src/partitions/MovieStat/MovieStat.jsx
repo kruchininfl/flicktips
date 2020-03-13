@@ -9,7 +9,7 @@ import {getVoteIconClassById} from '../../helpers';
 const propTypes = {
   dispatch   : PropTypes.func.isRequired,
   id         : PropTypes.number.isRequired,
-  super      : PropTypes.super,
+  super      : PropTypes.number,
   likes      : PropTypes.number,
   dislikes   : PropTypes.number,
   neutral    : PropTypes.number,

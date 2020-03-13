@@ -6,7 +6,7 @@ import routes from './routes';
 import {Provider} from 'react-redux';
 import configureStore from './redux/configureStore';
 import {ReduxAsyncConnect} from 'redux-connect';
-import {initialize} from 'redux-oauth';
+import {initialize} from './partitions/redux-oauth';
 import config from './config';
 import {SocketProvider} from 'socket.io-react';
 import io from 'socket.io-client';

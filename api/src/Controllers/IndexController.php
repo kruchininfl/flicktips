@@ -346,10 +346,10 @@ class IndexController
         $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
 
         if ($user && $user['hide_viewed']) {
-            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid GROUP BY movie_id DESC) mv');
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid GROUP BY movie_id ORDER BY movie_id DESC) mv');
             $totalSth->execute(['uid' => $user['id']]);
         } else {
-            $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id DESC) mv');
+            $totalSth = $app['pdo']->query('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote GROUP BY movie_id ORDER BY movie_id DESC) mv');
         }
         $total = intval($totalSth->fetch()['num']);
 
@@ -396,10 +396,10 @@ class IndexController
         $limit = $request->get('page') ? $request->get('page') * HOME_LIST_SIZE : HOME_LIST_SIZE;
 
         if ($user && $user['hide_viewed']) {
-            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid AND movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid AND movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id ORDER BY movie_id DESC) mv');
             $totalSth->execute(['uid' => $user['id']]);
         } else {
-            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id DESC) mv');
+            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id ORDER BY movie_id DESC) mv');
         }
         $totalSth->execute(['uid' => $user['id']]);
         $total = intval($totalSth->fetch()['num']);

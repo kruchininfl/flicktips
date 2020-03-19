@@ -32,8 +32,7 @@ module.exports = {
       path : '/var/www/flick.tips',
       'post-deploy' : 'npm --prefix /var/www/flick.tips/web install ' +
         '&& npm --prefix /var/www/flick.tips/web run build ' +
-        '&& npm --prefix /var/www/flick.tips/kp-parser install ' +
-        '&& npm --prefix /var/www/flick.tips/kp-parser run start'
+        '&& npm --prefix /var/www/flick.tips/kp-parser install '
     }
   }
 };

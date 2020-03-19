@@ -12,6 +12,8 @@ var cssName = 'styles.css';
 var jsName = 'bundle.js';
 var HashPlugin = require('hash-webpack-plugin');
 
+console.log(process.env.NODE_ENV);
+
 var plugins = [
   new webpack.DefinePlugin({
     'process.env': {

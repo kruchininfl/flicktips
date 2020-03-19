@@ -4,10 +4,10 @@
   "description": "The recommendation of friends about movies",
   "main": "index.js",
   "scripts": {
-    "build": "cross-env NODE_ENV=production && webpack -p",
-    "webpack-devserver": "cross-env NODE_ENV=development && webpack-dev-server --debug --hot --devtool source-map --output-pathinfo --watch --colors --inline --content-base public --port 8050 --host 0.0.0.0 --public flicktips.local:8050",
-    "nodemon": "cross-env NODE_ENV=development && set NODE_PATH=./src&& nodemon -e ejs server.js",
-    "server-debug": "cross-env NODE_ENV=development && set NODE_PATH=./src&& node %NODE_DEBUG_OPTION% server.js",
+    "build": "cross-env NODE_ENV=production webpack -p",
+    "webpack-devserver": "cross-env NODE_ENV=development webpack-dev-server --debug --hot --devtool source-map --output-pathinfo --watch --colors --inline --content-base public --port 8050 --host 0.0.0.0 --public flicktips.local:8050",
+    "nodemon": "cross-env NODE_ENV=development set NODE_PATH=./src&& nodemon -e ejs server.js",
+    "server-debug": "cross-env NODE_ENV=development set NODE_PATH=./src&& node %NODE_DEBUG_OPTION% server.js",
     "server": "NODE_PATH=./src NODE_ENV='production' node server.js"
   },
   "repository": {

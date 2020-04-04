@@ -1,5 +1,7 @@
 @import "../base";
 @import "../Common/Movie";
+@import "../Common/MovieTablets";
+
 .movie__head {
     display: flex;
     flex-direction: row;
@@ -83,6 +85,7 @@
     bottom: 0;
     z-index: 1;
     background: #ffffff;
+    box-shadow: 0 0 2px 1px rgba(#000000, .2);
 
     .movie-votes {
         margin: 0;

@@ -48,7 +48,7 @@ class App extends Component {
 
   handleToggleViewedFilter = () => {
     this.props.dispatch(profileUpdate({
-      hide_viewed: !this.props.user.hide_viewed
+      hide_viewed: +!this.props.user.hide_viewed
     }));
   };
 

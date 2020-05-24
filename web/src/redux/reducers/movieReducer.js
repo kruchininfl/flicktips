@@ -12,6 +12,7 @@ import {
 
 import {VOTE_REQUEST_FINISHED} from 'redux/actions/voteActions';
 import {BOOKMARK_REQUEST_FINISHED} from '../actions/bookmarkActions';
+import {MOVIE_UPDATE_AND_GET_POSTER_FINISH} from '../actions/movieActions';
 
 const initialState = Immutable.fromJS({
   response    : null,
@@ -87,5 +88,15 @@ export default createReducer(initialState, {
       pendingVotes : false,
       errorsVotes  : action.err
     });
+  },
+
+  [MOVIE_UPDATE_AND_GET_POSTER_FINISH]: (state, action) => {
+    const movie = state.getIn(['response', 'movie']);
+
+    if (!movie || movie.get('id') !== +action.response.movie_id) {
+      return state;
+    }
+
+    return state.setIn(['response', 'movie', 'tmdb_poster_path'], action.response.poster_path);
   }
 });

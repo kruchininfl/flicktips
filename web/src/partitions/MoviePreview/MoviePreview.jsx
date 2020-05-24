@@ -11,9 +11,12 @@ import {getVoteIconClassById} from '../../helpers';
 import {Link} from 'react-router';
 import MovieBookmark from '../MovieBookmark/MovieBookmark';
 import MovieVotes from '../MovieVotes';
+import {updateAndGetFilmPoster} from '../../redux/actions/movieActions';
+import {connect} from 'react-redux';
 
 const propTypes = {
   children   : PropTypes.node,
+  dispatch   : PropTypes.func,
   movie      : PropTypes.any,
   className  : PropTypes.string,
   votesFilter: PropTypes.number
@@ -22,6 +25,17 @@ const propTypes = {
 class MoviePreview extends Component {
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    const {movie} = this.props;
+    const poster = config.tmdb.posterPath342 + movie.tmdb_poster_path;
+    const img = document.createElement('img');
+
+    img.addEventListener('error', () => {
+      this.props.dispatch(updateAndGetFilmPoster(movie.id));
+    });
+    img.src = poster;
   }
 
   render() {
@@ -100,4 +114,4 @@ class MoviePreview extends Component {
 
 MoviePreview.propTypes = propTypes;
 
-export default MoviePreview;
+export default connect()(MoviePreview);

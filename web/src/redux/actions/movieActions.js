@@ -6,6 +6,10 @@ export const MOVIE_VOTES_LOADING_START = 'MOVIE_VOTES_LOADING_START';
 export const MOVIE_VOTES_LOADING_FINISH = 'MOVIE_VOTES_LOADING_FINISH';
 export const MOVIE_VOTES_LOADING_ERROR = 'MOVIE_VOTES_LOADING_ERROR';
 
+export const MOVIE_UPDATE_AND_GET_POSTER_START = 'MOVIE_UPDATE_AND_GET_POSTER_START';
+export const MOVIE_UPDATE_AND_GET_POSTER_FINISH = 'MOVIE_UPDATE_AND_GET_POSTER_FINISH';
+export const MOVIE_UPDATE_AND_GET_POSTER_ERROR = 'MOVIE_UPDATE_AND_GET_POSTER_ERROR';
+
 import api from 'api';
 
 function startRequest() {
@@ -32,6 +36,18 @@ function errorVotesRequest(err) {
   return {type: MOVIE_VOTES_LOADING_ERROR, err};
 }
 
+function startUpdatePosterRequest() {
+  return {type: MOVIE_UPDATE_AND_GET_POSTER_START};
+}
+
+function finishUpdatePosterRequest(response) {
+  return {type: MOVIE_UPDATE_AND_GET_POSTER_FINISH, response};
+}
+
+function errorUpdatePosterRequest(err) {
+  return {type: MOVIE_UPDATE_AND_GET_POSTER_ERROR, err};
+}
+
 export function getFilm(id) {
   return (dispatch) => {
     dispatch(startRequest());
@@ -49,5 +65,15 @@ export function getFilmVotes(id) {
     return dispatch(api.getMovieVotes(id))
       .then((response) => dispatch(finishVotesRequest(response.body)))
       .catch((err) => dispatch(errorVotesRequest(err)));
+  };
+}
+
+export function updateAndGetFilmPoster(id) {
+  return (dispatch) => {
+    dispatch(startUpdatePosterRequest());
+
+    return dispatch(api.updateAndGetPoster(id))
+      .then((response) => dispatch(finishUpdatePosterRequest(response.body)))
+      .catch((err) => dispatch(errorUpdatePosterRequest(err)));
   };
 }

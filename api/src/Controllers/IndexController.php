@@ -211,6 +211,55 @@ class IndexController
         ]);
     }
 
+    public function updateAndGetPoster(Request $request, Application $app)
+    {
+        $mid = $request->get('mid');
+
+        if (!isset($mid)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'Not found'
+            ], 404);
+        }
+
+        $movie = $app['movie.repository']->getFilm($mid, null);
+
+        if (!$movie) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'Not found'
+            ], 404);
+        }
+
+        $tmdb = $app['tmdb'];
+        $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
+
+        if ($tmdbResponse->poster_path) {
+            /**
+             * @var $pdo \PDO
+             */
+            $pdo = $app['pdo'];
+            $sthMovie = $pdo->prepare('UPDATE movie SET `tmdb_poster_path`=:poster WHERE `id`=:id;');
+
+            $sthMovie->execute([
+                'id' => $movie['id'],
+                'poster' => $tmdbResponse->poster_path
+            ]);
+
+            return $app->json([
+                'success' => true,
+                'movie_id' => $mid,
+                'poster_path' => $tmdbResponse->poster_path
+            ]);
+        }
+
+        return $app->json([
+            'success' => true,
+            'movie_id' => $mid,
+            'poster_path' => $movie['tmdb_poster_path']
+        ]);
+    }
+
     public function getPerson(Request $request, Application $app)
     {
         $pid = $request->get('pid');

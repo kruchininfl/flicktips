@@ -232,6 +232,10 @@ export default {
     return this._fetch('get_film_votes/' + id);
   },
 
+  updateAndGetPoster(id) {
+    return this._fetch('update_poster/' + id);
+  },
+
   getPerson(id) {
     return this._fetch('get_person/' + id);
   }

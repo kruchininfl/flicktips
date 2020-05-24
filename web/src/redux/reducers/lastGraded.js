@@ -10,6 +10,7 @@ import {
 
 import {VOTE_REQUEST_FINISHED} from 'redux/actions/voteActions';
 import {BOOKMARK_REQUEST_FINISHED} from '../actions/bookmarkActions';
+import {MOVIE_UPDATE_AND_GET_POSTER_FINISH} from '../actions/movieActions';
 
 const initialState = Immutable.fromJS({
   loading    : false,
@@ -69,6 +70,23 @@ export default createReducer(initialState, {
       (entities) => entities.map((entity) => {
         if (entity.get('id') === action.response.data.movie_id) {
           return entity.set('inBookmarks', action.response.data.inBookmarks);
+        }
+
+        return entity;
+      })
+    );
+  },
+
+  [MOVIE_UPDATE_AND_GET_POSTER_FINISH]: (state, action) => {
+    if (!state.getIn(['response', 'results', 'entities'])) {
+      return state;
+    }
+
+    return state.updateIn(
+      ['response', 'results', 'entities'],
+      (entities) => entities.map((entity) => {
+        if (entity.get('id') === +action.response.movie_id) {
+          return entity.set('tmdb_poster_path', action.response.poster_path);
         }
 
         return entity;

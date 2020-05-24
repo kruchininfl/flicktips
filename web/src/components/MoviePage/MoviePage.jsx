@@ -16,13 +16,15 @@ import LazyLoad from 'react-lazy-load';
 import {Link} from 'react-router';
 import MovieTrailer from './MovieTrailer';
 import MovieVotes from './MovieVotes';
+import {updateAndGetFilmPoster} from '../../redux/actions/movieActions';
 
 const propTypes = {
   dispatch    : PropTypes.func,
   pending     : PropTypes.bool,
   pendingVotes: PropTypes.bool,
   loaded      : PropTypes.bool,
-  response    : PropTypes.any
+  response    : PropTypes.any,
+  params      : PropTypes.any
 };
 
 @asyncConnect([
@@ -40,6 +42,7 @@ class MoviePage extends Component {
 
     this.renderStaffGroup = this.renderStaffGroup.bind(this);
     this.handleToggleDesc = this.handleToggleDesc.bind(this);
+    this.handlePosterError = this.handlePosterError.bind(this);
 
     this.state = {
       openedDesc: false
@@ -66,6 +69,12 @@ class MoviePage extends Component {
 
   handleToggleDesc() {
     this.setState({openedDesc: !this.state.openedDesc});
+  }
+
+  handlePosterError() {
+    if (this.props.params && this.props.params.id) {
+      this.props.dispatch(updateAndGetFilmPoster(this.props.params.id));
+    }
   }
 
   renderStaffGroup(group, groupKey) {
@@ -180,6 +189,7 @@ class MoviePage extends Component {
                 >
                   <img src={poster}
                     alt={movie.title}
+                    onError={this.handlePosterError}
                   />
                 </div>
                 : ''

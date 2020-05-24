@@ -144,7 +144,7 @@ class MoviePage extends Component {
     const image = poster || 'https://flick.tips/public/img/logo/1024x1024.png';
     const url = 'https://flick.tips/movie/' + movie.id;
 
-    const totalVotes = movie.neutral + movie.dislikes + movie.likes;
+    const totalVotes = movie.neutral + movie.dislikes + movie.likes + movie.super;
 
     return (
       <div className="content movie">

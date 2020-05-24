@@ -81,7 +81,7 @@ class MovieVotes extends Component {
                 </Link>
 
                 <div className={'vote-details__value' + ' m-' + getStringByVoteId(vote.vote)}>
-                  <span className={getVoteIconClassById(vote.vote)} />
+                  <span className={getVoteIconClassById(vote.vote, true)} />
                   <span>{getTextByVoteId(vote.vote)}</span>
                 </div>
 

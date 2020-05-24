@@ -9,7 +9,7 @@ export function pluralGender(gender, phrases) {
 }
 
 export function getTextByVoteId(id) {
-  const icons = ['Не понравился', 'Средне', 'Понравился', 'Супер'];
+  const icons = ['Очень плохо', 'Средне', 'Хорошо', 'Супер'];
 
   return icons[id];
 }

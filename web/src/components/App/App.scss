@@ -826,33 +826,33 @@ html, body, .react-view, .layout {
     border-radius: 5px;
     color: #ffffff;
     text-transform: uppercase;
-    border: 1px solid;
     font-size: 12px;
     white-space: nowrap;
     cursor: default;
 
+    &.m-super {
+        color: $color-super;
+    }
+
     &.m-like {
-        border-color: $color-like;
         color: $color-like;
     }
 
     &.m-neutral {
-        border-color: $color-neutral;
         color: $color-neutral;
     }
 
     &.m-dislike {
-        border-color: $color-dislike;
         color: $color-dislike;
     }
 
-    > .icn,
+    > .vote-icn,
     > span {
         display: inline-block;
         vertical-align: middle;
     }
 
-    > .icn {
+    > .vote-icn {
         margin-right: 5px;
         position: relative;
         top: -1px;

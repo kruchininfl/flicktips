@@ -4,8 +4,11 @@ import cheerio from '../node_modules/cheerio';
 import HttpsProxyAgent from '../node_modules/https-proxy-agent';
 import stringSimilarity from '../node_modules/string-similarity';
 import tr from 'tor-request';
+import moment from 'moment';
 
-tr.TorControlPort.password = 'my_secret_pass';
+moment.locale('ru');
+
+tr.TorControlPort.password = 'giraffe';
 
 String.prototype.dateFormat = function () {
   let str = this.length === 8 ? this : (this.length === 6 ? this + '00' : (this.length === 6 ? this + '0000' : null));
@@ -144,10 +147,11 @@ async function doRequest(opts) {
       }
 
       if (!/application\/json/.test(res.headers['content-type'])) {
-        const $ = cheerio.load(/charset=windows-1251/gi.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body));
+        const html = /charset=windows-1251/gi.test(res.headers['content-type']) ? cpToUTF8(body) : toUTF8(body);
+        const $ = cheerio.load(html);
         const title = $('title').text();
 
-        if (title === 'КиноПоиск.ru' || title === 'Ой!') {
+        if (title === '' || title === 'КиноПоиск.ru' || title === 'Ой!') {
           resolve([new Error('Proxy server ' + (ENABLE_PROXY ? currentProxy : '') + ' banned.'), body]);
           return false;
         }
@@ -254,19 +258,26 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
     console.log(query);
   }
 
-  if (result.page.suggest && result.page.suggest.items && result.page.suggest.items.movies && result.page.suggest.items.movies.length) {
-    result.page.suggest.items.movies.some((movie) => {
-      const titles = [movie.originalTitle || null, movie.displayTitle || null].filter(t => t !== null);
-      const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
+  const suggest = result.page.suggest && result.page.suggest.suggest && result.page.suggest.suggest.top;
+  const movies = (suggest && suggest.movies) || [];
 
-      if (
-        (type === 'tv' && !/\(сериал\)$/.test(movie.displayTitle))
-        || minStringSimilarityK > stringSimilarityK
-      ) {
+  if (suggest && suggest.topResult && suggest.topResult.global) {
+    if (['TvSeries', 'Film'].includes(suggest.topResult.global["__typename"]))
+    movies.push({
+      movie: suggest.topResult.global
+    });
+  }
+
+  if (movies && movies.length) {
+    movies.some(({ movie }) => {
+      if (!movie || !movie.title) {
         return false;
       }
 
-      if (movie.year && Math.abs(movie.year.replace(/\-(.*)/, '') - year) <= 1) {
+      const titles = [movie.title.russian || null, movie.title.original || null].filter(t => t !== null);
+      const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
+
+      if (movie.productionYear && Math.abs(movie.productionYear - year) <= 1) {
         id = movie.id;
         similarity = stringSimilarityK;
         return true;
@@ -281,10 +292,10 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
   return {id, similarity};
 }
 
-async function getFilm(id, slug) {
+async function getFilm(id) {
   // return Promise.resolve({ 'id'            : 4541, 'title'         : 'Шоу Трумана', 'original_title': 'The Truman Show', 'year'          : 1998, 'countries'     : [{'name': 'США', 'id': 1}], 'genres'        : [{'name': 'фантастика', 'id': 2}, {'name': 'драма', 'id': 8}, { 'name': 'комедия', 'id': 6}], 'release_date'  : '1998-06-01', 'release_rus'   : '1998-10-00', 'release_dvd'   : '2009-12-15', 'duration'      : '103', 'kp_rating'     : {'value': 8.3, 'count': 242024}, 'imdb_rating'   : {'value': 8.1, 'count': 721710}, 'description'   : 'Представьте себе, что вы вдруг начинаете понимать, что все вокруг вас — декорации, а люди — актеры, притворяющиеся теми, кем они вам кажутся. Весь ваш мир оказывается большим телесериалом, где вы исполняете главную роль, даже не подозревая об этом. Вся ваша жизнь — результат работы автора телешоу, которое вот уже тридцать лет смотрит вся планета, начиная с момента вашего рождения. В такой ситуации оказался Труман, главный герой картины. Будет ли он продолжать жить в безопасном мире, где, как он теперь знает, у него практически нет свободы выбора, или все-таки выйдет из «игры» и станет сам хозяином своей судьбы, в которой его ждет не запланированная сценарием девушка?'});
 
-  const $ = await requestGet('https://www.kinopoisk.ru/film/' + (slug ? slug + '-' : '') + id + '/', {
+  const $ = await requestGet('https://www.kinopoisk.ru/film/' + id + '/', {
     'Content-Type': 'text/html',
     'Accept'      : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'User-Agent'  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
@@ -318,15 +329,13 @@ async function getFilm(id, slug) {
     }
   }
 
-  film.title = $('span.moviename-title-wrapper').text().trim() || null;
+  film.title = ($('span.styles_title__2l0HH').text() || $('h1.styles_title__3LRqk span').eq(0).text()).trim() || null;
 
-  film.original_title = $('span[itemprop=alternativeHeadline]').text() || null;
+  film.original_title = ($('span.styles_originalTitle__31aMS').text() || $('span.styles_originalTitle__29LcV').text()).trim() || null;
 
-  film.year = +$('.info a[href^="/lists/navigator/"]').first().text() || null;
+  film.year = +$('.styles_title__a0_0F:contains("Год производства")').next().find('a').text() || null;
 
-  $('.movieFlags').remove();
-
-  const $countries = $('.info a[href^="/lists/navigator/country-"]');
+  const $countries = $('.styles_title__a0_0F:contains("Страна")').next().find('a');
   if ($countries.length) {
     $countries.each((i, el) => {
       const $el = $(el);
@@ -337,7 +346,7 @@ async function getFilm(id, slug) {
     });
   }
 
-  const $genres = $('span[itemprop=genre] a');
+  const $genres = $('.styles_title__a0_0F:contains("Жанр")').next().find('a:not(:contains("...")):not(:contains("слова"))');
   if ($genres.length) {
     $genres.each((i, el) => {
       const $el = $(el);
@@ -348,20 +357,20 @@ async function getFilm(id, slug) {
     });
   }
 
-  const releaseDate = $('#div_world_prem_td2 [data-date-premier-start-link]').attr('data-date-premier-start-link');
-  film.release_date = releaseDate ? releaseDate.dateFormat() : null;
+  const releaseDate = moment($('.styles_title__a0_0F:contains("Премьера в мире")').next().find('a:not(:contains("..."))').text(), "DD MMMM YYYY");
+  film.release_date = releaseDate.isValid() ? releaseDate.format("YYYY-MM-DD") : null;
 
-  const releaseRus = $('#div_rus_prem_td2 [data-date-premier-start-link]').attr('data-date-premier-start-link');
-  film.release_rus = releaseRus ? releaseRus.dateFormat() : null;
+  const releaseRus = moment($('.styles_title__a0_0F:contains("Премьера в Росcии")').next().find('a').first().text(), "DD MMMM YYYY");
+  film.release_rus = releaseRus.isValid() ? releaseRus.format("YYYY-MM-DD") : null;
 
-  const releaseDvd = $('.calendar.dvd [data-date-premier-start-link]').attr('data-date-premier-start-link');
-  film.release_dvd = releaseDvd ? releaseDvd.dateFormat() : null;
+  const releaseDvd = moment($('.styles_title__a0_0F:contains("Релиз на DVD")').next().text().split(',')[0], "DD MMMM YYYY");
+  film.release_dvd = releaseDvd.isValid() ? releaseDvd.format("YYYY-MM-DD") : null;
 
-  const duration = $('#runtime').text().match(/(.+?)\sмин./);
+  const duration = $('.styles_title__a0_0F:contains("Время")').next().text().match(/(.+?)\sмин./);
   film.duration = duration ? +duration[1] : null;
 
-  const ratingValue = $('meta[itemprop=ratingValue]').attr('content');
-  const ratingCount = $('meta[itemprop=ratingCount]').attr('content');
+  const ratingValue = $('.film-rating-value.styles_rootPositive__ac3xv.styles_rootLink__1CSPc').text();
+  const ratingCount = $('.styles_count__3hSWL').eq(1).text().replace(/\D+/g, '');
   if (ratingValue) {
     film.kp_rating = {
       value: +ratingValue,
@@ -369,16 +378,15 @@ async function getFilm(id, slug) {
     }
   }
 
-  const imdbString = $('[style="color:#999;font:100 11px tahoma, verdana"]').text();
-  if (imdbString) {
-    const imdbMatches = imdbString.match(/IMDb: (.+?)\s\((.+?)\)/);
-    film.imdb_rating = {
-      value: +imdbMatches[1],
-      count: +imdbMatches[2].replace(/\s/g, '')
-    }
-  }
+  const imdbValue = $('.styles_valueSection__19woS').text().replace('IMDb: ', '');
+  const imdbCount = $('.styles_valueSection__19woS').next().text();
+  const imdbCountPure = imdbCount.replace(/\D+/g, '');
+  film.imdb_rating = {
+    value: +imdbValue,
+    count: /K$/.test(imdbCount) ? imdbCountPure * 1000 : +imdbCountPure
+  };
 
-  film.description = $('div[itemprop=description]').text() || null;
+  film.description = $('.styles_filmSynopsis__zLClu').text() || null;
 
   return film;
 }

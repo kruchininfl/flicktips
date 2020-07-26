@@ -1,7 +1,7 @@
-import {search as kpSearch, getFilm, getFilmStaff, sleep} from './components/parser';
-import {slugify} from 'transliteration';
+import {search as kpSearch, getFilm, getFilmStaff} from './components/parser';
 import mysql from 'mysql2/promise';
 import cs from 'console-stamp';
+import moment from 'moment';
 
 cs(console, '[HH:MM:ss.l]');
 
@@ -9,11 +9,12 @@ let connection;
 
 const MAX_WORKERS = 1;
 const MAX_DIFF_CHECKING_DAY = 7;
+const MAX_DIFF_CHECKING_DAY_FOR_STAFF = 180;
 const MIN_STRING_SIMILARITY_K = 0.5;
 
 const mysqlConfig = {
   host    : 'localhost',
-  // host    : '185.117.155.141',
+  // host    : '95.214.10.128',
   user    : 'flicktips',
   password: 'Aing6sii',
   database: 'flicktips'
@@ -22,7 +23,7 @@ const mysqlConfig = {
 const selectMovie = async () => {
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
-    movie.id, movie.title, movie.kp_id, movie.original_title, movie.type,
+    movie.id, movie.title, movie.kp_id, movie.original_title, movie.type, movie.kp_check_date,
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 
@@ -190,18 +191,23 @@ const worker = (mainResolve) => {
         return false;
       }
 
-      const {id, original_title, title, type, year, kp_id: dbKpId} = result[0];
-      const slug = slugify(title.toLowerCase()) + '-' + year;
+      const {id, original_title, title, type, year, kp_id: dbKpId, kp_check_date} = result[0];
 
-      kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId, similarity}) => {
+      (dbKpId
+        ? Promise.resolve({})
+        : kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K)
+      ).then(({id: kpId, similarity}) => {
         if (!kpId && !dbKpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
         } else {
+          const lastCheckDaysAgo = kp_check_date && moment().diff(kp_check_date, "days");
+          const disableStaffParsing = lastCheckDaysAgo && lastCheckDaysAgo < MAX_DIFF_CHECKING_DAY_FOR_STAFF;
+
           Promise.all([
-            id, getFilm(kpId || dbKpId, slug),
-            getFilmStaff(kpId || dbKpId),
+            id, getFilm(kpId || dbKpId),
+            disableStaffParsing ? Promise.resolve(null) : getFilmStaff(kpId || dbKpId),
             similarity
           ]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
@@ -236,7 +242,8 @@ const worker = (mainResolve) => {
 })();
 
 // (async () => {
-//   const d = await getFilm(464963);
+//   const d = await getFilm(655800) // serial;
+//   // const d = await getFilm(301) // film;
 //
 //   console.log(d);
 // })();
@@ -248,18 +255,17 @@ const worker = (mainResolve) => {
 //   })();
 // }).catch(err => console.error(err));
 
-// const original_title = 'Enemy of the State';
-// const title = 'Враг государства';
-// const year = 1998;
-// const type = 'movie';
+// (async function () {
+//   const original_title = 'Mad Max: Fury Road';
+//   const title = 'Безумный Макс: Дорога ярости';
+//   const year = 2015;
+//   const type = 'movie';
 //
-// kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then(({id: kpId}) => {
-//   const slug = slugify(title.toLowerCase()) + '-' + year;
-//
-//   getFilm(kpId, slug).then((...args) => {
-//     console.log(args);
+//   kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then((res) => {
+//     console.log(res);
 //   });
-// });
+// })();
+
 
 process.on('unhandledRejection', function (reason) {
   console.error('Unhandled Rejection:', reason.stack);

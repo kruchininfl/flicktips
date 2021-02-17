@@ -262,34 +262,37 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
   const movies = (suggest && suggest.movies) || [];
 
   if (suggest && suggest.topResult && suggest.topResult.global) {
-    if (['TvSeries', 'Film'].includes(suggest.topResult.global["__typename"]))
-    movies.push({
-      movie: suggest.topResult.global
-    });
+    if (['TvSeries', 'Film'].includes(suggest.topResult.global["__typename"])) {
+      movies.push({
+        movie: suggest.topResult.global
+      });
+    }
   }
 
-  if (movies && movies.length) {
-    movies.some(({ movie }) => {
-      if (!movie || !movie.title) {
-        return false;
-      }
-
-      const titles = [movie.title.russian || null, movie.title.original || null].filter(t => t !== null);
-      const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
-
-      if (movie.productionYear && Math.abs(movie.productionYear - year) <= 1) {
-        id = movie.id;
-        similarity = stringSimilarityK;
-        return true;
-      }
-    });
-  }
-
-  if (id === null && querySecond) {
+  if ((!movies || !movies.length) && querySecond) {
     return await search(querySecond, null, year, type, minStringSimilarityK);
   }
 
-  return {id, similarity};
+  const simMovies = movies.map(({ movie }) => {
+    if (!movie || !movie.title) {
+      return null;
+    }
+
+    const titles = [movie.title.russian || null, movie.title.original || null].filter(t => t !== null);
+    const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
+
+    if (movie.productionYear && Math.abs(movie.productionYear - year) <= 1) {
+      return {
+        id: movie.id,
+        similarity: stringSimilarityK,
+      }
+    }
+    return null;
+  });
+
+  return  simMovies
+    .filter((movie) => movie !== null)
+    .sort((m1, m2) => m1.similarity > m2.similarity ? -1 : 1)[0] || {id: null, similarity: 0};
 }
 
 async function getFilm(id) {

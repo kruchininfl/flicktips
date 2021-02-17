@@ -23,11 +23,11 @@ const mysqlConfig = {
 const selectMovie = async () => {
   let [rows] = await connection.execute(`SELECT 
     COUNT(*) AS sum_total,
-    movie.id, movie.title, movie.kp_id, movie.original_title, movie.type, movie.kp_check_date,
+    movie.id, movie.title, movie.kp_id, movie.original_title, movie.type, movie.kp_check_date, movie.kp_force_check,
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 
-    WHERE movie.kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
+    WHERE movie.kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check IS NOT NULL
     GROUP BY movie_id 
     ORDER BY 
       SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 1 DAY), 1, 0)) DESC,
@@ -142,6 +142,7 @@ const updateFilm = async (film) => {
       imdb_rating_count  : film.imdb_rating.count,
       kp_error           : null,
       kp_check_date      : new Date(),
+      kp_force_check     : null,
       kp_title_similarity: film.similarity
     }, film.my_id]);
 
@@ -191,9 +192,18 @@ const worker = (mainResolve) => {
         return false;
       }
 
-      const {id, original_title, title, type, year, kp_id: dbKpId, kp_check_date} = result[0];
+      const {
+        id,
+        original_title,
+        title,
+        type,
+        year,
+        kp_id: dbKpId,
+        kp_check_date,
+        kp_force_check,
+      } = result[0];
 
-      (dbKpId
+      (dbKpId && !kp_force_check
         ? Promise.resolve({})
         : kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K)
       ).then(({id: kpId, similarity}) => {
@@ -203,7 +213,7 @@ const worker = (mainResolve) => {
             .catch(err => console.error(err));
         } else {
           const lastCheckDaysAgo = kp_check_date && moment().diff(kp_check_date, "days");
-          const disableStaffParsing = lastCheckDaysAgo && lastCheckDaysAgo < MAX_DIFF_CHECKING_DAY_FOR_STAFF;
+          const disableStaffParsing = lastCheckDaysAgo && lastCheckDaysAgo < MAX_DIFF_CHECKING_DAY_FOR_STAFF && !kp_force_check;
 
           Promise.all([
             id, getFilm(kpId || dbKpId),
@@ -256,9 +266,9 @@ const worker = (mainResolve) => {
 // }).catch(err => console.error(err));
 
 // (async function () {
-//   const original_title = 'Mad Max: Fury Road';
-//   const title = 'Безумный Макс: Дорога ярости';
-//   const year = 2015;
+//   const original_title = 'The Help';
+//   const title = 'Прислуга';
+//   const year = 2011;
 //   const type = 'movie';
 //
 //   kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then((res) => {

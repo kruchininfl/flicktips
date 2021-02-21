@@ -249,6 +249,13 @@ const worker = (mainResolve) => {
   for (let i = 0; i < MAX_WORKERS; i++) {
     workers.push(worker());
   }
+
+  Promise.all(workers).then(() => {
+    (async function () {
+      console.log('end');
+      await (60000);
+    })();
+  }).catch(err => console.error(err));
 })();
 
 // (async () => {
@@ -257,13 +264,6 @@ const worker = (mainResolve) => {
 //
 //   console.log(d);
 // })();
-
-// Promise.all(workers).then(() => {
-//   (async function () {
-//     console.log('end');
-//     await (1800000);
-//   })();
-// }).catch(err => console.error(err));
 
 // (async function () {
 //   const original_title = 'The Help';
@@ -275,7 +275,6 @@ const worker = (mainResolve) => {
 //     console.log(res);
 //   });
 // })();
-
 
 process.on('unhandledRejection', function (reason) {
   console.error('Unhandled Rejection:', reason.stack);

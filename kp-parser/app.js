@@ -1,4 +1,4 @@
-import {search as kpSearch, getFilm, getFilmStaff} from './components/parser';
+import {search as kpSearch, getFilm, getFilmStaff, sleep} from './components/parser';
 import mysql from 'mysql2/promise';
 import cs from 'console-stamp';
 import moment from 'moment';
@@ -253,7 +253,7 @@ const worker = (mainResolve) => {
   Promise.all(workers).then(() => {
     (async function () {
       console.log('end');
-      await (60000);
+      await sleep(60000);
     })();
   }).catch(err => console.error(err));
 })();

@@ -54,8 +54,8 @@ const insertCountries = async (countries) => {
     return false;
   }
 
-  await connection.query('INSERT IGNORE `country` (kp_id, name) VALUES ?', [countries.map(country => [country.id, country.name])]);
-  const [rows] = await connection.query('SELECT id FROM `country` WHERE kp_id IN (?)', [countries.map(country => [country.id])]);
+  await connection.query('INSERT IGNORE `country` (name) VALUES ?', [countries.map(country => [country])]);
+  const [rows] = await connection.query('SELECT id FROM `country` WHERE name IN (?)', [countries]);
 
   return rows;
 };

@@ -342,10 +342,7 @@ async function getFilm(id) {
   if ($countries.length) {
     $countries.each((i, el) => {
       const $el = $(el);
-      film.countries.push({
-        name: $el.text() || 'Unknown',
-        id  : +$el.attr('href').match(/\/lists\/navigator\/country-(.+?)\//)[1]
-      })
+      film.countries.push($el.text() || 'Unknown')
     });
   }
 

@@ -65,8 +65,8 @@ const insertGenres = async (genres) => {
     return false;
   }
 
-  await connection.query('INSERT IGNORE `kp-genre` (kp_id, name) VALUES ?', [genres.map(genre => [genre.id, genre.name])]);
-  const [rows] = await connection.query('SELECT id FROM `kp-genre` WHERE kp_id IN (?)', [genres.map(genre => [genre.id])]);
+  await connection.query('INSERT IGNORE `kp-genre` (name) VALUES ?', [genres.map(genre => [genre])]);
+  const [rows] = await connection.query('SELECT id FROM `kp-genre` WHERE name IN (?)', [genres]);
 
   return rows;
 };

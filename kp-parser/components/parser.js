@@ -350,10 +350,7 @@ async function getFilm(id) {
   if ($genres.length) {
     $genres.each((i, el) => {
       const $el = $(el);
-      film.genres.push({
-        name: $el.text() || 'Unknown',
-        id  : $el.attr('href').match(/\/lists\/navigator\/(.+?)\//)[1]
-      })
+      film.genres.push($el.text() || 'Unknown')
     });
   }
 

@@ -142,7 +142,7 @@ const updateFilm = async (film) => {
       imdb_rating_count  : film.imdb_rating.count,
       kp_error           : null,
       kp_check_date      : new Date(),
-      kp_force_check     : null,
+      kp_force_check     : 0,
       kp_title_similarity: film.similarity
     }, film.my_id]);
 

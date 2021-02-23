@@ -27,7 +27,7 @@ const selectMovie = async () => {
     CASE WHEN movie.release_date IS NOT NULL THEN YEAR(movie.release_date) ELSE YEAR(movie.first_air_date) END AS year
     FROM movie_vote
     LEFT JOIN movie ON movie.id=movie_vote.movie_id 
-    WHERE movie.kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check IS NOT NULL
+    WHERE movie.kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check >= 1
     GROUP BY movie_id 
     ORDER BY 
       SUM(IF(movie_vote.timestamp >= DATE_SUB(NOW(), INTERVAL 1 DAY), 1, 0)) DESC,
@@ -39,11 +39,11 @@ const selectMovie = async () => {
 
   if (!rows || !rows.length) {
     [rows] = await connection.execute(`SELECT
-      id, (likes + dislikes + neutral) AS votes, original_title, title, type, 
+      id, (likes + dislikes + neutral) AS votes, original_title, title, type, kp_id,
       CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
       FROM movie 
-      WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ?
-      ORDER BY votes DESC, kp_check_date ASC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
+      WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check >= 1
+      ORDER BY votes DESC, kp_force_check DESC, kp_check_date ASC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
   }
 
   return rows;

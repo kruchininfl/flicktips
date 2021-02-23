@@ -242,28 +242,28 @@ const worker = (mainResolve) => {
   }).catch(err => console.error(err));
 };
 
-// (async function () {
-//   connection = await mysql.createConnection(mysqlConfig);
-//
-//   let workers = [];
-//   for (let i = 0; i < MAX_WORKERS; i++) {
-//     workers.push(worker());
-//   }
-//
-//   Promise.all(workers).then(() => {
-//     (async function () {
-//       console.log('end');
-//       await sleep(60000);
-//     })();
-//   }).catch(err => console.error(err));
-// })();
+(async function () {
+  connection = await mysql.createConnection(mysqlConfig);
 
-(async () => {
-  // const d = await getFilm(655800) // serial;
-  const d = await getFilm(31739) // film;
+  let workers = [];
+  for (let i = 0; i < MAX_WORKERS; i++) {
+    workers.push(worker());
+  }
 
-  console.log(d);
+  Promise.all(workers).then(() => {
+    (async function () {
+      console.log('end');
+      await sleep(60000);
+    })();
+  }).catch(err => console.error(err));
 })();
+
+// (async () => {
+//   // const d = await getFilm(655800) // serial;
+//   const d = await getFilm(31739) // film;
+//
+//   console.log(d);
+// })();
 
 // (async function () {
 //   const original_title = 'The Help';

@@ -10,7 +10,7 @@ let connection;
 const MAX_WORKERS = 1;
 const MAX_DIFF_CHECKING_DAY = 7;
 const MAX_DIFF_CHECKING_DAY_FOR_STAFF = 180;
-const MIN_STRING_SIMILARITY_K = 0.5;
+const MIN_STRING_SIMILARITY_K = 0.9;
 
 const mysqlConfig = {
   host    : 'localhost',

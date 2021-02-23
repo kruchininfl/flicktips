@@ -366,7 +366,7 @@ async function getFilm(id) {
   const duration = $('.styles_title__a0_0F:contains("Время")').next().text().match(/(.+?)\sмин./);
   film.duration = duration ? +duration[1] : null;
 
-  const ratingValue = $('.film-rating-value.styles_rootPositive__ac3xv.styles_rootLink__1CSPc').text();
+  const ratingValue = $('a.film-rating-value').text();
   const ratingCount = $('.styles_count__3hSWL').eq(1).text().replace(/\D+/g, '');
   if (ratingValue) {
     film.kp_rating = {

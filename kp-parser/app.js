@@ -203,7 +203,7 @@ const worker = (mainResolve) => {
         kp_force_check,
       } = result[0];
 
-      (dbKpId && !kp_force_check
+      (dbKpId && kp_force_check !== 2
         ? Promise.resolve({})
         : kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K)
       ).then(({id: kpId, similarity}) => {
@@ -242,28 +242,28 @@ const worker = (mainResolve) => {
   }).catch(err => console.error(err));
 };
 
-(async function () {
-  connection = await mysql.createConnection(mysqlConfig);
-
-  let workers = [];
-  for (let i = 0; i < MAX_WORKERS; i++) {
-    workers.push(worker());
-  }
-
-  Promise.all(workers).then(() => {
-    (async function () {
-      console.log('end');
-      await sleep(60000);
-    })();
-  }).catch(err => console.error(err));
-})();
-
-// (async () => {
-//   const d = await getFilm(655800) // serial;
-//   // const d = await getFilm(301) // film;
+// (async function () {
+//   connection = await mysql.createConnection(mysqlConfig);
 //
-//   console.log(d);
+//   let workers = [];
+//   for (let i = 0; i < MAX_WORKERS; i++) {
+//     workers.push(worker());
+//   }
+//
+//   Promise.all(workers).then(() => {
+//     (async function () {
+//       console.log('end');
+//       await sleep(60000);
+//     })();
+//   }).catch(err => console.error(err));
 // })();
+
+(async () => {
+  // const d = await getFilm(655800) // serial;
+  const d = await getFilm(31739) // film;
+
+  console.log(d);
+})();
 
 // (async function () {
 //   const original_title = 'The Help';

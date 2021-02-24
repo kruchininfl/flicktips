@@ -250,19 +250,22 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
     return {};
   }
 
-  let id = null;
-  let similarity = 0;
-
   if (!result.page) {
     console.log(result);
     console.log(query);
   }
 
   const suggest = result.page.suggest && result.page.suggest.suggest && result.page.suggest.suggest.top;
-  const movies = (suggest && suggest.movies) || [];
+  const movies = (suggest && suggest.movies.filter(({ movie }) => (
+    (type === "movie" && movie["__typename"] === "Film") ||
+    (type === "tv" && movie["__typename"] === "TvSeries")
+  ))) || [];
 
   if (suggest && suggest.topResult && suggest.topResult.global) {
-    if (['TvSeries', 'Film'].includes(suggest.topResult.global["__typename"])) {
+    if (
+      (type === "movie" && suggest.topResult.global["__typename"] === "Film") ||
+      (type === "tv" && suggest.topResult.global["__typename"] === "TvSeries")
+    ) {
       movies.push({
         movie: suggest.topResult.global
       });
@@ -281,12 +284,17 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
     const titles = [movie.title.russian || null, movie.title.original || null].filter(t => t !== null);
     const stringSimilarityK = stringSimilarity.findBestMatch(query, titles).bestMatch.rating;
 
-    if (movie.productionYear && Math.abs(movie.productionYear - year) <= 1) {
+    const productionYear = type === "movie"
+      ? movie.productionYear
+      : (movie.releaseYears && movie.releaseYears[0] && movie.releaseYears[0].start);
+
+    if (productionYear && Math.abs(productionYear - year) <= 1 && stringSimilarityK >= minStringSimilarityK) {
       return {
         id: movie.id,
         similarity: stringSimilarityK,
       }
     }
+
     return null;
   });
 

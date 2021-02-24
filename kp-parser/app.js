@@ -39,7 +39,7 @@ const selectMovie = async () => {
 
   if (!rows || !rows.length) {
     [rows] = await connection.execute(`SELECT
-      id, (likes + dislikes + neutral) AS votes, original_title, title, type, kp_id,
+      id, (likes + dislikes + neutral) AS votes, original_title, title, type, kp_id, kp_force_check,
       CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
       FROM movie 
       WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check >= 1
@@ -176,6 +176,7 @@ const insertError = async (filmId, error) => {
     imdb_rating_count  : null,
     kp_error           : error,
     kp_check_date      : new Date(),
+    kp_force_check     : 0,
     kp_title_similarity: null
   }, filmId]);
 
@@ -204,10 +205,10 @@ const worker = (mainResolve) => {
       } = result[0];
 
       (dbKpId && kp_force_check !== 2
-        ? Promise.resolve({})
+        ? Promise.resolve({id: dbKpId})
         : kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K)
       ).then(({id: kpId, similarity}) => {
-        if (!kpId && !dbKpId) {
+        if (!kpId) {
           insertError(id, 'not_found')
             .then(() => worker(mainResolve))
             .catch(err => console.error(err));
@@ -216,8 +217,8 @@ const worker = (mainResolve) => {
           const disableStaffParsing = lastCheckDaysAgo && lastCheckDaysAgo < MAX_DIFF_CHECKING_DAY_FOR_STAFF && !kp_force_check;
 
           Promise.all([
-            id, getFilm(kpId || dbKpId),
-            disableStaffParsing ? Promise.resolve(null) : getFilmStaff(kpId || dbKpId),
+            id, getFilm(kpId),
+            disableStaffParsing ? Promise.resolve(null) : getFilmStaff(kpId),
             similarity
           ]).then(([my_id, film, staff, similarity]) => {
             film.my_id = my_id;
@@ -266,9 +267,9 @@ const worker = (mainResolve) => {
 // })();
 
 // (async function () {
-//   const original_title = 'The Help';
-//   const title = 'Прислуга';
-//   const year = 2011;
+//   const original_title = 'Фантом 2040';
+//   const title = 'Фантом 2040';
+//   const year = 1994;
 //   const type = 'movie';
 //
 //   kpSearch(original_title, title, year, type, MIN_STRING_SIMILARITY_K).then((res) => {

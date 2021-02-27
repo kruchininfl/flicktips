@@ -73,7 +73,7 @@ class PersonRepository {
             LEFT JOIN movie_vote AS my_movie_vote ON my_movie_vote.movie_id = movie.id AND my_movie_vote.user_id = ' . $userId . '
             LEFT JOIN bookmark ON (bookmark.user_id=1 AND bookmark.movie_id=movie.id)';
         }
-        $queryMovie .= ' WHERE people_id = ' . $id . ' ORDER BY IF(movie_type = \'movie\', movie_release_date, movie_first_air_date) DESC';
+        $queryMovie .= ' WHERE people_id = ' . $id . ' AND movie.`suspend` <> 1 ORDER BY IF(movie_type = \'movie\', movie_release_date, movie_first_air_date) DESC';
 
         $sth = $this->pdo->prepare($queryMovie);
         $sth->execute();

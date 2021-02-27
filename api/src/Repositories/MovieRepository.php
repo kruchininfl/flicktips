@@ -55,7 +55,7 @@ class MovieRepository {
             LEFT JOIN movie_vote ON movie_vote.movie_id=movie.id AND movie_vote.user_id=' . $userId . '
             LEFT JOIN bookmark ON (bookmark.user_id=' . $userId . ' AND bookmark.movie_id=movie.id)';
         }
-        $query .= ' WHERE movie.id = ' . $id;
+        $query .= ' WHERE movie.id = ' . $id . ' AND movie.`suspend` <> 1';
 
         $sth = $this->pdo->prepare($query);
         $sth->execute();
@@ -232,7 +232,7 @@ class MovieRepository {
             LEFT JOIN `user` AS friend ON friend.id = friend_votes.user_id';
         }
 
-        $query .= ' WHERE movie_vote.id IN(\'' . implode('\',\'', $voteIds) . '\') ORDER BY movie_vote.timestamp DESC';
+        $query .= ' WHERE movie_vote.id IN(\'' . implode('\',\'', $voteIds) . '\') AND movie.`suspend` <> 1 ORDER BY movie_vote.timestamp DESC';
 
         $sth = $this->pdo->prepare($query);
         $sth->execute();
@@ -303,7 +303,7 @@ class MovieRepository {
             LEFT JOIN movie_vote AS friend_votes ON friend_votes.movie_id = movie.id AND friend_votes.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ' . $userId . ' AND user_friends.subscribed = 1)
             LEFT JOIN `user` AS friend ON friend.id = friend_votes.user_id';
         }
-        $query .= ' WHERE movie.tmdb_id IN (' . $whereInString . ') ORDER BY FIELD(movie.tmdb_id, ' . $whereInString . ')';
+        $query .= ' WHERE movie.tmdb_id IN (' . $whereInString . ') AND movie.`suspend` <> 1 ORDER BY FIELD(movie.tmdb_id, ' . $whereInString . ')';
 
         $sth = $this->pdo->prepare($query);
         $sth->execute();

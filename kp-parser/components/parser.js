@@ -253,6 +253,7 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
   if (!result.page) {
     console.log(result);
     console.log(query);
+    return null;
   }
 
   const suggest = result.page.suggest && result.page.suggest.suggest && result.page.suggest.suggest.top;

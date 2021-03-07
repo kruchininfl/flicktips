@@ -42,7 +42,7 @@ const selectMovie = async () => {
       id, (likes + dislikes + neutral) AS votes, original_title, title, type, kp_id, kp_force_check,
       CASE WHEN release_date IS NOT NULL THEN YEAR(release_date) ELSE YEAR(first_air_date) END AS year
       FROM movie 
-      WHERE kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check >= 1
+      WHERE (kp_check_date IS NULL OR DATEDIFF(CURDATE(), kp_check_date) >= ? OR kp_force_check >= 1) AND SUSPEND = 0
       ORDER BY votes DESC, kp_force_check DESC, kp_check_date ASC LIMIT 1`, [MAX_DIFF_CHECKING_DAY]);
   }
 

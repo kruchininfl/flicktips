@@ -21,6 +21,17 @@ module.exports = {
     env_production : {
       NODE_ENV: 'production'
     }
+  }, {
+    name      : 'flicktips-ft-parser',
+    cwd       : '/var/www/flick.tips/ft-parser',
+    script    : 'npm',
+    args      : 'run start',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production : {
+      NODE_ENV: 'production'
+    }
   }],
 
   deploy : {
@@ -32,7 +43,8 @@ module.exports = {
       path : '/var/www/flick.tips',
       'post-deploy' : 'npm --prefix /var/www/flick.tips/web install ' +
         '&& npm --prefix /var/www/flick.tips/web run build ' +
-        '&& npm --prefix /var/www/flick.tips/kp-parser install '
+        '&& npm --prefix /var/www/flick.tips/kp-parser install ' +
+        '&& yarn --prefix /var/www/flick.tips/ft-parser'
     }
   }
 };

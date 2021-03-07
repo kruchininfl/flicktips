@@ -12,6 +12,7 @@ $app->get('/api/update_poster/{mid}', '\Controllers\IndexController::updateAndGe
 $app->get('/api/get_person/{pid}', '\Controllers\IndexController::getPerson');
 $app->get('/api/get_last_graded_films/', '\Controllers\IndexController::getLastGradedFilms');
 $app->get('/api/get_last_graded_films_friends/', '\Controllers\IndexController::getLastGradedFilmsFriends');
+$app->get('/api/get_digital/', '\Controllers\IndexController::getDigitalFilms');
 
 $app->get('/api/votes/user/{uid}', '\Controllers\IndexController::getVotes')->value('uid', false);
 

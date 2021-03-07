@@ -477,4 +477,86 @@ class IndexController
             ]
         ]);
     }
+
+    public function getDigitalFilms(Request $request, Application $app)
+    {
+        /**
+         * @var $pdo \PDO
+         */
+        $pdo = $app['pdo'];
+
+        $uid = $request->headers->get('uid');
+        $token = $request->headers->get('access-token');
+        $quality = $request->get('quality') ? array_filter(explode(',', $request->get('quality')), 'is_numeric') : null;
+        $voice = $request->get('voice') ?  array_filter(explode(',', $request->get('voice')), 'is_numeric') : null;
+        $ratingValue = $request->get('kp_rating_value');
+        $ratingCount = $request->get('kp_rating_count');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+
+        $user = $app['user.repository']->getByCredentials($uid, $token);
+
+        $page = $request->get('page') ? $request->get('page') : 1;
+        $offset = ($page - 1) * DIGITAL_LIST_SIZE;
+
+        $selectFrom = 'SELECT min(t2.created) AS created, t2.id FROM ft_torrent t2 INNER JOIN ft_film_torrent ft ON ft.torrent_id = t2.id';
+        if ($quality || $voice) {
+            $selectFrom .= ' WHERE ';
+
+            if ($quality) {
+                $selectFrom .= ' t2.quality IN(' . implode(',', $quality) . ')';
+            }
+            if ($voice) {
+                $selectFrom .= $quality ? ' AND' : '';
+                $selectFrom .= ' t2.voice IN(' . implode(',', $voice) . ')';
+            }
+        }
+        $selectFrom .= ' GROUP BY ft.film_id';
+
+        $joins = 'LEFT JOIN ft_film_torrent ft ON ft.torrent_id = t.id LEFT JOIN ft_film f ON f.id = ft.film_id RIGHT JOIN movie m_m ON m_m.kp_id = f.kp_id';
+        $where = 'WHERE t.created IS NOT NULL AND m_m.kp_rating_value >= :ratingValue AND m_m.kp_rating_count >= :ratingCount';
+        $where .= ' AND m_m.release_date >= :dateFrom AND m_m.release_date <= :dateTo';
+        $order = 'ORDER BY created DESC, m_m.tmdb_id DESC';
+
+//        if ($user && $user['hide_viewed']) {
+//            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE user_id <> :uid AND movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id ORDER BY movie_id DESC) mv');
+//            $totalSth->execute(['uid' => $user['id']]);
+//        } else {
+//            $totalSth = $app['pdo']->prepare('SELECT COUNT(*) AS num FROM(SELECT * FROM movie_vote WHERE movie_vote.user_id IN (SELECT user_friends.user_2 FROM user_friends WHERE user_1 = :uid) GROUP BY movie_id ORDER BY movie_id DESC) mv');
+//        }
+
+        $pRatingValue = isset($ratingValue) ? (float) $ratingValue : 0;
+        $pRatingCount = isset($ratingCount) ? (int) $ratingCount : 0;
+        $pDateFrom = isset($dateFrom) && isset(explode("-", $dateFrom)[0]) && isset(explode("-", $dateFrom)[1]) ? $dateFrom : "0";
+        $pDateTo = isset($dateFrom) && isset(explode("-", $dateTo)[0]) && isset(explode("-", $dateTo)[1]) ? $dateTo : "9999";
+
+        $totalSth = $pdo->prepare('SELECT COUNT(*) as num FROM (' . $selectFrom . ') t ' . $joins . ' ' . $where);
+        $totalSth->bindValue(':ratingValue', $pRatingValue, \PDO::PARAM_STR);
+        $totalSth->bindValue(':ratingCount', $pRatingCount, \PDO::PARAM_INT);
+        $totalSth->bindValue(':dateFrom', $pDateFrom, \PDO::PARAM_STR);
+        $totalSth->bindValue(':dateTo', $pDateTo, \PDO::PARAM_STR);
+        $totalSth->execute();
+        $total = intval($totalSth->fetch()['num']);
+
+        $sthTmdbIds = $pdo->prepare(' SELECT m_m.tmdb_id FROM (' . $selectFrom . ') t ' . $joins . ' ' . $where . ' ' . $order . ' LIMIT :limit OFFSET :offset');
+        $sthTmdbIds->bindValue(':ratingValue', $pRatingValue, \PDO::PARAM_STR);
+        $sthTmdbIds->bindValue(':ratingCount', $pRatingCount, \PDO::PARAM_INT);
+        $sthTmdbIds->bindValue(':dateFrom', $pDateFrom, \PDO::PARAM_STR);
+        $sthTmdbIds->bindValue(':dateTo', $pDateTo, \PDO::PARAM_STR);
+        $sthTmdbIds->bindValue(':limit', DIGITAL_LIST_SIZE, \PDO::PARAM_INT);
+        $sthTmdbIds->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $sthTmdbIds->execute();
+        $tmdbIds = array_column($sthTmdbIds->fetchAll(), 'tmdb_id');
+
+        return $app->json([
+            'success' => true,
+            'results' => [
+                'total' => $total,
+                'page' => (int)$page,
+                'pages' => ceil($total / HOME_LIST_SIZE),
+                'sth' => $sthTmdbIds->queryString,
+                'entities' => count($tmdbIds) ? $app['movie.repository']->findByTmdbId($tmdbIds, $user ? $user['id'] : null) : []
+            ]
+        ]);
+    }
 }

@@ -45,8 +45,9 @@ class MovieVotes extends Component {
         delay={300}
         hideDelay={100}
         className="movie-user-votes__item"
+        key={key}
       >
-        <Link to={'/user/' + userId} key={key}>
+        <Link to={'/user/' + userId}>
           <div
             onClick={this.handleOpenSearch}
             className="movie-user-votes__item-photo userpic header-profile__photo"

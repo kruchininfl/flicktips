@@ -44,7 +44,7 @@ module.exports = {
       'post-deploy' : 'npm --prefix /var/www/flick.tips/web install ' +
         '&& npm --prefix /var/www/flick.tips/web run build ' +
         '&& npm --prefix /var/www/flick.tips/kp-parser install ' +
-        '&& yarn --prefix /var/www/flick.tips/ft-parser'
+        '&& yarn --prefix /var/www/flick.tips/ft-parser install'
     }
   }
 };

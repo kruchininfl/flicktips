@@ -95,7 +95,3 @@ cron.schedule("0 * * * *", async () => {
   await run();
   started = false;
 });
-// const start = Date.now();
-// run().then(() => {
-//   console.info(`${moment(Date.now()).diff(start, "minute")} minutes`);
-// });

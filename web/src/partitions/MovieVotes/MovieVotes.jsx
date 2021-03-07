@@ -8,6 +8,7 @@ import {isUserSignedIn} from '../../redux/models/user';
 import moment from 'moment';
 import 'moment/locale/ru';
 import CustomScrollbars from 'components/Gui/CustomScrollbars';
+import {Tooltip} from 'react-tippy';
 
 const propTypes = {
   dispatch    : PropTypes.func.isRequired,
@@ -35,25 +36,36 @@ class MovieVotes extends Component {
       .from((global ? new Date().getTime() : window.SERVER_TIMESTAMP));
 
     return (
-      <Link to={'/user/' + userId} key={key} className="movie-user-votes__item">
-        <div
-          onClick={this.handleOpenSearch}
-          className="movie-user-votes__item-photo userpic header-profile__photo"
-        >
-          <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
-          <div className="movie-user-votes__item-vote">
-            <span className={getVoteIconClassById(value, true)} />
+      <Tooltip
+        title={time}
+        position="top"
+        trigger="mouseenter"
+        arrow
+        distance={36}
+        delay={300}
+        hideDelay={100}
+        className="movie-user-votes__item"
+      >
+        <Link to={'/user/' + userId} key={key}>
+          <div
+            onClick={this.handleOpenSearch}
+            className="movie-user-votes__item-photo userpic header-profile__photo"
+          >
+            <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
+            <div className="movie-user-votes__item-vote">
+              <span className={getVoteIconClassById(value, true)} />
+            </div>
           </div>
-        </div>
 
-        <div className="movie-user-votes__item-content">
-          <div className="movie-user-votes__item-head">
-            <span>{userName}</span>
-            <span className={getVoteIconClassById(value, true)} />
+          <div className="movie-user-votes__item-content">
+            <div className="movie-user-votes__item-head">
+              <span>{userName}</span>
+              <span className={getVoteIconClassById(value, true)} />
+            </div>
+            <div className="movie-user-votes__item-date">{time}</div>
           </div>
-          <div className="movie-user-votes__item-date">{time}</div>
-        </div>
-      </Link>
+        </Link>
+      </Tooltip>
     );
   }
 

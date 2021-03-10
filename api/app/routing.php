@@ -29,3 +29,5 @@ $app->post('/api/user/toggle_bookmark/', '\Controllers\UserController::toggleBoo
 $app->put('/api/user/', '\Controllers\UserController::updateUser');
 
 $app->get('/api/updateGenres/', '\Controllers\IndexController::updateGenres');
+
+$app->get('/api/get_datasets/', '\Controllers\IndexController::getDatasets');

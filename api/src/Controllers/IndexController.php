@@ -559,4 +559,26 @@ class IndexController
             ]
         ]);
     }
+
+    public function getDatasets(Request $request, Application $app)
+    {
+        /**
+         * @var $pdo \PDO
+         */
+        $pdo = $app['pdo'];
+
+        $qualitySth = $pdo->prepare('SELECT * FROM ft_quality');
+        $qualitySth->execute();
+
+        $voiceSth = $pdo->prepare('SELECT * FROM ft_voice ORDER BY sort DESC');
+        $voiceSth->execute();
+
+        return $app->json([
+            'success' => true,
+            'results' => [
+                'quality' => $qualitySth->fetchAll(),
+                'voice' => $voiceSth->fetchAll(),
+            ]
+        ]);
+    }
 }

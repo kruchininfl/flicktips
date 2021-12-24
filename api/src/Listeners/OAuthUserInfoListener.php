@@ -116,7 +116,7 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                         return $el['id'];
                     }, $info['friends']['data']) : null;
                 } else if ($serviceName == 'vkontakte') {
-                    $response = json_decode($this->app['guzzle']->request('GET', 'https://api.vk.com/method/friends.get?v=5.21&user_id=' . $info['id'] . '&access_token=' . $accesToken)->getBody());
+                    $response = json_decode($this->app['guzzle']->request('GET', 'https://api.vk.com/method/friends.get?v=5.131&user_id=' . $info['id'] . '&access_token=' . $accesToken)->getBody());
                     return $response->response->items;
                 }
             }),

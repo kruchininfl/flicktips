@@ -64,7 +64,9 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'secret' => VKONTAKTE_API_SECRET,
             'scope' => array('friends'),
             'user_endpoint' => function ($token) {
-                if (isset($token) && $userId = $token->getAccessToken()->getExtraParams()['user_id']) {
+                $extraParams = $token->getAccessToken()->getExtraParams();
+
+                if (isset($token) && isset($extraParams['user_id']) && $userId = $extraParams['user_id']) {
                     return 'https://api.vk.com/method/users.get?v=5.131&fields=photo_max_orig,photo_400_orig,sex&user_ids=' . $userId;
                 }
                 return 'https://api.vk.com/method/users.get?v=5.131&fields=photo_max_orig,photo_400_orig,sex';

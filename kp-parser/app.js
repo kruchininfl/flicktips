@@ -260,15 +260,16 @@ const worker = (mainResolve) => {
 })();
 
 // (async () => {
-//   // const d = await getFilm(655800) // serial;
-//   const d = await getFilm(31739) // film;
+//   const d = await getFilm(1338480);
+//   const s = await getFilmStaff(1338480);
 //
 //   console.log(d);
+//   console.log(s);
 // })();
 
 // (async function () {
-//   const original_title = 'Фантом 2040';
-//   const title = 'Фантом 2040';
+//   const original_title = 'Фантом 2040: Ходячий призрак';
+//   const title = 'Фантом 2040: Ходячий призрак';
 //   const year = 1994;
 //   const type = 'movie';
 //

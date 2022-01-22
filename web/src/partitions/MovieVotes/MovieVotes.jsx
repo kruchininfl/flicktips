@@ -59,7 +59,7 @@ class MovieVotes extends Component {
           </div>
 
           <div className="movie-user-votes__item-content">
-            <div className="movie-user-votes__item-head">
+            <div className={`movie-user-votes__item-head ${userId === 4 && "movie-user-votes__item-head_gold"}`}>
               <span>{userName}</span>
               <span className={getVoteIconClassById(value, true)} />
             </div>

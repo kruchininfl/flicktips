@@ -40,6 +40,20 @@
             margin-right: 0;
         }
     }
+
+    &:first-child {
+        .movie-user-votes__item-vote {
+            display: none;
+        }
+        .movie-user-votes__item-content {
+            display: inline-block;
+        }
+    }
+
+    &:nth-child(2) {
+        padding-left: 18px;
+        border-left: 1px solid #f1f1f1;
+    }
 }
 .userpic.movie-user-votes__item-photo {
     position: relative;
@@ -110,6 +124,15 @@
         right: 0;
         margin: auto;
         height: 18px;
+    }
+}
+.movie-user-votes__item-head_gold {
+    > span {
+        color: #FFD700;
+
+        .movie-user-votes__item:hover & {
+            color: darken(#FFD700, 15);
+        }
     }
 }
 .movie-user-votes__item-date {

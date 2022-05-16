@@ -27,7 +27,7 @@ class TMDBServiceProvider
         ], $params));
 
         $url = self::API_URL . $method . '?' . $query;
-        return json_decode($this->app['guzzle']->request('GET', $url, ['proxy' => 'http://0wjYUH:z69CGD@45.94.37.49:8000'])->getBody());
+        return json_decode($this->app['guzzle']->request('GET', $url, ['proxy' => 'http://u5dkhH:N3Bjb0@196.19.122.135:8000'])->getBody());
     }
 
     public function multiSearch($query)

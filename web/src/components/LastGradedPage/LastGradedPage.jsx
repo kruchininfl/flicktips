@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import PropTypes from 'prop-types';
 import './LastGradedPage.scss';
 import {asyncConnect} from 'redux-connect';
@@ -42,13 +42,22 @@ class LastGradedPage extends Component {
   constructor(props) {
     super(props);
 
+    this.ref = createRef()
+
     this.renderEmptyPage = this.renderEmptyPage.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount() {
     window.scrollTo(0, 0);
+    window.addEventListener("resize", this.handleResize)
+    this.handleResize(true)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -58,6 +67,22 @@ class LastGradedPage extends Component {
     ) {
       this.props.dispatch(getLastGraded(1, nextProps.userSignedIn));
     }
+  }
+
+  handleResize(first) {
+
+    const windowWidth = document.documentElement.clientWidth
+    const minTileWidth = 270
+    const actualTileWidthPercents = (100 / Math.floor(windowWidth / minTileWidth)) + "%"
+
+    let style = this.ref.current.style
+
+    if (first === true) {
+      style.setProperty("--tile-transition", "none")
+      setTimeout(() => style.setProperty("--tile-transition", "all"), 10)
+    }
+
+    style.setProperty("--tile-width", actualTileWidthPercents)
   }
 
   handleLoadData() {
@@ -120,7 +145,7 @@ class LastGradedPage extends Component {
     // return this.renderEmptyPage();
 
     return (
-      <div className="home-page">
+      <div className="home-page" ref={this.ref}>
         <div className="lg-header">
           <span
             onClick={() => this.handleFilter(false)}

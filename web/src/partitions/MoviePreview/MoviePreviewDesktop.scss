@@ -3,7 +3,7 @@
 @media screen and (min-width: 1024px) {
     .movie-prev-list {
         .movie-prev {
-            width: 33.33%;
+            width: var(--tile-width, 33.33%);
         }
     }
 }
@@ -11,7 +11,7 @@
 @media screen and (min-width: 1600px) {
     .movie-prev-list {
         .movie-prev {
-            width: 16.6666%;
+            width: var(--tile-width, 16.6666%)
         }
     }
 }

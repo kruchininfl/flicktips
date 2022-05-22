@@ -17,6 +17,7 @@ import {Link} from 'react-router';
 import MovieTrailer from './MovieTrailer';
 import MovieVotes from './MovieVotes';
 import {updateAndGetFilmPoster} from '../../redux/actions/movieActions';
+import request from 'superagent';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -57,6 +58,21 @@ class MoviePage extends Component {
     if (node) {
       node.parentNode.classList.add('m-movie');
     }
+
+    request
+      .get(`${config.commentoUrl}/api/commenter/token/new`)
+      .end((err, res) => {
+        if (!err) {
+          console.log(res);
+        }
+      });
+
+    // const script = document.createElement('script');
+    //
+    // script.src = `${config.commentoUrl}/js/commento.js`;
+    // script.defer = true;
+    //
+    // document.body.appendChild(script);
   }
 
   componentWillUnmount() {
@@ -301,6 +317,8 @@ class MoviePage extends Component {
           ? movie.staff.map((group, key) => this.renderStaffGroup(group, key))
           : ''
         }
+
+        <div id="commento" />
       </div>
     );
   }

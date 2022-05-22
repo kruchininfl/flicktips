@@ -8,13 +8,13 @@ const config = {
 
   oAuth: {
     backend: {
-      apiUrl             : 'https://flick.tips',
-      authProviderPaths  : {
+      apiUrl: 'https://flick.tips',
+      authProviderPaths: {
         vkontakte: '/auth/vkontakte',
-        facebook : '/auth/facebook'
+        facebook: '/auth/facebook'
       },
       tokenValidationPath: '/api/checkUser/',
-      signOutPath        : null
+      signOutPath: null
     },
     cookieOptions: {
       key: 'authHeaders',
@@ -24,8 +24,8 @@ const config = {
   },
 
   tmdb: {
-    posterPath   : TMDB_POSTER_PATH,
-    posterPath92 : TMDB_POSTER_PATH + '/w92',
+    posterPath: TMDB_POSTER_PATH,
+    posterPath92: TMDB_POSTER_PATH + '/w92',
     posterPath154: TMDB_POSTER_PATH + '/w154',
     posterPath185: TMDB_POSTER_PATH + '/w185',
     posterPath342: TMDB_POSTER_PATH + '/w342',

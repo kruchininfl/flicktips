@@ -2,27 +2,27 @@ import React, {Component, createRef} from 'react';
 import PropTypes from 'prop-types';
 import './LastGradedPage.scss';
 import {asyncConnect} from 'redux-connect';
-import {getLastGraded, addLastGraded} from 'redux/actions/lastGradedActions';
+import {addLastGraded, getLastGraded} from 'redux/actions/lastGradedActions';
 import Button from '../Gui/Button';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
 import {getUserModel, isUserSignedIn} from '../../redux/models/user';
 import InviteButton from '../../partitions/VkApp/InviteButton';
 
 const propTypes = {
-  dispatch    : PropTypes.func,
-  pending     : PropTypes.bool,
-  loaded      : PropTypes.bool,
-  loading     : PropTypes.bool,
+  dispatch: PropTypes.func,
+  pending: PropTypes.bool,
+  loaded: PropTypes.bool,
+  loading: PropTypes.bool,
   userSignedIn: PropTypes.bool,
-  user        : PropTypes.object,
-  response    : PropTypes.any,
-  onlyFriends : PropTypes.bool,
-  isVkApp     : PropTypes.bool
+  user: PropTypes.object,
+  response: PropTypes.any,
+  onlyFriends: PropTypes.bool,
+  isVkApp: PropTypes.bool
 };
 
 @asyncConnect([
   {
-    key    : 'lastGraded',
+    key: 'lastGraded',
     promise: ({store}) => {
       const state = store.getState();
       const userSignedIn = isUserSignedIn(state);
@@ -42,7 +42,7 @@ class LastGradedPage extends Component {
   constructor(props) {
     super(props);
 
-    this.ref = createRef()
+    this.ref = createRef();
 
     this.renderEmptyPage = this.renderEmptyPage.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
@@ -52,12 +52,8 @@ class LastGradedPage extends Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    window.addEventListener("resize", this.handleResize)
-    this.handleResize(true)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleResize)
+    window.addEventListener('resize', this.handleResize);
+    this.handleResize(true);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -69,20 +65,23 @@ class LastGradedPage extends Component {
     }
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
   handleResize(first) {
+    const windowWidth = document.documentElement.clientWidth;
+    const minTileWidth = 270;
+    const actualTileWidthPercents = (100 / Math.floor(windowWidth / minTileWidth)) + '%';
 
-    const windowWidth = document.documentElement.clientWidth
-    const minTileWidth = 270
-    const actualTileWidthPercents = (100 / Math.floor(windowWidth / minTileWidth)) + "%"
-
-    let style = this.ref.current.style
+    const style = this.ref.current.style;
 
     if (first === true) {
-      style.setProperty("--tile-transition", "none")
-      setTimeout(() => style.setProperty("--tile-transition", "all"), 10)
+      style.setProperty('--tile-transition', 'none');
+      setTimeout(() => style.setProperty('--tile-transition', 'all'), 10);
     }
 
-    style.setProperty("--tile-width", actualTileWidthPercents)
+    style.setProperty('--tile-width', actualTileWidthPercents);
   }
 
   handleLoadData() {

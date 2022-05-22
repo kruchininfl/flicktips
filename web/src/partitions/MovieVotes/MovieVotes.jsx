@@ -11,11 +11,11 @@ import CustomScrollbars from 'components/Gui/CustomScrollbars';
 import {Tooltip} from 'react-tippy';
 
 const propTypes = {
-  dispatch    : PropTypes.func.isRequired,
-  votes       : PropTypes.array,
-  className   : PropTypes.any,
+  dispatch: PropTypes.func.isRequired,
+  votes: PropTypes.array,
+  className: PropTypes.any,
   userSignedIn: PropTypes.bool,
-  filter      : PropTypes.number // 0 - hidden, 1 - all users, 2 - only friends
+  filter: PropTypes.number // 0 - hidden, 1 - all users, 2 - only friends
 };
 
 const defaultPropTypes = {
@@ -59,7 +59,7 @@ class MovieVotes extends Component {
           </div>
 
           <div className="movie-user-votes__item-content">
-            <div className={`movie-user-votes__item-head ${userId === 4 && "movie-user-votes__item-head_gold"}`}>
+            <div className={`movie-user-votes__item-head ${userId === 4 && 'movie-user-votes__item-head_gold'}`}>
               <span>{userName}</span>
               <span className={getVoteIconClassById(value, true)} />
             </div>

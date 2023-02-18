@@ -40,11 +40,11 @@ module.exports = {
       host : '92.255.107.174',
       ref  : 'origin/master',
       repo : 'git@bitbucket.org:infamoustill/flicktips.git',
-      path : '/var/www/flick.tips',
-      'post-deploy' : 'npm --prefix /var/www/flick.tips/web install ' +
-        '&& npm --prefix /var/www/flick.tips/web run build ' +
-        '&& npm --prefix /var/www/flick.tips/kp-parser install ' +
-        '&& yarn --prefix /var/www/flick.tips/ft-parser install'
+      path : '/var/www/flicktips.ru',
+      'post-deploy' : 'npm --prefix /var/www/flicktips.ru/source/web install ' +
+        '&& npm --prefix /var/www/flicktips.ru/source/web run build ' +
+        '&& npm --prefix /var/www/flicktips.ru/source/kp-parser install ' +
+        '&& yarn --prefix /var/www/flicktips.ru/source/ft-parser install'
     }
   }
 };

@@ -37,7 +37,7 @@ module.exports = {
   deploy : {
     production : {
       user : 'root',
-      host : '95.214.10.128',
+      host : '92.255.107.174',
       ref  : 'origin/master',
       repo : 'git@bitbucket.org:infamoustill/flicktips.git',
       path : '/var/www/flick.tips',

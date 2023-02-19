@@ -1,7 +1,7 @@
 module.exports = {
   apps : [{
     name      : 'flicktips-web-server',
-    cwd       : '/var/www/flick.tips/web',
+    cwd       : '/var/www/flick.tips/source/web',
     script    : 'npm',
     args      : 'run server',
     env: {
@@ -12,7 +12,7 @@ module.exports = {
     }
   }, {
     name      : 'flicktips-kp-parser',
-    cwd       : '/var/www/flick.tips/kp-parser',
+    cwd       : '/var/www/flick.tips/source/kp-parser',
     script    : 'npm',
     args      : 'run start',
     env: {
@@ -23,7 +23,7 @@ module.exports = {
     }
   }, {
     name      : 'flicktips-ft-parser',
-    cwd       : '/var/www/flick.tips/ft-parser',
+    cwd       : '/var/www/flick.tips/source/ft-parser',
     script    : 'npm',
     args      : 'run start',
     env: {

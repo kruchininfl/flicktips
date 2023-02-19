@@ -13,7 +13,7 @@ $app->register(
             'dbname'   => $app['env'] == 'prod' ? 'flicktips' : 'flicktips_test',
             'port'     => 3306,
             'user'     => 'flicktips',
-            'password' => 'Aing6sii',
+            'password' => 'PUA2$PM:jTC4@6a4tTwL',
         ),
         'pdo.options' => array(
             \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"

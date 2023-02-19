@@ -16,7 +16,7 @@ const mysqlConfig = {
   host    : 'localhost',
   // host    : '95.214.10.128',
   user    : 'flicktips',
-  password: 'Aing6sii',
+  password: 'PUA2$PM:jTC4@6a4tTwL',
   database: 'flicktips'
 };
 

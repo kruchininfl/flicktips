@@ -11,7 +11,7 @@ import mysql, {
 const config = {
   host: 'localhost',
   user: 'flicktips',
-  password: 'Aing6sii',
+  password: 'PUA2$PM:jTC4@6a4tTwL',
   database: 'flicktips'
 };
 

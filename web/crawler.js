@@ -2,7 +2,7 @@ const SitemapGenerator = require('sitemap-generator');
 const path = require('path');
 
 // create generator
-const generator = SitemapGenerator('https://flick.tips', {
+const generator = SitemapGenerator('https://flicktips.ru', {
   stripQuerystring: false,
   filepath: path.join(process.cwd(), '/sitemaps/sitemap.xml')
 });

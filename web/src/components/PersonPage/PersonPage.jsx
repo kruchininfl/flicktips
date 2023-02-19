@@ -69,8 +69,8 @@ class PersonPage extends Component {
 
     const title = metaName + ' — FlickTips';
     const description = metaName + '. ' + (career.length ? career.join(', ') + '. ' : '') + 'Фильмография, фото.';
-    const image = person.kp_photo || 'https://flick.tips/public/img/logo/1024x1024.png';
-    const url = 'https://flick.tips/person/' + person.id;
+    const image = person.kp_photo || 'https://flicktips.ru/public/img/logo/1024x1024.png';
+    const url = 'https://flicktips.ru/person/' + person.id;
 
     return (
       <div className="person">

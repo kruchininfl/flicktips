@@ -150,8 +150,8 @@ class MoviePage extends Component {
     const title = name + ' — FlickTips';
     const description = `Все о ${movie.isTv ? 'сериале' : 'фильме'} ${name}: оценки друзей, рейтинги 
     кинопоиск и имдб, трейлеры, обложка, актеры и режиссеры`;
-    const image = poster || 'https://flick.tips/public/img/logo/1024x1024.png';
-    const url = 'https://flick.tips/movie/' + movie.id;
+    const image = poster || 'https://flicktips.ru/public/img/logo/1024x1024.png';
+    const url = 'https://flicktips.ru/movie/' + movie.id;
 
     const totalVotes = movie.neutral + movie.dislikes + movie.likes + movie.super;
 

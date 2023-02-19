@@ -1,7 +1,7 @@
 import FetchBase from './FetchBase';
 
 const {_} = new FetchBase({
-  baseUrl: "https://flick.tips/api",
+  baseUrl: "https://flicktips.ru/api",
   timeout: 5000,
   enableProxy: false,
 });

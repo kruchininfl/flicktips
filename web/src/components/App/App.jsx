@@ -89,7 +89,7 @@ class App extends Component {
           <meta name="description" content="Рейтинг фильмов и сериалов на основе оценок друзей, кинопоиска и imdb." />
 
           <meta property="og:title" content="FlickTips — Делитесь впечатлениями о просмотренных фильмах с друзьями." />
-          <meta property="og:image" content="https://flick.tips/public/img/logo/1024x1024.png" />
+          <meta property="og:image" content="https://flicktips.ru/public/img/logo/1024x1024.png" />
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
@@ -130,7 +130,7 @@ class App extends Component {
 
         <div className="footer">
           <div className="wrapper">
-            <a href="mailto:support@flick.tips" className="footer__link">Контакты</a>
+            <a href="mailto:support@flicktips.ru" className="footer__link">Контакты</a>
             <Link to="/about" className="footer__link">О Проекте</Link>
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>

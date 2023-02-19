@@ -29,7 +29,7 @@ class InviteButton extends Component {
         VKShareButton
       } = ShareButtons;
 
-      const url = 'https://flick.tips';
+      const url = 'https://flicktips.ru';
 
       return (
         <div className="share-buttons">

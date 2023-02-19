@@ -74,6 +74,7 @@
     "redux-immutablejs": "0.0.8",
     "redux-oauth": "^2.0.5",
     "redux-thunk": "^2.2.0",
+    "request": "^2.88.2",
     "sitemap-generator": "^7.3.0",
     "socket.io": "^2.0.3",
     "socket.io-react": "^1.2.0",

@@ -12,7 +12,7 @@ class UserRepository {
      */
     protected $pdo;
 
-    protected $safety_fields = ['id', 'username', 'avatar', 'gender', 'registration_date'];
+    protected $safety_fields = ['id', 'username', 'avatar_source AS avatar', 'gender', 'registration_date'];
 
 
     public function __construct(Application $app)
@@ -85,7 +85,7 @@ class UserRepository {
         genre.name AS movie_genre_name, 
         user.id AS user_id, 
         user.username AS user_name, 
-        user.avatar AS user_avatar, 
+        user.avatar_source AS user_avatar, 
         user.gender AS user_gender,
         CONCAT(user.id, \'_\', movie.id) AS group_id
         FROM ( 

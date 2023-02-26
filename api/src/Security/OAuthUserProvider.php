@@ -44,7 +44,8 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
         $userInfo = $token->getAttribute('userInfo');
 
         // upload avatar to s3
-        if (isset($userInfo['avatar_source'])) {
+        if (isset($userInfo['avatar_source']) && ENABLE_S3) {
+          try {
             /**
              * @var $s3 S3Client;
              */
@@ -52,14 +53,16 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
             $image = file_get_contents($userInfo['avatar_source']);
 
             $result = $s3->putObject(array(
-                'Bucket' => 'flicktips',
-                'Key' => 'avatar/origin/' . md5($service . $userInfo['id']) . '.jpg',
-                'Body' => $image,
-                'ContentType' => 'image/jpeg',
-                'ACL' => 'public-read'
+              'Bucket' => 'flicktips',
+              'Key' => 'avatar/origin/' . md5($service . $userInfo['id']) . '.jpg',
+              'Body' => $image,
+              'ContentType' => 'image/jpeg',
+              'ACL' => 'public-read'
             ));
 
             $userInfo['avatar'] = $result && isset($result['ObjectURL']) ? $result['ObjectURL'] : null;
+          } catch (Exception $e) {
+          }
         }
 
         // insert user
@@ -72,7 +75,7 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
         $sth->execute([
                 'username' => $userInfo['username'],
                 'token' => md5(openssl_random_pseudo_bytes(32)),
-                'avatar' => $userInfo['avatar'],
+                'avatar' => $userInfo['avatar'] ?? "",
                 'avatar_source' => $userInfo['avatar_source'],
                 'gender' => $userInfo['gender'],
                 'service_id' => $userInfo['id'],

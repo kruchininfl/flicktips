@@ -52,7 +52,7 @@ class PersonRepository {
         votes.vote as vote_val,
         `user`.id as vote_user_id,
         `user`.username as vote_user_username,
-        `user`.avatar as vote_user_avatar';
+        `user`.avatar_source as vote_user_avatar';
 
         if ($userId) {
             $queryMovie .= ', IF (my_movie_vote.vote = \'3\', true, false) AS movie_isSuper,

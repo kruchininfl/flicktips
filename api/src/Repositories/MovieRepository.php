@@ -27,7 +27,7 @@ class MovieRepository {
             votes.vote as vote_val,
             `user`.id as vote_user_id,
             `user`.username as vote_user_username,
-            `user`.avatar as vote_user_avatar,
+            `user`.avatar_source as vote_user_avatar,
             CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
         if ($userId) {
             $query .= ', IF (movie_vote.vote = \'3\', true, false) AS isSuper,
@@ -149,7 +149,7 @@ class MovieRepository {
     public function getFilmVotes($id, $userId = null) {
         $query = 'SELECT 
             mv.id, mv.vote, mv.timestamp, mv.user_id, 
-            u.avatar AS user_avatar, u.gender AS user_gender, u.username AS user_username,';
+            u.avatar_source AS user_avatar, u.gender AS user_gender, u.username AS user_username,';
         if ($userId) {
             $query .= 'IF (uf.user_1 is NULL, false, true) AS user_isFriend';
         } else {
@@ -210,7 +210,7 @@ class MovieRepository {
             $query .= ', friend_votes.vote AS friends_votes_val, 
             friend.id AS friends_votes_user_id, 
             friend.username AS friends_votes_user_name, 
-            friend.avatar AS friends_votes_user_avatar,
+            friend.avatar_source AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp, 
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
             IF (my_movie_vote.vote = \'3\', true, false) AS isSuper,
@@ -284,7 +284,7 @@ class MovieRepository {
             $query .= ', friend_votes.vote AS friends_votes_val,
             friend.id AS friends_votes_user_id,
             friend.username AS friends_votes_user_name,
-            friend.avatar AS friends_votes_user_avatar,
+            friend.avatar_source AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp,
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
             IF (movie_vote.vote = \'3\', true, false) AS isSuper,
@@ -354,7 +354,7 @@ class MovieRepository {
             $query .= ', friend_votes.vote AS friends_votes_val, 
             friend.id AS friends_votes_user_id, 
             friend.username AS friends_votes_user_name, 
-            friend.avatar AS friends_votes_user_avatar,
+            friend.avatar_source AS friends_votes_user_avatar,
             UNIX_TIMESTAMP(friend_votes.timestamp) AS friends_votes_timestamp, 
             IF (friend.id IS NOT NULL, CONCAT_WS(\'_\', movie.id, friend.id), NULL) AS friends_votes_group_id,
             IF (movie_vote.vote = \'3\', true, false) AS isSuper,
@@ -460,7 +460,7 @@ class MovieRepository {
         votes.vote as vote_val,
         `user`.id as vote_user_id,
         `user`.username as vote_user_username,
-        `user`.avatar as vote_user_avatar,
+        `user`.avatar_source as vote_user_avatar,
         CONCAT_WS(\'_\', `user`.id, movie.id) AS votes_field_group';
 
         if ($userId) {

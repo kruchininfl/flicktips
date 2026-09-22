@@ -1,1 +1,5 @@
 node_modules/
+/api/vendor/
+/design/
+/ft-parser/dist/
+/ft-parser/temp/

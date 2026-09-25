@@ -46,6 +46,26 @@ All run inside the subproject dir (`npm install` first; there is no root install
   external sites. Prefer `npm run dev` for local work.
 - `kp-parser/components/parser.js` imports deps via relative `../node_modules/...` paths
   and toggles Tor/proxy via `ENABLE_TOR`/`ENABLE_PROXY` constants.
-- Deploy is `pm2` via `ecosystem.config.js` from `origin/master`; the post-deploy hook
-  installs web + kp-parser (npm) and ft-parser (yarn) and builds web. Server dir is
-  `/var/www/flicktips.ru/source`. Repo remote is Bitbucket, not GitHub.
+- `kp-parser` uses `mysql2@3.x` (needed for MySQL 8.4 `caching_sha2_password`); its entry
+  still loads `babel-core/register`, so `require('mysql2/promise')` must stay CJS-compatible.
+- Repo remote is Bitbucket, not GitHub.
+
+## CI/CD
+
+Bitbucket Pipelines (`bitbucket-pipelines.yml`) builds and pushes Docker images to Docker
+Hub, then deploys over SSH+rsync. pm2 was removed; the server runs Docker Compose only.
+
+- Checks (all branches/PRs): web `npm ci && npm run build` (Node 16), api `composer install`,
+  ft-parser `yarn install && tsc --noEmit`, kp-parser `npm ci`.
+- `master`: checks → build/push images tagged with the commit SHA + `latest` → rsync repo to
+  `DEPLOY_PATH` → `docker/deploy.sh` (`docker compose pull && up -d`).
+- Required Bitbucket repo variables (Pipelines → Variables): `DOCKERHUB_USER`,
+  `DOCKERHUB_TOKEN`, `DEPLOY_SSH_KEY` (secured), `DEPLOY_KNOWN_HOSTS` (secured),
+  `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`.
+- Compose services (`web`, `api`, `kp-parser`, `ft-parser`, `nginx`) all use
+  `network_mode: host`, so they reach the host MySQL (`127.0.0.1:3306`) and loopback ports:
+  web `:3001`, php-fpm `:9000`, nginx `:80/:443`. tg-brew stays on `:3002`.
+- Local image build: `docker compose build` (set `DOCKERHUB_USER` to override image names).
+- Rollback: `TAG=<git-sha> docker compose up -d` on the server, or set `TAG` for `deploy.sh`.
+- Note: some committed `package-lock.json` files are `lockfileVersion 2` (npm 7/8); Node 16
+  in CI is compatible.

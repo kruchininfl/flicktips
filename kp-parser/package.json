@@ -23,7 +23,7 @@
     "https-proxy-agent": "^2.0.0",
     "iconv-lite": "^0.4.18",
     "moment": "^2.27.0",
-    "mysql2": "^1.4.2",
+    "mysql2": "^3.11.3",
     "socks5-http-client": "^1.0.2",
     "string-similarity": "^1.2.0",
     "tor-request": "^1.2.2",

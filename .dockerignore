@@ -1,0 +1,12 @@
+.git
+.gitignore
+.idea
+.DS_Store
+node_modules
+*/node_modules
+api/vendor
+ft-parser/dist
+ft-parser/temp
+design
+mobileApp
+data

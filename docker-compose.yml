@@ -10,7 +10,7 @@
 
 services:
   web:
-    image: docker.io/${DOCKERHUB_USER:-flicktips}/flicktips-web:${TAG:-latest}
+    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-web:${TAG:-latest}
     build:
       context: ./web
     network_mode: host
@@ -25,7 +25,7 @@ services:
         max-file: "3"
 
   api:
-    image: docker.io/${DOCKERHUB_USER:-flicktips}/flicktips-api:${TAG:-latest}
+    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-api:${TAG:-latest}
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -40,7 +40,7 @@ services:
         max-file: "3"
 
   kp-parser:
-    image: docker.io/${DOCKERHUB_USER:-flicktips}/flicktips-kp-parser:${TAG:-latest}
+    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-kp-parser:${TAG:-latest}
     build:
       context: ./kp-parser
     network_mode: host
@@ -52,7 +52,7 @@ services:
         max-file: "3"
 
   ft-parser:
-    image: docker.io/${DOCKERHUB_USER:-flicktips}/flicktips-ft-parser:${TAG:-latest}
+    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-ft-parser:${TAG:-latest}
     build:
       context: ./ft-parser
     network_mode: host
@@ -64,7 +64,7 @@ services:
         max-file: "3"
 
   nginx:
-    image: docker.io/${DOCKERHUB_USER:-flicktips}/flicktips-nginx:${TAG:-latest}
+    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-nginx:${TAG:-latest}
     build:
       context: ./nginx
     network_mode: host

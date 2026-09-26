@@ -221,6 +221,13 @@ const worker = (mainResolve) => {
             disableStaffParsing ? Promise.resolve(null) : getFilmStaff(kpId),
             similarity
           ]).then(([my_id, film, staff, similarity]) => {
+            if (!film) {
+              insertError(id, 'not_found')
+                .then(() => worker(mainResolve))
+                .catch(err => console.error(err));
+              return;
+            }
+
             film.my_id = my_id;
 
             const countriesReady = insertCountries(film.countries);
@@ -238,6 +245,11 @@ const worker = (mainResolve) => {
               }).catch(err => console.error(err));
           }).catch(err => console.error(err));
         }
+      }).catch(err => {
+        console.error(err);
+        insertError(id, 'search_error')
+          .then(() => worker(mainResolve))
+          .catch(e => console.error(e));
       });
     }).catch(err => console.error(err));
   }).catch(err => console.error(err));

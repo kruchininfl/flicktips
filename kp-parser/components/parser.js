@@ -244,6 +244,17 @@ async function requestGet(url, headers = {}) {
 
 async function search(query, querySecond, year, type, minStringSimilarityK = 0) {
   // return Promise.resolve(4541);
+  if (query === null || query === undefined || query === '') {
+    query = querySecond;
+    querySecond = null;
+  }
+
+  if (query === null || query === undefined || query === '') {
+    return {id: null, similarity: 0};
+  }
+
+  query = String(query);
+
   const startYear = year ? year - 2 : 1000;
   const finishYear = year ? year + 2 : 3000;
   const result = await requestGet(`https://kinopoiskapiunofficial.tech/api/v2.2/films?order=RATING&type=ALL&ratingFrom=0&ratingTo=10&yearFrom=${startYear}&yearTo=${finishYear}&page=1&keyword=` + encodeURIComponent(query.replace(" (сериал)", "")));
@@ -251,7 +262,7 @@ async function search(query, querySecond, year, type, minStringSimilarityK = 0) 
   if (!result) {
     console.log(result);
     console.log(query);
-    return null;
+    return {id: null, similarity: 0};
   }
 
   if ((!result.items || !result.items.length) && querySecond) {

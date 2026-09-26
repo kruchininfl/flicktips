@@ -18,3 +18,5 @@ define('DIGITAL_LIST_SIZE', 24);
 define('FILMS_VOTES_SIZE', 50);
 
 define('ENABLE_S3', false);
+
+define('TMDB_PROXY', 'socks5h://srUdEa:74kAtn@45.83.11.133:8000');

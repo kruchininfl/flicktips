@@ -127,19 +127,13 @@ class OAuthServiceProvider implements ServiceProviderInterface, EventListenerPro
                         isset($options['callback_path']) ? $options['callback_path'] : '/auth/{service}/callback',
                         function () {
                         }
-                    )
-                        ->bind($options['callback_route'])
-                        ->value('auth_origin_url', false)
-                        ->assert('auth_origin_url', '(.*)');
+                    )->bind($options['callback_route']);
 
                     $app->get(
                         isset($options['check_path']) ? $options['check_path'] : '/auth/{service}/check',
                         function () {
                         }
-                    )
-                        ->bind($options['check_route'])
-                        ->value('auth_origin_url', false)
-                        ->assert('auth_origin_url', '(.*)');
+                    )->bind($options['check_route']);
                 }
 
                 if (!isset($app['security.authentication.success_handler.' . $name . '.oauth'])) {

@@ -185,10 +185,12 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
             }
 
             // the access token is now stored in the session, redirect back to check_path
-            return $this->httpUtils->createRedirectResponse(
-                $request,
-                $this->options['check_route']
-            );
+            $checkUrl = $this->httpUtils->generateUri($request, $this->options['check_route']);
+            if ($authOriginUrl) {
+                $checkUrl .= '?' . http_build_query(array('auth_origin_url' => $authOriginUrl));
+            }
+
+            return $this->httpUtils->createRedirectResponse($request, $checkUrl);
         }
 
         $authToken = new OAuthToken($this->providerKey);

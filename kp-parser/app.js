@@ -2,6 +2,7 @@ import {search as kpSearch, getFilm, getFilmStaff, sleep} from './components/par
 import mysql from 'mysql2/promise';
 import cs from 'console-stamp';
 import moment from 'moment';
+import {env} from './components/env';
 
 cs(console, '[HH:MM:ss.l]');
 
@@ -15,8 +16,8 @@ const MIN_STRING_SIMILARITY_K = 0.9;
 const mysqlConfig = {
   host    : 'localhost',
   // host    : '95.214.10.128',
-  user    : 'flicktips',
-  password: 'PUA2$PM:jTC4@6a4tTwL',
+  user    : env('DB_USER', 'flicktips'),
+  password: env('DB_PASSWORD'),
   database: 'flicktips'
 };
 

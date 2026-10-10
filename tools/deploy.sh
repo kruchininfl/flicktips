@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 # Manual deploy. Builds images locally for linux/amd64 (the server has 1 vCPU / <1 GB RAM,
-# too small to build), ships them over SSH with docker save/load (no registry), then
-# switches the server to the new tag via docker/deploy.sh.
+# too small to build) and pushes them to Docker Hub; the server pulls them and switches to
+# the new tag via docker/deploy.sh. Uploading straight to the server is not an option:
+# traffic from abroad to it is throttled to ~50 KB/s, while its Docker Hub pulls are fast.
 #
 #   tools/deploy.sh                 build and deploy all services
 #   tools/deploy.sh api web         rebuild only these; the rest are re-tagged on the server
 #   tools/deploy.sh --rollback      switch the server back to PREV_TAG
+#
+# Needs `docker login` as infamoustill locally; the repos are public, so the server pulls
+# without credentials. Images must stay secret-free: secrets live only in the server's .env.
 #
 # Env: DEPLOY_HOST (default root@45.15.252.159), DEPLOY_PATH (default /var/www/flicktips.ru),
 #      ALLOW_DIRTY=1 to deploy uncommitted changes (tag gets a -dirty suffix).
@@ -65,30 +69,23 @@ for svc in "${services[@]}"; do
 done
 
 for svc in "${services[@]}"; do
-  echo "==> Building $PREFIX$svc:$TAG for linux/amd64"
+  echo "==> Building and pushing $PREFIX$svc:$TAG for linux/amd64"
   if [[ "$svc" == api ]]; then
-    docker buildx build --platform linux/amd64 --load -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
+    docker buildx build --platform linux/amd64 --push -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
   else
-    docker buildx build --platform linux/amd64 --load -t "$PREFIX$svc:$TAG" "./$svc"
+    docker buildx build --platform linux/amd64 --push -t "$PREFIX$svc:$TAG" "./$svc"
   fi
 done
 
 echo "==> Syncing compose config to $DEPLOY_HOST:$DEPLOY_PATH"
-rsync -az docker-compose.yml docker "$DEPLOY_HOST:$DEPLOY_PATH/"
+rsync -az docker-compose.yml .env.example docker "$DEPLOY_HOST:$DEPLOY_PATH/"
 
 current="$(remote 'docker/deploy.sh current')"
 echo "==> Server is on ${current:-<unknown>}; removing older flicktips images"
 remote "docker/deploy.sh prune '$current'"
 
-images=()
-for svc in "${services[@]}"; do
-  images+=("$PREFIX$svc:$TAG")
-done
-echo "==> Uploading ${images[*]}"
-docker save "${images[@]}" | gzip | "${SSH[@]}" 'gunzip | docker load'
-
 echo "==> Switching to $TAG"
-remote "docker/deploy.sh up '$TAG'"
+remote "docker/deploy.sh up '$TAG' ${services[*]}"
 
 echo "==> Health check"
 sleep 5

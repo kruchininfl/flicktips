@@ -1,12 +1,26 @@
 <?php
 
-define('FACEBOOK_API_KEY',    '323326988105785');
-define('FACEBOOK_API_SECRET', 'e02677691c3687dc3afacbe2cb0dea40');
-define('VKONTAKTE_API_KEY',    '51559563');
-define('VKONTAKTE_API_SECRET', 'h2gjKUYIzXDsDuhT4I38');
-define('VKONTAKTE_APP_API_KEY',    '6127205');
-define('VKONTAKTE_APP_API_SECRET', 'Khy89JdjSgI6CExUUwWd');
-define('VKONTAKTE_APP_SERVICE_KEY', 'bf26455ebf26455ebf26455e1abf7b3b3bbbf26bf26455ee65f3e56ca392abc436982b8');
+// Secrets come from the environment (docker compose env_file: .env on the server;
+// see .env.example). php-fpm passes them through because of clear_env = no.
+function env_var($name, $default = null)
+{
+    $value = getenv($name);
+    if ($value === false || $value === '') {
+        if (func_num_args() > 1) {
+            return $default;
+        }
+        throw new RuntimeException("Missing environment variable $name");
+    }
+    return $value;
+}
+
+define('FACEBOOK_API_KEY',    env_var('FACEBOOK_API_KEY'));
+define('FACEBOOK_API_SECRET', env_var('FACEBOOK_API_SECRET'));
+define('VKONTAKTE_API_KEY',    env_var('VKONTAKTE_API_KEY'));
+define('VKONTAKTE_API_SECRET', env_var('VKONTAKTE_API_SECRET'));
+define('VKONTAKTE_APP_API_KEY',    env_var('VKONTAKTE_APP_API_KEY'));
+define('VKONTAKTE_APP_API_SECRET', env_var('VKONTAKTE_APP_API_SECRET'));
+define('VKONTAKTE_APP_SERVICE_KEY', env_var('VKONTAKTE_APP_SERVICE_KEY'));
 
 define('VOTES_LIST_SIZE', 24);
 define('FRIENDS_VOTES_LIST_SIZE', 24);
@@ -19,4 +33,5 @@ define('FILMS_VOTES_SIZE', 50);
 
 define('ENABLE_S3', false);
 
-define('TMDB_PROXY', 'socks5h://srUdEa:74kAtn@45.83.11.133:8000');
+define('TMDB_API_KEY', env_var('TMDB_API_KEY'));
+define('TMDB_PROXY', env_var('TMDB_PROXY', ''));

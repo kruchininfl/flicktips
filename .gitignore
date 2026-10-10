@@ -4,3 +4,4 @@ node_modules/
 /ft-parser/dist/
 /ft-parser/temp/
 /data/
+.env

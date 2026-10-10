@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Server-side half of tools/deploy.sh. Images arrive via `docker load`; nothing is
-# pulled from a registry. The active tag lives in .env (TAG, PREV_TAG).
+# Server-side half of tools/deploy.sh. Freshly built images are pulled from Docker Hub
+# (public repos); the active tag lives in .env (TAG, PREV_TAG).
 #
 #   docker/deploy.sh current               print the active tag
-#   docker/deploy.sh up <tag>              switch all services to <tag>; services without
-#                                          an image for <tag> are re-tagged from the current one
+#   docker/deploy.sh up <tag> [service...] pull <tag> for the listed services, re-tag the
+#                                          rest from the current tag, switch all to <tag>
 #   docker/deploy.sh prune <keep-tag...>   remove flicktips images with any other tag
 #
 # Rollback: docker/deploy.sh up "$(sed -n 's/^PREV_TAG=//p' .env)"
@@ -38,9 +38,26 @@ current_tag() {
   echo "$tag"
 }
 
+check_env() {
+  local name missing=()
+  for name in $(sed -n '/^# Optional/q; s/^\([A-Z_]*\)=.*/\1/p' .env.example); do
+    [[ -n "$(env_get "$name")" ]] || missing+=("$name")
+  done
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "Missing in .env (see .env.example): ${missing[*]}" >&2
+    exit 1
+  fi
+}
+
 cmd_up() {
   local new="$1" cur svc
+  shift
+  check_env
   cur="$(current_tag)"
+
+  for svc in "$@"; do
+    docker pull "$PREFIX$svc:$new"
+  done
 
   for svc in "${SERVICES[@]}"; do
     if ! docker image inspect "$PREFIX$svc:$new" > /dev/null 2>&1; then
@@ -77,7 +94,7 @@ cmd_prune() {
 
 case "${1:-}" in
   current) current_tag ;;
-  up) cmd_up "${2:?tag required}" ;;
+  up) shift; cmd_up "${1:?tag required}" "${@:2}" ;;
   prune) shift; cmd_prune "$@" ;;
   *) sed -n '2,10p' "$0"; exit 1 ;;
 esac

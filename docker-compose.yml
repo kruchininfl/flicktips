@@ -2,7 +2,7 @@
 #
 # All services use network_mode: host so they can reach the host's MySQL
 # (127.0.0.1:3306), the host's Tor/proxy, and each other on loopback.
-# Images are built locally and shipped over SSH by tools/deploy.sh (no registry);
+# Images are built locally and pushed to Docker Hub by tools/deploy.sh; the server pulls;
 # the active tag is stored as TAG in the server's .env.
 #
 #   docker/deploy.sh up <tag>      # on the server
@@ -30,6 +30,9 @@ services:
       dockerfile: api/Dockerfile
     network_mode: host
     restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
     environment:
       PHP_FPM_LISTEN: "127.0.0.1:9000"
     logging:
@@ -44,6 +47,9 @@ services:
       context: ./kp-parser
     network_mode: host
     restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
     logging:
       driver: json-file
       options:
@@ -56,6 +62,9 @@ services:
       context: ./ft-parser
     network_mode: host
     restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
     logging:
       driver: json-file
       options:

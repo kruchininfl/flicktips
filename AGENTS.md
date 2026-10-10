@@ -38,10 +38,13 @@ All run inside the subproject dir (`npm install` first; there is no root install
 - `web/.eslintrc` is strict and non-standard: single quotes, `semi` always but
   `eol-last: never`, `object-curly-spacing: never`, `no-var`, `prefer-const`,
   `max-len 128`, 2-space indent. Match it when editing `web/src`.
-- DB credentials are hard-coded in three places and must stay in sync: `api/app/services.php`,
-  `ft-parser/src/core/db.ts`, `kp-parser/app.js`. API chooses `flicktips` vs
-  `flicktips_test` by `HTTP_HOST`. API/DB/OAuth/AWS secrets are committed in
-  `api/app/config.php`.
+- Secrets (DB password, VK/Facebook OAuth, TMDb and kinopoiskapiunofficial keys, AWS, TMDb
+  proxy) come from environment variables, never from code: `env_var()` in `api/app/config.php`,
+  `env()` in `ft-parser/src/core/env.ts` and `kp-parser/components/env.js`. The list lives in
+  `.env.example`; compose loads `.env` (`env_file`) into api, ft-parser and kp-parser, and
+  php-fpm keeps them via `clear_env = no`. Docker Hub images are public, so a secret added
+  to code leaks — add it to `.env.example` instead. Old values remain in git history.
+  API chooses `flicktips` vs `flicktips_test` DB by `HTTP_HOST`.
 - ft-parser `npm start` deletes `dist/` and connects to the production DB; it also hits
   external sites. Prefer `npm run dev` for local work.
 - `kp-parser/components/parser.js` imports deps via relative `../node_modules/...` paths
@@ -53,23 +56,26 @@ All run inside the subproject dir (`npm install` first; there is no root install
 ## Deploy
 
 No CI/CD (CircleCI and Bitbucket Pipelines were dropped). Deploys are manual from a dev Mac
-with `tools/deploy.sh`; the server only runs Docker Compose (pm2 was removed).
+(needs `docker login` as `infamoustill`) with `tools/deploy.sh`; the server only runs Docker
+Compose (pm2 was removed).
 
 - Server: `root@45.15.252.159`, project in `/var/www/flicktips.ru`. 1 vCPU, <1 GB RAM,
   ~20 GB disk that is nearly full — never build images there.
-- `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (`docker buildx`, no compose needed locally),
-  tagged with the commit SHA, rsyncs `docker-compose.yml` + `docker/`, prunes older
-  flicktips images on the server, uploads via `docker save | gzip | ssh docker load`, then
-  runs `docker/deploy.sh up <sha>` and curls the site and `/api/`. Services not listed are
-  re-tagged from the current release, so one `TAG` always covers all five.
+- `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (`docker buildx`,
+  no compose needed locally), tagged with the commit SHA, and pushes them to Docker Hub
+  (`infamoustill/flicktips-*`, public). It then rsyncs `docker-compose.yml`, `.env.example`
+  and `docker/`, prunes older flicktips images on the server and runs
+  `docker/deploy.sh up <sha> <services>`, which checks `.env` against `.env.example`, pulls
+  the new images and recreates containers; finally it curls the site and `/api/`. Services
+  not listed are re-tagged from the current release, so one `TAG` always covers all five.
+- Do not upload images straight to the server (`docker save | ssh`): uploads from abroad to
+  it are throttled to ~50 KB/s, while its pulls from Docker Hub are fast.
 - Requires a clean tree (`ALLOW_DIRTY=1` adds a `-dirty` tag suffix). Nothing runs lint or
   tests first; build `web` / `tsc` ft-parser locally if in doubt.
-- Server state: `TAG` and `PREV_TAG` in `/var/www/flicktips.ru/.env`; only the current and
-  previous images are kept. Rollback: `tools/deploy.sh --rollback`.
+- Server state: secrets plus `TAG`/`PREV_TAG` in `/var/www/flicktips.ru/.env`; only the
+  current and previous images are kept. Rollback: `tools/deploy.sh --rollback`.
 - Compose services (`web`, `api`, `kp-parser`, `ft-parser`, `nginx`) all use
   `network_mode: host`, so they reach the host MySQL (`127.0.0.1:3306`) and loopback ports:
   web `:3001`, php-fpm `:9000`, nginx `:80/:443`. tg-brew stays on `:3002`.
-- Image names stay `infamoustill/flicktips-*` for compatibility with the old Docker Hub
-  tags, but nothing is pushed or pulled.
 - Note: some committed `package-lock.json` files are `lockfileVersion 2` (npm 7/8); the
   Node 16 build images handle them.

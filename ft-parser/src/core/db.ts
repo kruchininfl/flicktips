@@ -7,11 +7,12 @@ import mysql, {
   FieldPacket,
   QueryOptions,
 } from 'mysql2/promise';
+import {env} from './env';
 
 const config = {
   host: 'localhost',
-  user: 'flicktips',
-  password: 'PUA2$PM:jTC4@6a4tTwL',
+  user: env('DB_USER', 'flicktips'),
+  password: env('DB_PASSWORD'),
   database: 'flicktips'
 };
 

@@ -12,8 +12,8 @@ $app->register(
             'host'     => '127.0.0.1',
             'dbname'   => $app['env'] == 'prod' ? 'flicktips' : 'flicktips_test',
             'port'     => 3306,
-            'user'     => 'flicktips',
-            'password' => 'PUA2$PM:jTC4@6a4tTwL',
+            'user'     => env_var('DB_USER', 'flicktips'),
+            'password' => env_var('DB_PASSWORD'),
         ),
         'pdo.options' => array(
             \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"
@@ -30,8 +30,8 @@ $app->register(new AwsServiceProvider(), array(
         'version' => 'latest',
         'region' => 'eu-central-1',
         'credentials' => [
-            'key'    => 'AKIAJY7LFQK7M62YAFYA',
-            'secret' => '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'
+            'key'    => env_var('AWS_ACCESS_KEY_ID', ''),
+            'secret' => env_var('AWS_SECRET_ACCESS_KEY', '')
         ]
     )
 ));

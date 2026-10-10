@@ -2,13 +2,14 @@ import Iconv from '../node_modules/iconv-lite';
 import httpRequest from '../node_modules/request';
 import cheerio from '../node_modules/cheerio';
 import HttpsProxyAgent from '../node_modules/https-proxy-agent';
+import {env} from './env';
 import stringSimilarity from '../node_modules/string-similarity';
 import tr from 'tor-request';
 import moment from 'moment';
 
 moment.locale('ru');
 
-tr.TorControlPort.password = 'giraffe';
+tr.TorControlPort.password = env('TOR_CONTROL_PASSWORD', '');
 
 String.prototype.dateFormat = function () {
   let str = this.length === 8 ? this : (this.length === 6 ? this + '00' : (this.length === 6 ? this + '0000' : null));
@@ -191,7 +192,7 @@ async function requestGet(url, headers = {}) {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
       'Connection': 'keep-alive',
-      'X-API-KEY': '615ae712-24f3-4d67-919e-b636b0e671e8',
+      'X-API-KEY': env('KP_API_KEY'),
     }, headers),
     timeout       : 5000,
     followRedirect: true,

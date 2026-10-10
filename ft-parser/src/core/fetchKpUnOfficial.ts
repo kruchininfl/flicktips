@@ -1,11 +1,12 @@
 import FetchBase from './FetchBase';
+import {env} from './env';
 
 const {_} = new FetchBase({
   baseUrl: "https://kinopoiskapiunofficial.tech/api/v2.1/",
   timeout: 5000,
   enableProxy: false,
   headers: {
-    "X-API-KEY": "615ae712-24f3-4d67-919e-b636b0e671e8",
+    "X-API-KEY": env("KP_API_KEY"),
   },
 });
 

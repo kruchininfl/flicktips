@@ -1,5 +1,6 @@
 import FetchBase from './FetchBase';
 import {AxiosRequestConfig} from 'axios';
+import {env} from './env';
 
 const {_} = new FetchBase({
   baseUrl: "http://api.themoviedb.org/3",
@@ -15,7 +16,7 @@ async function fetchTmdb<T>(url: string, params?: AxiosRequestConfig["params"]) 
    return _<T>(url, {
     params: {
       ...(params || {}),
-      api_key: "d272326e467344029e68e3c4ff0b4059",
+      api_key: env("TMDB_API_KEY"),
       language: "ru-RU",
     }
   });

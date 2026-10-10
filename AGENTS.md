@@ -50,22 +50,26 @@ All run inside the subproject dir (`npm install` first; there is no root install
   still loads `babel-core/register`, so `require('mysql2/promise')` must stay CJS-compatible.
 - Repo remote is Bitbucket, not GitHub.
 
-## CI/CD
+## Deploy
 
-Bitbucket Pipelines (`bitbucket-pipelines.yml`) builds and pushes Docker images to Docker
-Hub, then deploys over SSH+rsync. pm2 was removed; the server runs Docker Compose only.
+No CI/CD (CircleCI and Bitbucket Pipelines were dropped). Deploys are manual from a dev Mac
+with `tools/deploy.sh`; the server only runs Docker Compose (pm2 was removed).
 
-- Checks (all branches/PRs): web `npm ci && npm run build` (Node 16), api `composer install`,
-  ft-parser `yarn install && tsc --noEmit`, kp-parser `npm ci`.
-- `master`: checks → build/push images tagged with the commit SHA + `latest` → rsync repo to
-  `DEPLOY_PATH` → `docker/deploy.sh` (`docker compose pull && up -d`).
-- Required Bitbucket repo variables (Pipelines → Variables): `DOCKERHUB_USER`,
-  `DOCKERHUB_TOKEN`, `DEPLOY_SSH_KEY` (secured), `DEPLOY_KNOWN_HOSTS` (secured),
-  `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`.
+- Server: `root@45.15.252.159`, project in `/var/www/flicktips.ru`. 1 vCPU, <1 GB RAM,
+  ~20 GB disk that is nearly full — never build images there.
+- `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (Colima/buildx),
+  tagged with the commit SHA, rsyncs `docker-compose.yml` + `docker/`, prunes older
+  flicktips images on the server, uploads via `docker save | gzip | ssh docker load`, then
+  runs `docker/deploy.sh up <sha>` and curls the site and `/api/`. Services not listed are
+  re-tagged from the current release, so one `TAG` always covers all five.
+- Requires a clean tree (`ALLOW_DIRTY=1` adds a `-dirty` tag suffix). Nothing runs lint or
+  tests first; build `web` / `tsc` ft-parser locally if in doubt.
+- Server state: `TAG` and `PREV_TAG` in `/var/www/flicktips.ru/.env`; only the current and
+  previous images are kept. Rollback: `tools/deploy.sh --rollback`.
 - Compose services (`web`, `api`, `kp-parser`, `ft-parser`, `nginx`) all use
   `network_mode: host`, so they reach the host MySQL (`127.0.0.1:3306`) and loopback ports:
   web `:3001`, php-fpm `:9000`, nginx `:80/:443`. tg-brew stays on `:3002`.
-- Local image build: `docker compose build` (set `DOCKERHUB_USER` to override image names).
-- Rollback: `TAG=<git-sha> docker compose up -d` on the server, or set `TAG` for `deploy.sh`.
-- Note: some committed `package-lock.json` files are `lockfileVersion 2` (npm 7/8); Node 16
-  in CI is compatible.
+- Image names stay `infamoustill/flicktips-*` for compatibility with the old Docker Hub
+  tags, but nothing is pushed or pulled.
+- Note: some committed `package-lock.json` files are `lockfileVersion 2` (npm 7/8); the
+  Node 16 build images handle them.

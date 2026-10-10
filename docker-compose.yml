@@ -2,15 +2,14 @@
 #
 # All services use network_mode: host so they can reach the host's MySQL
 # (127.0.0.1:3306), the host's Tor/proxy, and each other on loopback.
-# Images are built and pushed by Bitbucket Pipelines; the server only pulls.
+# Images are built locally and shipped over SSH by tools/deploy.sh (no registry);
+# the active tag is stored as TAG in the server's .env.
 #
-#   docker compose pull && docker compose up -d
-#
-# For local image builds (docker compose build) set DOCKERHUB_USER and DOCKERHUB_REPO.
+#   docker/deploy.sh up <tag>      # on the server
 
 services:
   web:
-    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-web:${TAG:-latest}
+    image: infamoustill/flicktips-web:${TAG:-latest}
     build:
       context: ./web
     network_mode: host
@@ -25,7 +24,7 @@ services:
         max-file: "3"
 
   api:
-    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-api:${TAG:-latest}
+    image: infamoustill/flicktips-api:${TAG:-latest}
     build:
       context: .
       dockerfile: api/Dockerfile
@@ -40,7 +39,7 @@ services:
         max-file: "3"
 
   kp-parser:
-    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-kp-parser:${TAG:-latest}
+    image: infamoustill/flicktips-kp-parser:${TAG:-latest}
     build:
       context: ./kp-parser
     network_mode: host
@@ -52,7 +51,7 @@ services:
         max-file: "3"
 
   ft-parser:
-    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-ft-parser:${TAG:-latest}
+    image: infamoustill/flicktips-ft-parser:${TAG:-latest}
     build:
       context: ./ft-parser
     network_mode: host
@@ -64,7 +63,7 @@ services:
         max-file: "3"
 
   nginx:
-    image: docker.io/${DOCKERHUB_USER:-infamoustill}/flicktips-nginx:${TAG:-latest}
+    image: infamoustill/flicktips-nginx:${TAG:-latest}
     build:
       context: ./nginx
     network_mode: host

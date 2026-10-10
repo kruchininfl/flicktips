@@ -57,7 +57,7 @@ with `tools/deploy.sh`; the server only runs Docker Compose (pm2 was removed).
 
 - Server: `root@45.15.252.159`, project in `/var/www/flicktips.ru`. 1 vCPU, <1 GB RAM,
   ~20 GB disk that is nearly full — never build images there.
-- `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (Colima/buildx),
+- `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (`docker buildx`, no compose needed locally),
   tagged with the commit SHA, rsyncs `docker-compose.yml` + `docker/`, prunes older
   flicktips images on the server, uploads via `docker save | gzip | ssh docker load`, then
   runs `docker/deploy.sh up <sha>` and curls the site and `/api/`. Services not listed are

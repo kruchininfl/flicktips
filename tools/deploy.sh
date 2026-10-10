@@ -64,8 +64,14 @@ for svc in "${services[@]}"; do
   [[ " ${ALL_SERVICES[*]} " == *" $svc "* ]] || { echo "Unknown service: $svc" >&2; exit 1; }
 done
 
-echo "==> Building ${services[*]} for linux/amd64 (tag $TAG)"
-TAG="$TAG" DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose build "${services[@]}"
+for svc in "${services[@]}"; do
+  echo "==> Building $PREFIX$svc:$TAG for linux/amd64"
+  if [[ "$svc" == api ]]; then
+    docker buildx build --platform linux/amd64 --load -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
+  else
+    docker buildx build --platform linux/amd64 --load -t "$PREFIX$svc:$TAG" "./$svc"
+  fi
+done
 
 echo "==> Syncing compose config to $DEPLOY_HOST:$DEPLOY_PATH"
 rsync -az docker-compose.yml docker "$DEPLOY_HOST:$DEPLOY_PATH/"

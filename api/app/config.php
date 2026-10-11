@@ -26,7 +26,6 @@ define('HOME_LIST_SIZE', 24);
 define('DIGITAL_LIST_SIZE', 24);
 define('FILMS_VOTES_SIZE', 50);
 
-define('ENABLE_S3', false);
 
 define('TMDB_API_KEY', env_var('TMDB_API_KEY'));
 define('TMDB_PROXY', env_var('TMDB_PROXY', ''));

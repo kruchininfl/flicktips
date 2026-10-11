@@ -21,8 +21,7 @@
     "symfony/security": "~2.7,<3.0",
     "gigablah/silex-oauth": "~2.0",
     "csanquer/pdo-service-provider": "~1.1",
-    "aws/aws-sdk-php-silex": "^3.0",
-    "aws/aws-sdk-php": "3.336.0"
+    "guzzlehttp/guzzle": "^7.15"
   },
   "config": {
     "platform": {

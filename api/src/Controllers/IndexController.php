@@ -2,7 +2,6 @@
 
 namespace Controllers;
 
-use Aws\Api\DateTimeResult;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\TransferException;
 use Services\TMDBServiceProvider;

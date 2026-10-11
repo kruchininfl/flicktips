@@ -2,7 +2,6 @@
 
 namespace Security;
 
-use Aws\S3\S3Client;
 use Gigablah\Silex\OAuth\Security\User\Provider\OAuthUserProviderInterface;
 use Gigablah\Silex\OAuth\Security\Authentication\Token\OAuthTokenInterface;
 use Silex\Application;
@@ -42,28 +41,6 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
     {
         $service = strtolower($token->getService());
         $userInfo = $token->getAttribute('userInfo');
-
-        // upload avatar to s3
-        if (isset($userInfo['avatar_source']) && ENABLE_S3) {
-          try {
-            /**
-             * @var $s3 S3Client;
-             */
-            $s3 = $this->app['aws']->createS3();
-            $image = file_get_contents($userInfo['avatar_source']);
-
-            $result = $s3->putObject(array(
-              'Bucket' => 'flicktips',
-              'Key' => 'avatar/origin/' . md5($service . $userInfo['id']) . '.jpg',
-              'Body' => $image,
-              'ContentType' => 'image/jpeg',
-              'ACL' => 'public-read'
-            ));
-
-            $userInfo['avatar'] = $result && isset($result['ObjectURL']) ? $result['ObjectURL'] : null;
-          } catch (Exception $e) {
-          }
-        }
 
         // insert user
         $sth = $this->pdo->prepare('

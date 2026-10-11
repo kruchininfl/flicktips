@@ -1,6 +1,5 @@
 <?php
 
-use Aws\Silex\AwsServiceProvider;
 use Csanquer\Silex\PdoServiceProvider\Provider\PDOServiceProvider;
 use Security\AuthenticationSuccessHandler;
 
@@ -25,16 +24,6 @@ $app->register(
     )
 );
 
-$app->register(new AwsServiceProvider(), array(
-    'aws.config' => array(
-        'version' => 'latest',
-        'region' => 'eu-central-1',
-        'credentials' => [
-            'key'    => env_var('AWS_ACCESS_KEY_ID', ''),
-            'secret' => env_var('AWS_SECRET_ACCESS_KEY', '')
-        ]
-    )
-));
 $app['user.repository'] = new Repositories\UserRepository($app);
 
 $app['movie.repository'] = new Repositories\MovieRepository($app);

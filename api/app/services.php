@@ -53,12 +53,6 @@ $app->register(new Silex\Provider\RoutingServiceProvider());
 
 $app->register(new Services\OAuthServiceProvider(), array(
     'oauth.services' => array(
-        'Facebook' => array(
-            'key' => FACEBOOK_API_KEY,
-            'secret' => FACEBOOK_API_SECRET,
-            'scope' => array('email', 'public_profile', 'user_friends'),
-            'user_endpoint' => 'https://graph.facebook.com/me/?fields=name,picture.type(large){url},gender,location,friends.limit(5000){id}'
-        ),
         'Vkontakte' => array(
             'class' => '\Services\VkId',
             'key' => VKONTAKTE_API_KEY,

@@ -13,8 +13,7 @@ const propTypes = {
 };
 
 const classAliases = {
-  'vkontakte': 'vk',
-  'facebook' : 'fb'
+  'vkontakte': 'vk'
 };
 
 class OAuthButton extends Component {

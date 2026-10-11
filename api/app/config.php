@@ -14,8 +14,6 @@ function env_var($name, $default = null)
     return $value;
 }
 
-define('FACEBOOK_API_KEY',    env_var('FACEBOOK_API_KEY'));
-define('FACEBOOK_API_SECRET', env_var('FACEBOOK_API_SECRET'));
 define('VKONTAKTE_API_KEY',    env_var('VKONTAKTE_API_KEY'));
 define('VKONTAKTE_API_SECRET', env_var('VKONTAKTE_API_SECRET'));
 define('VKONTAKTE_APP_API_KEY',    env_var('VKONTAKTE_APP_API_KEY'));

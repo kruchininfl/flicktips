@@ -10,8 +10,7 @@ const config = {
     backend: {
       apiUrl: 'https://flicktips.ru',
       authProviderPaths: {
-        vkontakte: '/auth/vkontakte',
-        facebook: '/auth/facebook'
+        vkontakte: '/auth/vkontakte'
       },
       tokenValidationPath: '/api/checkUser/',
       signOutPath: null

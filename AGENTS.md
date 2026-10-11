@@ -38,7 +38,7 @@ All run inside the subproject dir (`npm install` first; there is no root install
 - `web/.eslintrc` is strict and non-standard: single quotes, `semi` always but
   `eol-last: never`, `object-curly-spacing: never`, `no-var`, `prefer-const`,
   `max-len 128`, 2-space indent. Match it when editing `web/src`.
-- Secrets (DB password, VK/Facebook OAuth, TMDb and kinopoiskapiunofficial keys, AWS, TMDb
+- Secrets (DB password, VK OAuth, TMDb and kinopoiskapiunofficial keys, AWS, TMDb
   proxy) come from environment variables, never from code: `env_var()` in `api/app/config.php`,
   `env()` in `ft-parser/src/core/env.ts` and `kp-parser/components/env.js`. The list lives in
   `.env.example`; compose loads `.env` (`env_file`) into api, ft-parser and kp-parser, and

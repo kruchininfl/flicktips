@@ -10,8 +10,7 @@ import './SignInPage.scss';
 const propTypes = {
   handleCrossClick: PropTypes.func,
   userSignedIn    : PropTypes.bool.isRequired,
-  loadingVk       : PropTypes.bool.isRequired,
-  loadingFb       : PropTypes.bool.isRequired
+  loadingVk       : PropTypes.bool.isRequired
 };
 
 class SignInPage extends Component {
@@ -24,7 +23,7 @@ class SignInPage extends Component {
   }
 
   render() {
-    const {handleCrossClick, loadingFb, loadingVk, userSignedIn} = this.props;
+    const {handleCrossClick, loadingVk, userSignedIn} = this.props;
 
     if (userSignedIn) {
       if (browserHistory) {
@@ -49,10 +48,7 @@ class SignInPage extends Component {
             рекомендованные твоими друзьями!
           </div>
           <div>
-            <OAuthButton disabled={loadingFb} loading={loadingVk} provider="vkontakte">Войти через Вконтакте</OAuthButton>
-          </div>
-          <div>
-            <OAuthButton disabled={loadingVk} loading={loadingFb} provider="facebook">Войти через Facebook</OAuthButton>
+            <OAuthButton disabled={false} loading={loadingVk} provider="vkontakte">Войти через Вконтакте</OAuthButton>
           </div>
         </div>
       </div>
@@ -62,9 +58,8 @@ class SignInPage extends Component {
 
 function mapStateToProps(state) {
   const loadingVk = state.auth.getIn(['oAuthSignIn', 'vkontakte', 'loading']) || false;
-  const loadingFb = state.auth.getIn(['oAuthSignIn', 'facebook', 'loading']) || false;
 
-  return {userSignedIn: isUserSignedIn(state), loadingVk, loadingFb};
+  return {userSignedIn: isUserSignedIn(state), loadingVk};
 }
 
 SignInPage.propTypes = propTypes;

@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Exception;
 use OAuth\OAuth2\Token\StdOAuth2Token;
+use Services\MyOAuthServiceRegistry;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,11 +23,12 @@ class UserController
             $request->attributes->set('auth_origin_url', $auth_origin_url);
             $request->attributes->set('service', 'vkontakte');
 
+            // no VK ID token here: the signed viewer_id is the proof, profile comes via the service key
             $token = new StdOAuth2Token();
             $token->setAccessToken(VKONTAKTE_APP_SERVICE_KEY);
-            $token->setExtraParams(['user_id' => $uid]);
+            $token->setExtraParams(['user_id' => $uid, 'vk_app' => true]);
 
-            $servise->getStorage()->storeAccessToken('Vkontakte', $token);
+            $servise->getStorage()->storeAccessToken(MyOAuthServiceRegistry::getServiceName($servise), $token);
             return $app['security.http_utils']->createRedirectResponse($request, '_auth_service_check');
         }
 

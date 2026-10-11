@@ -3,6 +3,8 @@
 namespace Controllers;
 
 use Aws\Api\DateTimeResult;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\TransferException;
 use Services\TMDBServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -157,25 +159,37 @@ class IndexController
 
         if (is_null($movie['tmdb_trailers'])) {
             $tmdb = $app['tmdb'];
-            $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
-
             $mapTrailers = function ($trailer) {
                 return $trailer->site . ':' . $trailer->key;
             };
 
-            $movie['tmdb_trailers'] = array_map($mapTrailers, $tmdbResponse->videos->results);
+            try {
+                $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
+                $trailers = array_map($mapTrailers, $tmdbResponse->videos->results);
+            } catch (ClientException $e) {
+                // removed from TMDb (404): remember that there are no trailers; other 4xx (e.g. a bad
+                // API key) must not be cached as "no trailers"
+                $trailers = 404 === $e->getResponse()->getStatusCode() ? array() : null;
+            } catch (TransferException $e) {
+                // TMDb or the proxy is unreachable: show the film now, try again next time
+                $trailers = null;
+            }
 
-            /**
-             * @var $pdo \PDO
-             */
-            $pdo = $app['pdo'];
+            $movie['tmdb_trailers'] = $trailers ?: array();
 
-            $sthMovie = $pdo->prepare('UPDATE movie SET `tmdb_trailers`=:trailers WHERE `id`=:id;');
+            if (null !== $trailers) {
+                /**
+                 * @var $pdo \PDO
+                 */
+                $pdo = $app['pdo'];
 
-            $sthMovie->execute([
-                'id' => $movie['id'],
-                'trailers' => json_encode($movie['tmdb_trailers'])
-            ]);
+                $sthMovie = $pdo->prepare('UPDATE movie SET `tmdb_trailers`=:trailers WHERE `id`=:id;');
+
+                $sthMovie->execute([
+                    'id' => $movie['id'],
+                    'trailers' => json_encode($trailers)
+                ]);
+            }
         } else {
             $movie['tmdb_trailers'] = json_decode($movie['tmdb_trailers']);
         }
@@ -232,9 +246,14 @@ class IndexController
         }
 
         $tmdb = $app['tmdb'];
-        $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
+        try {
+            $tmdbResponse = $tmdb->getMovie($movie['tmdb_id']);
+        } catch (TransferException $e) {
+            // gone from TMDb or TMDb unreachable: keep the poster we have
+            $tmdbResponse = null;
+        }
 
-        if ($tmdbResponse->poster_path) {
+        if ($tmdbResponse && $tmdbResponse->poster_path) {
             /**
              * @var $pdo \PDO
              */

@@ -4,6 +4,7 @@ namespace Listeners;
 
 use Gigablah\Silex\OAuth\Security\Authentication\Token\OAuthToken;
 use Services\MyOAuthServiceRegistry;
+use Services\VkId;
 use Gigablah\Silex\OAuth\OAuthEvents;
 use Gigablah\Silex\OAuth\Event\FilterTokenEvent;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderAdapter;
@@ -115,6 +116,7 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
     {
         $service = $request->attributes->get('service');
         $authOriginUrl = $request->get('auth_origin_url');
+        $session = $request->getSession();
         $oauthService = $this->registry->getService($service, $authOriginUrl);
 
         // redirect to auth provider if initiating
@@ -142,6 +144,11 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
                     'oauth_token' => $token->getRequestToken()
                 );
             }
+            // VK ID needs an exact redirect_uri, so auth_origin_url cannot ride along in it
+            if ($oauthService instanceof VkId && null !== $session) {
+                $session->set('oauth.auth_origin_url', $authOriginUrl);
+            }
+
             $authorizationUri = $oauthService->getAuthorizationUri($authorizationParameters);
 
             return $this->httpUtils->createRedirectResponse($request, $authorizationUri->getAbsoluteUri());
@@ -170,6 +177,25 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
                     $request->query->get('oauth_verifier'),
                     $token->getRequestTokenSecret()
                 );
+            } elseif ($oauthService instanceof VkId) {
+                // the redirect flow returns code/state/device_id as query params, the SDK flow as JSON in payload
+                $params = $request->query->all();
+                if (isset($params['payload'])) {
+                    $params = json_decode($params['payload'], true) ?: array();
+                }
+                if (empty($params['code']) || empty($params['state']) || empty($params['device_id'])) {
+                    throw new AuthenticationException('Token parameters missing.');
+                }
+
+                try {
+                    $oauthService->requestAccessToken($params['code'], $params['state'], $params['device_id']);
+                } catch (OAuthException $exception) {
+                    throw new AuthenticationException('Could not retrieve access token.', null, $exception);
+                }
+
+                if (!$authOriginUrl && null !== $session) {
+                    $authOriginUrl = $session->remove('oauth.auth_origin_url');
+                }
             } else {
                 if (!$request->query->has('code')) {
                     throw new AuthenticationException('Token parameters missing.');

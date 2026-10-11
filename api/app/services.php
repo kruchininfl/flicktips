@@ -60,9 +60,9 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'user_endpoint' => 'https://graph.facebook.com/me/?fields=name,picture.type(large){url},gender,location,friends.limit(5000){id}'
         ),
         'Vkontakte' => array(
+            'class' => '\Services\VkId',
             'key' => VKONTAKTE_API_KEY,
             'secret' => VKONTAKTE_API_SECRET,
-            'scope' => array('friends'),
             'user_endpoint' => function ($token) {
                 $extraParams = $token->getAccessToken()->getExtraParams();
 

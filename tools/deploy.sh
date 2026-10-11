@@ -54,7 +54,7 @@ if [[ "${1:-}" == "--rollback" ]]; then
 fi
 
 TAG="$(git rev-parse HEAD)"
-if [[ -n "$(git status --porcelain)" ]]; then
+if [[ -n "$(git status --porcelain -- . ':!.claude')" ]]; then
   if [[ -z "${ALLOW_DIRTY:-}" ]]; then
     echo "Working tree has uncommitted changes; commit them or set ALLOW_DIRTY=1" >&2
     exit 1

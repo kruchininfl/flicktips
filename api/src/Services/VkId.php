@@ -16,8 +16,8 @@ use OAuth\OAuth2\Token\StdOAuth2Token;
  * VK ID (OAuth 2.1 + PKCE) for apps created in the VK ID cabinet; they cannot use oauth.vk.com.
  *
  * The code_verifier is derived from the state with the app secret, so nothing beyond the state
- * has to be kept in the session. VK ID tokens only carry vkid.* scopes, so VK API calls made via
- * request() use the service key of the vk.com app instead of the user token.
+ * has to be kept in the session. VK ID tokens only carry vkid.* scopes, which is enough for
+ * oauth2/user_info; VK friends are not available to VK ID apps and are no longer synced.
  *
  * @see https://id.vk.ru/about/business/go/docs/ru/vkid/latest/vk-id/connection/start-integration/auth-without-sdk/auth-without-sdk-web
  */
@@ -128,9 +128,7 @@ class VkId extends AbstractService
             ), $extraHeaders, 'POST');
         }
 
-        $uri->addToQuery('access_token', VKONTAKTE_APP_SERVICE_KEY);
-
-        return $this->httpClient->retrieveResponse($uri, $body, $extraHeaders, $method);
+        return parent::request($path, $method, $body, $extraHeaders);
     }
 
     public function isValidScope($scope)

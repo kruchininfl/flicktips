@@ -85,21 +85,6 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
         );
         $user = $this->pdo->query('SELECT * FROM user WHERE id = LAST_INSERT_ID()')->fetch();
 
-        // insert friends
-        if (isset($userInfo['friends']) && count($userInfo['friends'])) {
-            $friends = $this->pdo->query('SELECT id FROM user WHERE `' . $service . '_id` IN (' . join(',', $userInfo['friends']) . ')')->fetchAll(\PDO::FETCH_NUM);
-
-            if (count($friends)) {
-                $stmt = $this->pdo->prepare('INSERT IGNORE INTO user_friends (`user_1`, `user_2`) VALUES (:user1, :user2), (:user2, :user1)');
-                foreach ($friends as $friend) {
-                    $stmt->execute(array(
-                        'user1' => $friend[0],
-                        'user2' => $user['id'],
-                    ));
-                }
-            }
-        }
-
         return $user;
     }
 

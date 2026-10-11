@@ -57,7 +57,7 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'class' => '\Services\VkId',
             'key' => VKONTAKTE_API_KEY,
             'secret' => VKONTAKTE_API_SECRET,
-            // VK ID profile (name, sex, avatar); the service key gets neither photos nor Russian names
+            // VK ID profile: name, sex, avatar
             'user_endpoint' => 'https://id.vk.ru/oauth2/user_info'
         )
     )

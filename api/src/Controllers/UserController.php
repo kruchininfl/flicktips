@@ -3,41 +3,12 @@
 namespace Controllers;
 
 use Exception;
-use OAuth\OAuth2\Token\StdOAuth2Token;
-use Services\MyOAuthServiceRegistry;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class UserController
 {
-    public function validateVkUser(Request $request, Application $app)
-    {
-        $uid = $request->get('user_id');
-        $auth_key = $request->get('auth_key');
-        $auth_origin_url = $request->get('auth_origin_url');
-
-        if ($uid && $auth_key === md5(VKONTAKTE_APP_API_KEY . '_' . $uid . '_' . VKONTAKTE_APP_API_SECRET)) {
-            $servise = $app['oauth']->createService('Vkontakte');
-
-            $request->attributes->set('auth_origin_url', $auth_origin_url);
-            $request->attributes->set('service', 'vkontakte');
-
-            // no VK ID token here: the signed viewer_id is the proof, profile comes via the service key
-            $token = new StdOAuth2Token();
-            $token->setAccessToken(VKONTAKTE_APP_SERVICE_KEY);
-            $token->setExtraParams(['user_id' => $uid, 'vk_app' => true]);
-
-            $servise->getStorage()->storeAccessToken(MyOAuthServiceRegistry::getServiceName($servise), $token);
-            return $app['security.http_utils']->createRedirectResponse($request, '_auth_service_check');
-        }
-
-        return $app->json([
-            'success' => false,
-            'msg' => 'authorization required'
-        ], 401);
-    }
-
     public function validateToken(Request $request, Application $app)
     {
         $uid = $request->headers->get('uid');

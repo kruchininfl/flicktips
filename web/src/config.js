@@ -4,8 +4,6 @@ const config = {
   // apiUrl: 'http://dev.flicktips.ru:8888/api',
   apiUrl: 'https://flicktips.ru/api',
 
-  vkAppUrl: 'https://vk.com/app6127205',
-
   oAuth: {
     backend: {
       apiUrl: 'https://flicktips.ru',

@@ -16,8 +16,6 @@ $app->get('/api/get_digital/', '\Controllers\IndexController::getDigitalFilms');
 
 $app->get('/api/votes/user/{uid}', '\Controllers\IndexController::getVotes')->value('uid', false);
 
-$app->get('/api/app/authVk/', '\Controllers\UserController::validateVkUser');
-
 $app->get('/api/checkUser/', '\Controllers\UserController::validateToken');
 $app->get('/api/user/{uid}', '\Controllers\UserController::getUser')->value('uid', false);
 $app->get('/api/user/friends_votes/', '\Controllers\UserController::getFriendsVotes');

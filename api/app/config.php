@@ -16,8 +16,6 @@ function env_var($name, $default = null)
 
 define('VKONTAKTE_API_KEY',    env_var('VKONTAKTE_API_KEY'));
 define('VKONTAKTE_API_SECRET', env_var('VKONTAKTE_API_SECRET'));
-define('VKONTAKTE_APP_API_KEY',    env_var('VKONTAKTE_APP_API_KEY'));
-define('VKONTAKTE_APP_API_SECRET', env_var('VKONTAKTE_APP_API_SECRET'));
 define('VKONTAKTE_APP_SERVICE_KEY', env_var('VKONTAKTE_APP_SERVICE_KEY'));
 
 define('VOTES_LIST_SIZE', 24);

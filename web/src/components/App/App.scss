@@ -54,18 +54,6 @@ body {
     text-align: center;
     flex-direction: column;
     color: #c0c0c0;
-
-    .layout.m-vk-app & {
-        display: block;
-        width: 300px;
-        height: 250px;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-    }
 }
 .page-ph__icn {
     font-size: 72px;
@@ -635,20 +623,6 @@ html, body, .react-view, .layout {
     &.m-movie {
         padding-bottom: 94px;
     }
-
-    .layout.m-vk-app & {
-        max-width: 807px;
-        min-height: 0;
-        height: auto;
-        overflow-y: auto;
-        display: block;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 70px;
-        bottom: 50px;
-        padding: 10px 20px;
-    }
 }
 .content {
     flex: 1 1 auto;
@@ -674,12 +648,6 @@ html, body, .react-view, .layout {
 
     > .wrapper {
         height: 100%;
-    }
-
-    .layout.m-vk-app & {
-        background: #ffffff;
-        color: #333b41;
-        border-bottom: 1px solid #e7e8ec;
     }
 
     .toggler {
@@ -723,10 +691,6 @@ html, body, .react-view, .layout {
 
     &:hover {
         color: #ffffff;
-
-        .layout.m-vk-app & {
-            color: #18476d;
-        }
     }
 }
 .header__right {
@@ -757,16 +721,6 @@ html, body, .react-view, .layout {
     color: #f1f1ef;
     height: 50px;
     margin-top: -50px;
-
-    .layout.m-vk-app & {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        color: #333b41;
-        border-top: 1px solid #e7e8ec;
-    }
 
     .container.m-movie ~ & {
         margin-top: -94px;

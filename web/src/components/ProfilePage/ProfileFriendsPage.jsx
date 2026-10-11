@@ -7,7 +7,7 @@ import {getUserModel} from '../../redux/models/user';
 import ProfileLayout from './ProfileLayout';
 import Button from '../Gui/Button';
 import {browserHistory} from 'react-router';
-import InviteButton from '../../partitions/VkApp/InviteButton';
+import InviteButton from '../../partitions/InviteButton/InviteButton';
 
 const propTypes = {
   dispatch: PropTypes.func,

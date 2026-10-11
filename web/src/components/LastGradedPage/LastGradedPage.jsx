@@ -6,7 +6,7 @@ import {addLastGraded, getLastGraded} from 'redux/actions/lastGradedActions';
 import Button from '../Gui/Button';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
 import {getUserModel, isUserSignedIn} from '../../redux/models/user';
-import InviteButton from '../../partitions/VkApp/InviteButton';
+import InviteButton from '../../partitions/InviteButton/InviteButton';
 
 const propTypes = {
   dispatch: PropTypes.func,
@@ -16,8 +16,7 @@ const propTypes = {
   userSignedIn: PropTypes.bool,
   user: PropTypes.object,
   response: PropTypes.any,
-  onlyFriends: PropTypes.bool,
-  isVkApp: PropTypes.bool
+  onlyFriends: PropTypes.bool
 };
 
 @asyncConnect([
@@ -111,7 +110,7 @@ class LastGradedPage extends Component {
   }
 
   renderEmptyPage() {
-    const {onlyFriends, isVkApp} = this.props;
+    const {onlyFriends} = this.props;
 
     if (onlyFriends) {
       return (
@@ -119,10 +118,7 @@ class LastGradedPage extends Component {
           <div className="page-ph__icn"><i className="icn icn_list" /></div>
           <div className="page-ph__text">
             К сожалению, ваши друзья пока не оценивали фильмы и сериалы. <br /><br />
-            {isVkApp
-              ? 'Пригласите друзей, чтобы знать какие фильмы им понравились.'
-              : 'Расскажите друзьям о нашем приложение, чтобы знать какие фильмы им понравились.'
-            }
+            Расскажите друзьям о нашем приложении, чтобы знать какие фильмы им понравились.
           </div>
           <br />
           <InviteButton />
@@ -181,9 +177,7 @@ function mapStateToProps(state) {
   const userSignedIn = isUserSignedIn(state);
   const user = userSignedIn && getUserModel(state).toJS();
   const loaded = state.reduxAsyncConnect.loadState.lastGraded && state.reduxAsyncConnect.loadState.lastGraded.loaded;
-  const isVkApp = state.app.get('isVkApp');
-
-  return {pending, loading, loaded, response, user, userSignedIn, onlyFriends, isVkApp};
+  return {pending, loading, loaded, response, user, userSignedIn, onlyFriends};
 }
 
 export default LastGradedPage;

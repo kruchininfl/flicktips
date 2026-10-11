@@ -18,13 +18,10 @@ import {profileUpdate} from '../../redux/actions/profileActions';
 import {Tooltip} from 'react-tippy';
 import {openSignInPopup} from '../../redux/actions/appActions';
 
-const VK = typeof window !== 'undefined' ? window.VK : null;
-
 const propTypes = {
   dispatch    : PropTypes.func,
   socket      : PropTypes.any,
   children    : PropTypes.node,
-  isVkApp     : PropTypes.bool,
   user        : PropTypes.object,
   userSignedIn: PropTypes.bool
 };
@@ -35,12 +32,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if (this.props.isVkApp) {
-      VK.init(() => {
-        VK.callMethod('resizeWindow', '100%', 'auto');
-      });
-    }
-
     this.props.socket.on('vote-changed', (data) => {
       this.props.dispatch(voteUpdateCounters(data));
     });
@@ -57,9 +48,9 @@ class App extends Component {
   };
 
   renderAdv() {
-    const {userSignedIn, isVkApp} = this.props;
+    const {userSignedIn} = this.props;
 
-    if (userSignedIn || isVkApp) {
+    if (userSignedIn) {
       return false;
     }
 
@@ -83,7 +74,7 @@ class App extends Component {
 
   render() {
     return (
-      <div className={'layout' + (this.props.isVkApp ? ' m-vk-app' : '')}>
+      <div className="layout">
         <Helmet>
           <title>FlickTips — фильмы, друзья, лайки</title>
           <meta name="description" content="Рейтинг фильмов и сериалов на основе оценок друзей, кинопоиска и imdb." />
@@ -145,11 +136,10 @@ class App extends Component {
 App.propTypes = propTypes;
 
 function mapStateToProps(state) {
-  const isVkApp = state.app.get('isVkApp');
   const userSignedIn = isUserSignedIn(state);
   const user = userSignedIn ? getUserModel(state).toJS() : {};
 
-  return {isVkApp, user, userSignedIn};
+  return {user, userSignedIn};
 }
 
 export default connect(mapStateToProps)(socketConnect(App));

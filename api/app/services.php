@@ -57,18 +57,8 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'class' => '\Services\VkId',
             'key' => VKONTAKTE_API_KEY,
             'secret' => VKONTAKTE_API_SECRET,
-            'user_endpoint' => function ($token) {
-                $params = $token->getAccessToken()->getExtraParams();
-
-                // vk.com/app6127205 sign-in (UserController::validateVkUser) has only the user id
-                if (!empty($params['vk_app'])) {
-                    return 'https://api.vk.com/method/users.get?v=5.131&lang=ru&fields=photo_max_orig,photo_400_orig,sex&user_ids='
-                        . (int) $params['user_id'];
-                }
-
-                // VK ID profile (name, sex, avatar); the service key gets neither photos nor Russian names
-                return 'https://id.vk.ru/oauth2/user_info';
-            }
+            // VK ID profile (name, sex, avatar); the service key gets neither photos nor Russian names
+            'user_endpoint' => 'https://id.vk.ru/oauth2/user_info'
         )
     )
 ));

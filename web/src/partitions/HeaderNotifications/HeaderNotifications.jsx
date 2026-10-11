@@ -8,7 +8,7 @@ import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import {getFriendsVotes, loadVotes} from '../../redux/actions/feedActions';
 import FriendsVote from '../FriendsVote/FriendsVote';
 import Button from '../../components/Gui/Button';
-import InviteButton from '../VkApp/InviteButton';
+import InviteButton from '../InviteButton/InviteButton';
 
 const propTypes = {
   dispatch           : PropTypes.func.isRequired,

@@ -2,7 +2,6 @@
 	var assetUrl = htmlWebpackPlugin.options.assetUrl;
 	var initialState = htmlWebpackPlugin.options.initialState;
 	var componentHTML = htmlWebpackPlugin.options.componentHTML;
-	var isVkApp = false;
 } %>
 
 <!DOCTYPE html>
@@ -36,9 +35,6 @@
         window.SERVER_TIMESTAMP = <%- new Date().getTime() %>;
 	</script>
 
-	<% if (isVkApp) { %>
-	<script src="//vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
-	<% } %>
 </head>
 <body>
 

@@ -30,6 +30,13 @@ ini_set('display_errors', $app['debug'] ? 1 : 0);
 
 //register an error handler
 Symfony\Component\Debug\ErrorHandler::register();
+
+// with debug off nothing else records failures; this goes to the container log via php-fpm
+$app->error(function (\Exception $e, $code) {
+    if ($code >= 500) {
+        error_log(sprintf('%s: %s at %s:%d', get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()));
+    }
+});
 //$app->error(function (\Exception $e, $code) use ($app) {
 //
 //    $error = array(

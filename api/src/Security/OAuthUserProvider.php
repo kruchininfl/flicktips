@@ -79,7 +79,8 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
                 'avatar_source' => $userInfo['avatar_source'],
                 'gender' => $userInfo['gender'],
                 'service_id' => $userInfo['id'],
-                'service_token' => $token->getCredentials()
+                // provider tokens are never read back, and VK ID ones overflow the varchar(255) column
+                'service_token' => null
             ]
         );
         $user = $this->pdo->query('SELECT * FROM user WHERE id = LAST_INSERT_ID()')->fetch();

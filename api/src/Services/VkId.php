@@ -117,6 +117,17 @@ class VkId extends AbstractService
     public function request($path, $method = 'GET', $body = null, array $extraHeaders = array())
     {
         $uri = $this->determineRequestUriFromPath($path, $this->baseApiUri);
+
+        // VK ID's own endpoints (e.g. oauth2/user_info) take the user token as a form field
+        if ('id.vk.ru' === $uri->getHost()) {
+            $token = $this->storage->retrieveAccessToken($this->service());
+
+            return $this->httpClient->retrieveResponse($uri, array(
+                'access_token' => $token->getAccessToken(),
+                'client_id' => $this->credentials->getConsumerId(),
+            ), $extraHeaders, 'POST');
+        }
+
         $uri->addToQuery('access_token', VKONTAKTE_APP_SERVICE_KEY);
 
         return $this->httpClient->retrieveResponse($uri, $body, $extraHeaders, $method);

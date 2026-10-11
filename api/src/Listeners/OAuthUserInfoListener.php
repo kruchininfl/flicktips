@@ -75,7 +75,21 @@ class OAuthUserInfoListener implements EventSubscriberInterface
         $serviceName = strtolower($token->getService());
 
         if ($serviceName === 'vkontakte') {
-            $rawUserInfo = $rawUserInfo['response'][0];
+            if (isset($rawUserInfo['user'])) {
+                // VK ID oauth2/user_info, mapped onto the users.get fields used below
+                $vkIdUser = $rawUserInfo['user'];
+                $rawUserInfo = array(
+                    'id' => (int) $vkIdUser['user_id'],
+                    'first_name' => isset($vkIdUser['first_name']) ? $vkIdUser['first_name'] : '',
+                    'last_name' => isset($vkIdUser['last_name']) ? $vkIdUser['last_name'] : '',
+                    'sex' => isset($vkIdUser['sex']) ? (int) $vkIdUser['sex'] : 0,
+                    'photo_max_orig' => isset($vkIdUser['avatar']) ? $vkIdUser['avatar'] : null,
+                );
+            } elseif (isset($rawUserInfo['response'][0])) {
+                $rawUserInfo = $rawUserInfo['response'][0];
+            } else {
+                return;
+            }
         }
 
         $userInfo = array();
@@ -107,7 +121,7 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                 if ($serviceName == 'facebook') {
                     return isset($info['picture']['data']['url']) ? $info['picture']['data']['url'] : null;
                 } else if ($serviceName == 'vkontakte') {
-                    return isset($info['photo_400_orig']) ? $info['photo_400_orig'] : isset($info['photo_max_orig']) ? $info['photo_max_orig'] : null;
+                    return isset($info['photo_400_orig']) ? $info['photo_400_orig'] : (isset($info['photo_max_orig']) ? $info['photo_max_orig'] : null);
                 }
             }),
             'friends' => array(function ($info, $serviceName, $accesToken) {

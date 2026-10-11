@@ -24,8 +24,9 @@ $app->before(function (Request $request) {
 });
 
 $app['env'] = $_SERVER['HTTP_HOST'] == 'dev.flicktips.ru:8888' ? 'dev' : 'prod';
-$app['debug'] = true;
-ini_set('display_errors', 1);
+// debug pages print stack traces with OAuth tokens and SQL, so only outside prod
+$app['debug'] = $app['env'] !== 'prod';
+ini_set('display_errors', $app['debug'] ? 1 : 0);
 
 //register an error handler
 Symfony\Component\Debug\ErrorHandler::register();

@@ -18,6 +18,16 @@ use OAuth\Common\Storage\TokenStorageInterface;
 class MyOAuthServiceRegistry extends OAuthServiceRegistry
 {
     /**
+     * @param string $service
+     *
+     * @return bool
+     */
+    public function hasService($service)
+    {
+        return isset($this->serviceMap[strtolower($service)]);
+    }
+
+    /**
      * Retrieve a service by name.
      *
      * @param string $service

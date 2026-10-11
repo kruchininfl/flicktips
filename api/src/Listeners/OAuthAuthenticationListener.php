@@ -10,6 +10,7 @@ use Gigablah\Silex\OAuth\Event\FilterTokenEvent;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderAdapter;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -115,6 +116,10 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
     protected function attemptAuthentication(Request $request)
     {
         $service = $request->attributes->get('service');
+        // e.g. /auth/facebook after Facebook sign-in was removed
+        if (!$this->registry->hasService($service)) {
+            throw new NotFoundHttpException(sprintf('Unknown OAuth service "%s".', $service));
+        }
         $authOriginUrl = $request->get('auth_origin_url');
         $session = $request->getSession();
         $oauthService = $this->registry->getService($service, $authOriginUrl);

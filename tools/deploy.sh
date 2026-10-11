@@ -29,11 +29,19 @@ remote() {
 }
 
 health_check() {
-  local url code failed=0
+  local url code failed attempt
+  # web (SSR) needs up to a minute to boot on the 1-vCPU server, so retry before failing.
+  for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    failed=0
+    for url in "$SITE_URL/" "$SITE_URL/api/"; do
+      code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)"
+      [[ "$code" == 2* || "$code" == 3* ]] || failed=1
+    done
+    [[ "$failed" == 0 ]] && break
+    sleep 5
+  done
   for url in "$SITE_URL/" "$SITE_URL/api/"; do
-    code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)"
-    echo "  $url -> $code"
-    [[ "$code" == 2* || "$code" == 3* ]] || failed=1
+    echo "  $url -> $(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)"
   done
   if [[ "$failed" == 1 ]]; then
     echo "Health check failed. Roll back with: tools/deploy.sh --rollback" >&2
@@ -88,6 +96,5 @@ echo "==> Switching to $TAG"
 remote "docker/deploy.sh up '$TAG' ${services[*]}"
 
 echo "==> Health check"
-sleep 5
 health_check
 echo "Deployed $TAG"

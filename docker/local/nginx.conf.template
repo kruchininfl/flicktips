@@ -1,9 +1,13 @@
 # envsubst template (nginx image), rendered into conf.d/default.conf.
 # Local counterpart of nginx/conf.d/flicktips.conf (see docker-compose.local.yml):
-# plain HTTP on :${LOCAL_HTTP_PORT}, same routing to web SSR (:3001) and PHP-FPM (:9000).
+# HTTPS on ${LOCAL_HOST}:443 (VK ID only accepts https redirect URLs without a port) with a mkcert
+# certificate from docker/local/certs, same routing to web SSR (:3001) and PHP-FPM (:9000).
 server {
-    listen ${LOCAL_HTTP_PORT};
-    server_name localhost;
+    listen 443 ssl;
+    server_name ${LOCAL_HOST} localhost;
+
+    ssl_certificate /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
 
     client_max_body_size 20m;
 
@@ -13,6 +17,16 @@ server {
         fastcgi_param HTTP_HOST $http_host;
         fastcgi_param SCRIPT_FILENAME /var/www/api/web/index.php;
         fastcgi_param DOCUMENT_ROOT /var/www/api/web;
+    }
+
+    # webpack-dev-server bundles and its live-reload socket, so the https page loads them from
+    # its own origin instead of http://localhost:8050
+    location ~ ^/(public/assets|sockjs-node)/ {
+        proxy_pass http://127.0.0.1:8050;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
     }
 
     location / {

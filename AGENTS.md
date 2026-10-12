@@ -16,13 +16,14 @@ subproject is installed and run independently from its own directory.
 
 ## Commands
 
-- Local stack (preferred): `tools/local.sh up` from the repo root → http://localhost:8088.
+- Local stack (preferred): `tools/local.sh up` from the repo root → https://flicktips.local
+  (needs `127.0.0.1 flicktips.local` in `/etc/hosts` and mkcert; the script issues the cert).
   Runs `docker-compose.local.yml` (web SSR + webpack-dev-server :8050 on Node 16, php-fpm API,
   nginx; all share `web`'s network namespace like prod's host network). No local DB: the API
   uses `flicktips_test` on the server via an SSH tunnel on host `127.0.0.1:3307` (reused if
   already open). Needs the secrets in `.env`, SSH to the server and `docker compose`.
   `tools/local.sh down` / `logs [svc]`. Parsers are not included. VK login only works if the
-  local URL is allowed in the VK ID app.
+  local URL is allowed in the VK ID app (VK ID requires https, hence the local TLS).
 
 The rest run inside the subproject dir (`npm install` first; there is no root install).
 

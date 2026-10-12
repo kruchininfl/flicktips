@@ -6,7 +6,9 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-var publicPath = process.env.NODE_ENV === 'development' ? 'http://localhost:8050/public/assets' : '/assets/';
+// ASSET_URL overrides the webpack-dev-server origin (empty = same origin, proxied by the local nginx)
+var assetUrl = process.env.ASSET_URL !== undefined ? process.env.ASSET_URL : 'http://localhost:8050';
+var publicPath = process.env.NODE_ENV === 'development' ? assetUrl + '/public/assets' : '/assets/';
 var outputPath = `${__dirname}/public/assets/`;
 var cssName = 'styles.css';
 var jsName = 'bundle.js';

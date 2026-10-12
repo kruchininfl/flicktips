@@ -5,3 +5,4 @@ node_modules/
 /ft-parser/temp/
 /data/
 .env
+/docker/local/certs/

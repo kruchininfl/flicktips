@@ -17,7 +17,9 @@ import cors from 'cors';
 
 const hash = fs.readFileSync('./src/hash.txt').toString();
 const app = express();
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050' : '';
+// ASSET_URL overrides the webpack-dev-server origin (empty = same origin, proxied by the local nginx)
+const devAssetUrl = process.env.ASSET_URL !== undefined ? process.env.ASSET_URL : 'http://localhost:8050';
+const assetUrl = process.env.NODE_ENV !== 'production' ? devAssetUrl : '';
 
 app.use(cookieParser());
 app.use(cors({credentials: true, origin: 'http://localhost:3001'}));

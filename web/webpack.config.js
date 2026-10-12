@@ -18,7 +18,8 @@ var plugins = [
   new webpack.DefinePlugin({
     'process.env': {
       BROWSER : JSON.stringify(true),
-      NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development')
+      NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
+      SITE_URL: JSON.stringify(process.env.SITE_URL || '')
     }
   }),
   new webpack.LoaderOptionsPlugin({

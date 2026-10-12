@@ -1,12 +1,14 @@
 const TMDB_POSTER_PATH = '//image.tmdb.org/t/p';
+// SITE_URL comes from the environment on the server and from webpack DefinePlugin in the bundle
+const SITE_URL = process.env.SITE_URL || 'https://flicktips.ru';
 
 const config = {
-  // apiUrl: 'http://dev.flicktips.ru:8888/api',
-  apiUrl: 'https://flicktips.ru/api',
+  siteUrl: SITE_URL,
+  apiUrl : SITE_URL + '/api',
 
   oAuth: {
     backend: {
-      apiUrl: 'https://flicktips.ru',
+      apiUrl: SITE_URL,
       authProviderPaths: {
         vkontakte: '/auth/vkontakte'
       },

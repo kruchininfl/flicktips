@@ -23,7 +23,8 @@ $app->before(function (Request $request) {
     }
 });
 
-$app['env'] = $_SERVER['HTTP_HOST'] == 'dev.flicktips.ru:8888' ? 'dev' : 'prod';
+// APP_ENV=dev is set by docker-compose.local.yml; 'dev' also selects the flicktips_test DB
+$app['env'] = getenv('APP_ENV') ?: ($_SERVER['HTTP_HOST'] == 'dev.flicktips.ru:8888' ? 'dev' : 'prod');
 // debug pages print stack traces with OAuth tokens and SQL, so only outside prod
 $app['debug'] = $app['env'] !== 'prod';
 ini_set('display_errors', $app['debug'] ? 1 : 0);

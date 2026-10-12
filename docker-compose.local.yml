@@ -1,0 +1,97 @@
+# Local development stack: web SSR + webpack-dev-server, PHP API and nginx on
+# http://localhost:8088 (LOCAL_HTTP_PORT; the same URL must work inside the containers for SSR).
+# There is no local DB: the API talks to flicktips_test on the server through an SSH tunnel
+# that tools/local.sh opens on the host (LOCAL_DB_PORT, default 3307).
+#
+#   tools/local.sh up      # tunnel + docker compose -f docker-compose.local.yml up --build
+#   tools/local.sh down
+#
+# All services share the network namespace of `web` (like network_mode: host in production),
+# so they reach each other on 127.0.0.1 exactly as on the server: web :3001, php-fpm :9000,
+# nginx :${LOCAL_HTTP_PORT}, webpack-dev-server :8050. Parsers are not part of the local stack.
+
+services:
+  # Installs web/node_modules into a volume with Node 16 (the host Node is too new for
+  # webpack 2 / node-sass); reruns npm ci only when package-lock.json changes.
+  web-deps:
+    image: node:16
+    working_dir: /app
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    command: >
+      sh -c 'h=$$(md5sum package-lock.json);
+      [ "$$h" = "$$(cat node_modules/.lock-md5 2>/dev/null)" ] ||
+      { npm ci && echo "$$h" > node_modules/.lock-md5; }'
+
+  web:
+    image: node:16
+    working_dir: /app
+    depends_on:
+      web-deps:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${LOCAL_HTTP_PORT:-8088}:${LOCAL_HTTP_PORT:-8088}"
+      # webpack-dev-server; the port is hardcoded in web/src/server.js and webpack.config.js
+      - "127.0.0.1:8050:8050"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    environment:
+      SITE_URL: http://localhost:${LOCAL_HTTP_PORT:-8088}
+      CHOKIDAR_USEPOLLING: "true"
+    command: npm run nodemon
+
+  assets:
+    image: node:16
+    working_dir: /app
+    network_mode: service:web
+    depends_on:
+      - web
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      SITE_URL: http://localhost:${LOCAL_HTTP_PORT:-8088}
+      CHOKIDAR_USEPOLLING: "true"
+    command: >
+      node_modules/.bin/webpack-dev-server --hot --inline --colors --devtool source-map
+      --content-base public --port 8050 --host 0.0.0.0 --public localhost:8050
+
+  api:
+    image: flicktips-api:local
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    network_mode: service:web
+    depends_on:
+      - web
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      APP_ENV: dev
+      DB_HOST: host.docker.internal
+      DB_PORT: ${LOCAL_DB_PORT:-3307}
+    volumes:
+      - ./api:/var/www/api
+      # keep the image's composer vendor instead of the host's api/vendor
+      - /var/www/api/vendor
+
+  nginx:
+    image: nginx:1.28-alpine
+    network_mode: service:web
+    depends_on:
+      - web
+      - api
+    environment:
+      LOCAL_HTTP_PORT: ${LOCAL_HTTP_PORT:-8088}
+      NGINX_ENVSUBST_FILTER: ^LOCAL_
+    volumes:
+      - ./docker/local/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+
+volumes:
+  web_node_modules:

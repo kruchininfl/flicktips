@@ -8,9 +8,9 @@ $app->register(
     array(
         'pdo.server'   => array(
             'driver'   => 'mysql',
-            'host'     => '127.0.0.1',
+            'host'     => env_var('DB_HOST', '127.0.0.1'),
             'dbname'   => $app['env'] == 'prod' ? 'flicktips' : 'flicktips_test',
-            'port'     => 3306,
+            'port'     => (int) env_var('DB_PORT', 3306),
             'user'     => env_var('DB_USER', 'flicktips'),
             'password' => env_var('DB_PASSWORD'),
         ),

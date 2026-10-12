@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'cordova') {
   appHistory = useRouterHistory(createHashHistory)({queryKey: false});
 }
 
-const socket = io.connect('https://flicktips.ru');
+const socket = io.connect(config.siteUrl);
 
 const component = (
   <SocketProvider socket={socket}>

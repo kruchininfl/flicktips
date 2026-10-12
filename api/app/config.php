@@ -16,6 +16,8 @@ function env_var($name, $default = null)
 
 define('VKONTAKTE_API_KEY',    env_var('VKONTAKTE_API_KEY'));
 define('VKONTAKTE_API_SECRET', env_var('VKONTAKTE_API_SECRET'));
+define('YANDEX_CLIENT_ID',     env_var('YANDEX_CLIENT_ID'));
+define('YANDEX_CLIENT_SECRET', env_var('YANDEX_CLIENT_SECRET'));
 
 define('VOTES_LIST_SIZE', 24);
 define('FRIENDS_VOTES_LIST_SIZE', 24);

@@ -5,6 +5,7 @@ namespace Listeners;
 use Gigablah\Silex\OAuth\Security\Authentication\Token\OAuthToken;
 use Services\MyOAuthServiceRegistry;
 use Services\VkId;
+use Services\Yandex;
 use Gigablah\Silex\OAuth\OAuthEvents;
 use Gigablah\Silex\OAuth\Event\FilterTokenEvent;
 use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderAdapter;
@@ -149,8 +150,8 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
                     'oauth_token' => $token->getRequestToken()
                 );
             }
-            // VK ID needs an exact redirect_uri, so auth_origin_url cannot ride along in it
-            if ($oauthService instanceof VkId && null !== $session) {
+            // VK ID and Yandex ID need an exact redirect_uri, so auth_origin_url cannot ride along in it
+            if (($oauthService instanceof VkId || $oauthService instanceof Yandex) && null !== $session) {
                 $session->set('oauth.auth_origin_url', $authOriginUrl);
             }
 
@@ -194,6 +195,20 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
 
                 try {
                     $oauthService->requestAccessToken($params['code'], $params['state'], $params['device_id']);
+                } catch (OAuthException $exception) {
+                    throw new AuthenticationException('Could not retrieve access token.', null, $exception);
+                }
+
+                if (!$authOriginUrl && null !== $session) {
+                    $authOriginUrl = $session->remove('oauth.auth_origin_url');
+                }
+            } elseif ($oauthService instanceof Yandex) {
+                if (!$request->query->has('code') || !$request->query->has('state')) {
+                    throw new AuthenticationException('Token parameters missing.');
+                }
+
+                try {
+                    $oauthService->requestAccessToken($request->query->get('code'), $request->query->get('state'));
                 } catch (OAuthException $exception) {
                     throw new AuthenticationException('Could not retrieve access token.', null, $exception);
                 }

@@ -48,6 +48,13 @@ $app->register(new Services\OAuthServiceProvider(), array(
             'secret' => VKONTAKTE_API_SECRET,
             // VK ID profile: name, sex, avatar
             'user_endpoint' => 'https://id.vk.ru/oauth2/user_info'
+        ),
+        'Yandex' => array(
+            'class' => '\Services\Yandex',
+            'key' => YANDEX_CLIENT_ID,
+            'secret' => YANDEX_CLIENT_SECRET,
+            // name, sex, avatar; the scopes are set on the app in oauth.yandex.ru
+            'user_endpoint' => 'https://login.yandex.ru/info?format=json'
         )
     )
 ));

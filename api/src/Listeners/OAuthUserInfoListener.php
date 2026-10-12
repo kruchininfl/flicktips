@@ -103,6 +103,13 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                     return isset($info['name']) ? $info['name'] : null;
                 } else if ($serviceName == 'vkontakte') {
                     return $info['first_name'] . (isset($info['first_name']) && isset($info['last_name']) ? ' ' : '') . $info['last_name'];
+                } else if ($serviceName == 'yandex') {
+                    foreach (array('real_name', 'display_name', 'login') as $field) {
+                        if (!empty($info[$field])) {
+                            return $info[$field];
+                        }
+                    }
+                    return '';
                 }
             }),
             'gender' => array(function ($info, $serviceName) {
@@ -115,6 +122,8 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                         return 'male';
                     }
                     return null;
+                } else if ($serviceName == 'yandex') {
+                    return isset($info['sex']) && in_array($info['sex'], array('male', 'female'), true) ? $info['sex'] : null;
                 }
             }),
             'avatar_source' => array(function ($info, $serviceName) {
@@ -122,6 +131,11 @@ class OAuthUserInfoListener implements EventSubscriberInterface
                     return isset($info['picture']['data']['url']) ? $info['picture']['data']['url'] : null;
                 } else if ($serviceName == 'vkontakte') {
                     return isset($info['photo_400_orig']) ? $info['photo_400_orig'] : (isset($info['photo_max_orig']) ? $info['photo_max_orig'] : null);
+                } else if ($serviceName == 'yandex') {
+                    if (!empty($info['is_avatar_empty']) || empty($info['default_avatar_id'])) {
+                        return null;
+                    }
+                    return 'https://avatars.yandex.net/get-yapic/' . $info['default_avatar_id'] . '/islands-200';
                 }
             }),
         );

@@ -10,7 +10,8 @@ const config = {
     backend: {
       apiUrl: SITE_URL,
       authProviderPaths: {
-        vkontakte: '/auth/vkontakte'
+        vkontakte: '/auth/vkontakte',
+        yandex: '/auth/yandex'
       },
       tokenValidationPath: '/api/checkUser/',
       signOutPath: null

@@ -10,7 +10,8 @@ import './SignInPage.scss';
 const propTypes = {
   handleCrossClick: PropTypes.func,
   userSignedIn    : PropTypes.bool.isRequired,
-  loadingVk       : PropTypes.bool.isRequired
+  loadingVk       : PropTypes.bool.isRequired,
+  loadingYa       : PropTypes.bool.isRequired
 };
 
 class SignInPage extends Component {
@@ -23,7 +24,7 @@ class SignInPage extends Component {
   }
 
   render() {
-    const {handleCrossClick, loadingVk, userSignedIn} = this.props;
+    const {handleCrossClick, loadingVk, loadingYa, userSignedIn} = this.props;
 
     if (userSignedIn) {
       if (browserHistory) {
@@ -50,6 +51,9 @@ class SignInPage extends Component {
           <div>
             <OAuthButton disabled={false} loading={loadingVk} provider="vkontakte">Войти через Вконтакте</OAuthButton>
           </div>
+          <div>
+            <OAuthButton disabled={false} loading={loadingYa} provider="yandex">Войти с Яндекс ID</OAuthButton>
+          </div>
         </div>
       </div>
     );
@@ -58,8 +62,9 @@ class SignInPage extends Component {
 
 function mapStateToProps(state) {
   const loadingVk = state.auth.getIn(['oAuthSignIn', 'vkontakte', 'loading']) || false;
+  const loadingYa = state.auth.getIn(['oAuthSignIn', 'yandex', 'loading']) || false;
 
-  return {userSignedIn: isUserSignedIn(state), loadingVk};
+  return {userSignedIn: isUserSignedIn(state), loadingVk, loadingYa};
 }
 
 SignInPage.propTypes = propTypes;

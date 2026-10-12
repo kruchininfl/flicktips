@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tools/deploy.sh:*)",
+      "Bash(ssh root@45.15.252.159:*)"
+    ]
+  }
+}

@@ -31,7 +31,7 @@ class UserRepository {
         $safety_fields[] = 'SUM(IF(movie_vote.timestamp > `user`.last_seen_notifications, 1, 0)) AS new_notifications';
         $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ', hide_viewed
         FROM user 
-        LEFT JOIN `movie_vote` ON `movie_vote`.`user_id` IN (SELECT `user_friends`.`user_2` FROM `user_friends` WHERE `user_friends`.`user_1` = :uid)
+        LEFT JOIN `movie_vote` ON `movie_vote`.`user_id` IN (SELECT `user_friends`.`user_2` FROM `user_friends` WHERE `user_friends`.`user_1` = :uid AND `user_friends`.`subscribed` = 1)
         WHERE `user`.id = :uid AND token = :token');
         $sth->bindValue('uid', $uid);
         $sth->bindValue('token', $token);
@@ -214,17 +214,216 @@ class UserRepository {
         return $bookmarks;
     }
 
-    public function getFriends($uid, $limit, $offset)
+    /**
+     * People $uid follows ($type = 'following') or people following $uid ($type = 'followers').
+     * `subscribed` is always "does $uid see this user's votes". Unfollowed users keep their row with
+     * subscribed = 0 and drop out of both lists.
+     */
+    public function getFriends($uid, $limit, $offset, $type = 'following')
     {
         $safety_fields = array_map(function ($val) { return 'user.' . $val; }, $this->safety_fields);
-        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ', user_friends.subscribed FROM user_friends 
-        LEFT JOIN user ON user.id = user_friends.user_2
-        WHERE user_1 = :uid ORDER BY user.id LIMIT :limit OFFSET :offset');
+
+        if ($type === 'followers') {
+            $sql = 'SELECT ' . implode(', ', $safety_fields) . ', IFNULL(back.subscribed, 0) AS subscribed FROM user_friends
+            INNER JOIN user ON user.id = user_friends.user_1
+            LEFT JOIN user_friends back ON back.user_1 = :uid AND back.user_2 = user_friends.user_1
+            WHERE user_friends.user_2 = :uid AND user_friends.subscribed = 1 ORDER BY user.id LIMIT :limit OFFSET :offset';
+        } else {
+            $sql = 'SELECT ' . implode(', ', $safety_fields) . ', user_friends.subscribed FROM user_friends
+            INNER JOIN user ON user.id = user_friends.user_2
+            WHERE user_1 = :uid AND user_friends.subscribed = 1 ORDER BY user.id LIMIT :limit OFFSET :offset';
+        }
+
+        $sth = $this->pdo->prepare($sql);
         $sth->bindValue(':uid', (int) $uid, \PDO::PARAM_INT);
         $sth->bindValue(':limit', isset($limit) ? (int) $limit : 18446744073709551615, \PDO::PARAM_INT);
         $sth->bindValue(':offset', isset($offset) ? (int) $offset : 0, \PDO::PARAM_INT);
         $sth->execute();
-        $rows = $sth->fetchAll();
+
+        return $this->castUsers($sth->fetchAll());
+    }
+
+    public function countFriends($uid, $type = 'following')
+    {
+        $sql = $type === 'followers'
+            ? 'SELECT COUNT(*) AS num FROM user_friends INNER JOIN user ON user.id = user_friends.user_1
+               WHERE user_friends.user_2 = :uid AND user_friends.subscribed = 1'
+            : 'SELECT COUNT(*) AS num FROM user_friends INNER JOIN user ON user.id = user_friends.user_2
+               WHERE user_friends.user_1 = :uid AND user_friends.subscribed = 1';
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute(['uid' => (int) $uid]);
+
+        return intval($sth->fetch()['num']);
+    }
+
+    /**
+     * Users whose name contains $query, prefix matches first. $viewerId (optional) is excluded and
+     * gets a `subscribed` flag per user.
+     */
+    public function search($query, $viewerId, $limit)
+    {
+        $safety_fields = array_map(function ($val) { return 'user.' . $val; }, $this->safety_fields);
+        $like = addcslashes($query, '\\%_');
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $safety_fields) . ', IFNULL(uf.subscribed, 0) AS subscribed
+        FROM user
+        LEFT JOIN user_friends uf ON uf.user_1 = :viewer AND uf.user_2 = user.id
+        WHERE user.username LIKE :contains AND user.id <> :viewer
+        ORDER BY user.username LIKE :prefix DESC, user.username
+        LIMIT :limit');
+        $sth->bindValue(':viewer', (int) $viewerId, \PDO::PARAM_INT);
+        $sth->bindValue(':contains', '%' . $like . '%');
+        $sth->bindValue(':prefix', $like . '%');
+        $sth->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+        $sth->execute();
+
+        return $this->castUsers($sth->fetchAll());
+    }
+
+    /**
+     * Follow state between the viewer and another user: [subscribed => viewer follows, followsMe => user follows viewer].
+     */
+    public function getRelation($viewerId, $userId)
+    {
+        $sth = $this->pdo->prepare('SELECT user_1, subscribed FROM user_friends
+        WHERE (user_1 = :viewer AND user_2 = :user) OR (user_1 = :user AND user_2 = :viewer)');
+        $sth->execute(['viewer' => (int) $viewerId, 'user' => (int) $userId]);
+
+        $relation = ['subscribed' => false, 'followsMe' => false];
+        foreach ($sth->fetchAll() as $row) {
+            $relation[(int) $row['user_1'] === (int) $viewerId ? 'subscribed' : 'followsMe'] = (bool) $row['subscribed'];
+        }
+
+        return $relation;
+    }
+
+    public function setSubscribed($uid, $userId, $subscribed)
+    {
+        $sth = $this->pdo->prepare('INSERT INTO user_friends (user_1, user_2, subscribed) VALUES (:uid, :user, :subscribed)
+        ON DUPLICATE KEY UPDATE subscribed = VALUES(subscribed)');
+        $sth->execute(['uid' => (int) $uid, 'user' => (int) $userId, 'subscribed' => $subscribed ? 1 : 0]);
+    }
+
+    public function getInviteCode($uid)
+    {
+        $sth = $this->pdo->prepare('SELECT invite_code FROM user WHERE id = :uid');
+        $sth->execute(['uid' => (int) $uid]);
+        $code = $sth->fetchColumn();
+
+        if ($code) {
+            return $code;
+        }
+
+        // only set it if it is still empty, so two parallel requests end up with the same code
+        $sth = $this->pdo->prepare('UPDATE user SET invite_code = :code WHERE id = :uid AND invite_code IS NULL');
+        $sth->execute(['uid' => (int) $uid, 'code' => bin2hex(random_bytes(6))]);
+
+        return $this->getInviteCode($uid);
+    }
+
+    public function findByInviteCode($code)
+    {
+        $sth = $this->pdo->prepare('SELECT ' . implode(', ', $this->safety_fields) . ' FROM user WHERE invite_code = :code');
+        $sth->execute(['code' => (string) $code]);
+        $user = $sth->fetch();
+
+        if ($user) {
+            settype($user['id'], 'int');
+        }
+
+        return $user;
+    }
+
+    /**
+     * An accepted invite makes both users follow each other.
+     */
+    public function makeFriends($uid, $friendId)
+    {
+        $sth = $this->pdo->prepare('INSERT INTO user_friends (user_1, user_2, subscribed) VALUES (:user1, :user2, 1), (:user2, :user1, 1)
+        ON DUPLICATE KEY UPDATE subscribed = 1');
+        $sth->execute(['user1' => (int) $uid, 'user2' => (int) $friendId]);
+    }
+
+    /**
+     * Up to $limit people for $uid to follow: friends of friends first (most mutual follows), then
+     * people who voted the same way on the same movies, then random users (those with votes first).
+     * Each gets `reason` (friends | votes | random) and `reason_count` (mutual follows / matching votes).
+     */
+    public function getRecommendations($uid, $limit)
+    {
+        $uid = (int) $uid;
+        $fields = implode(', ', array_map(function ($val) { return 'user.' . $val; }, $this->safety_fields));
+
+        $sth = $this->pdo->prepare('SELECT user_2 FROM user_friends WHERE user_1 = :uid AND subscribed = 1');
+        $sth->execute(['uid' => $uid]);
+        $exclude = array_map('intval', $sth->fetchAll(\PDO::FETCH_COLUMN));
+        $exclude[] = $uid;
+
+        $result = [];
+        $add = function ($rows, $reason) use (&$result, &$exclude, $limit) {
+            foreach ($rows as $row) {
+                if (count($result) >= $limit || in_array((int) $row['id'], $exclude, true)) {
+                    continue;
+                }
+                $exclude[] = (int) $row['id'];
+                $row['reason'] = $reason;
+                $row['reason_count'] = isset($row['reason_count']) ? (int) $row['reason_count'] : 0;
+                $row['subscribed'] = false;
+                $result[] = $row;
+            }
+        };
+        // ids are ints from the DB, safe to inline
+        $notIn = function () use (&$exclude) {
+            return implode(',', $exclude);
+        };
+
+        // people followed by the people I follow
+        $sth = $this->pdo->prepare('SELECT ' . $fields . ', COUNT(DISTINCT mine.user_2) AS reason_count
+        FROM user_friends mine
+        INNER JOIN user_friends theirs ON theirs.user_1 = mine.user_2 AND theirs.subscribed = 1
+        INNER JOIN user ON user.id = theirs.user_2
+        WHERE mine.user_1 = :uid AND mine.subscribed = 1 AND user.id NOT IN (' . $notIn() . ')
+        GROUP BY user.id ORDER BY reason_count DESC, user.id DESC LIMIT :limit');
+        $sth->bindValue(':uid', $uid, \PDO::PARAM_INT);
+        $sth->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+        $sth->execute();
+        $add($sth->fetchAll(), 'friends');
+
+        // same vote on the same movie, at least 2 such movies
+        if (count($result) < $limit) {
+            $sth = $this->pdo->prepare('SELECT ' . $fields . ', COUNT(*) AS reason_count
+            FROM movie_vote mine
+            INNER JOIN movie_vote theirs ON theirs.movie_id = mine.movie_id AND theirs.vote = mine.vote
+            INNER JOIN user ON user.id = theirs.user_id
+            WHERE mine.user_id = :uid AND user.id NOT IN (' . $notIn() . ')
+            GROUP BY user.id HAVING reason_count >= 2 ORDER BY reason_count DESC LIMIT :limit');
+            $sth->bindValue(':uid', $uid, \PDO::PARAM_INT);
+            $sth->bindValue(':limit', (int) ($limit - count($result)), \PDO::PARAM_INT);
+            $sth->execute();
+            $add($sth->fetchAll(), 'votes');
+        }
+
+        if (count($result) < $limit) {
+            $sth = $this->pdo->prepare('SELECT ' . $fields . ' FROM user
+            WHERE user.id NOT IN (' . $notIn() . ')
+            ORDER BY EXISTS (SELECT 1 FROM movie_vote WHERE movie_vote.user_id = user.id) DESC, RAND() LIMIT :limit');
+            $sth->bindValue(':limit', (int) ($limit - count($result)), \PDO::PARAM_INT);
+            $sth->execute();
+            $add($sth->fetchAll(), 'random');
+        }
+
+        foreach ($result as &$row) {
+            settype($row['id'], 'int');
+        }
+
+        return $result;
+    }
+
+    private function castUsers($rows)
+    {
+        foreach ($rows as &$row) {
+            settype($row['id'], 'int');
+            $row['subscribed'] = (bool) $row['subscribed'];
+        }
 
         return $rows;
     }

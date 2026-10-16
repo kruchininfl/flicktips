@@ -39,6 +39,15 @@ class UserController
             ], 404);
         }
 
+        settype($user['id'], 'int');
+        $viewer = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+        if ($viewer && $viewer['id'] !== $user['id']) {
+            $user = array_merge($user, $app['user.repository']->getRelation($viewer['id'], $user['id']));
+        }
+
         return $app->json([
             'success' => true,
             'user' => $user
@@ -162,9 +171,8 @@ class UserController
         $size = $request->get('size') ? $request->get('size') : FRIENDS_LIST_SIZE;
         $page = $request->get('page') ? $request->get('page') : 1;
 
-        $totalSth = $app['pdo']->prepare('SELECT COUNT(user_friends.user_2) AS num FROM user_friends WHERE user_friends.user_1 = :uid');
-        $totalSth->execute(['uid' => $user['id']]);
-        $total = intval($totalSth->fetch()['num']);
+        $type = $request->get('type') === 'followers' ? 'followers' : 'following';
+        $total = $app['user.repository']->countFriends($user['id'], $type);
 
         if ($total == 0) {
             return $app->json([
@@ -184,7 +192,7 @@ class UserController
                 'total' => $total,
                 'page' => (int) $page,
                 'pages' => ceil($total / $size),
-                'entities' => $app['user.repository']->getFriends($user['id'], $size, ($page - 1) * $size)
+                'entities' => $app['user.repository']->getFriends($user['id'], $size, ($page - 1) * $size, $type)
             ]
         ]);
     }
@@ -424,6 +432,157 @@ class UserController
         return $app->json([
             'success' => true,
             'data' => $user
+        ]);
+    }
+
+    public function subscribe(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $userId = (int) $request->get('userId');
+        $subscribed = (bool) $request->get('subscribed');
+
+        if ($userId === $user['id']) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'cannot subscribe to yourself'
+            ], 400);
+        }
+
+        if (!$app['user.repository']->findById($userId)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'user not found'
+            ], 404);
+        }
+
+        $app['user.repository']->setSubscribed($user['id'], $userId, $subscribed);
+
+        return $app->json([
+            'success' => true,
+            'userId' => $userId,
+            'subscribed' => $subscribed
+        ]);
+    }
+
+    public function searchUsers(Request $request, Application $app)
+    {
+        $query = trim((string) $request->get('q'));
+        $viewer = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (mb_strlen($query) < 2) {
+            return $app->json([
+                'success' => true,
+                'results' => []
+            ]);
+        }
+
+        return $app->json([
+            'success' => true,
+            'results' => $app['user.repository']->search(mb_substr($query, 0, 64), $viewer ? $viewer['id'] : 0, USERS_SEARCH_SIZE)
+        ]);
+    }
+
+    public function getRecommendations(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        return $app->json([
+            'success' => true,
+            'results' => $app['user.repository']->getRecommendations($user['id'], USERS_RECOMMENDATIONS_SIZE)
+        ]);
+    }
+
+    public function getInviteCode(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        return $app->json([
+            'success' => true,
+            'code' => $app['user.repository']->getInviteCode($user['id'])
+        ]);
+    }
+
+    public function getInvite(Request $request, Application $app)
+    {
+        $inviter = $app['user.repository']->findByInviteCode($request->get('code'));
+
+        if (!$inviter) {
+            return $app->json([
+                'success' => false,
+                'err' => 'Invite not found'
+            ], 404);
+        }
+
+        return $app->json([
+            'success' => true,
+            'user' => $inviter
+        ]);
+    }
+
+    public function acceptInvite(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $inviter = $app['user.repository']->findByInviteCode($request->get('code'));
+
+        if (!$inviter) {
+            return $app->json([
+                'success' => false,
+                'err' => 'Invite not found'
+            ], 404);
+        }
+
+        if ($inviter['id'] !== $user['id']) {
+            $app['user.repository']->makeFriends($user['id'], $inviter['id']);
+        }
+
+        return $app->json([
+            'success' => true,
+            'inviterId' => $inviter['id']
         ]);
     }
 }

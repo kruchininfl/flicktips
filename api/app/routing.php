@@ -23,6 +23,12 @@ $app->get('/api/user/friends/', '\Controllers\UserController::getFriends');
 $app->get('/api/user/bookmarks/', '\Controllers\UserController::getBookmarks');
 $app->post('/api/user/vote/', '\Controllers\UserController::toggleVote');
 $app->post('/api/user/toggle_subscribe/', '\Controllers\UserController::toggleSubscribe');
+$app->post('/api/user/subscribe/', '\Controllers\UserController::subscribe');
+$app->get('/api/user/invite/', '\Controllers\UserController::getInviteCode');
+$app->get('/api/user/recommendations/', '\Controllers\UserController::getRecommendations');
+$app->post('/api/user/accept_invite/', '\Controllers\UserController::acceptInvite');
+$app->get('/api/users/search/', '\Controllers\UserController::searchUsers');
+$app->get('/api/invite/{code}', '\Controllers\UserController::getInvite');
 $app->post('/api/user/toggle_bookmark/', '\Controllers\UserController::toggleBookmark');
 $app->put('/api/user/', '\Controllers\UserController::updateUser');
 

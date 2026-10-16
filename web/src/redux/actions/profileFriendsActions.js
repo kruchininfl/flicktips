@@ -3,13 +3,16 @@ export const PROFILE_FRIENDS_LOADING_FINISH = 'PROFILE_FRIENDS_LOADING_FINISH';
 export const PROFILE_FRIENDS_LOADING_ERROR = 'PROFILE_FRIENDS_LOADING_ERROR';
 export const PROFILE_FRIENDS_ADD_START = 'PROFILE_FRIENDS_ADD_START';
 export const PROFILE_FRIENDS_ADD_FINISH = 'PROFILE_FRIENDS_ADD_FINISH';
-export const TOGGLE_FRIEND_SUBSCRIBE_START = 'TOGGLE_FRIEND_SUBSCRIBE_START';
-export const TOGGLE_FRIEND_SUBSCRIBE_FINISH = 'TOGGLE_FRIEND_SUBSCRIBE_FINISH';
+export const USER_SUBSCRIBE_FINISH = 'USER_SUBSCRIBE_FINISH';
+export const USERS_SEARCH_START = 'USERS_SEARCH_START';
+export const USERS_SEARCH_FINISH = 'USERS_SEARCH_FINISH';
+export const PROFILE_FRIENDS_FIND_OPEN = 'PROFILE_FRIENDS_FIND_OPEN';
+export const RECOMMENDATIONS_FINISH = 'RECOMMENDATIONS_FINISH';
 
 import api from 'api';
 
-function startRequest() {
-  return {type: PROFILE_FRIENDS_LOADING_START};
+function startRequest(listType) {
+  return {type: PROFILE_FRIENDS_LOADING_START, listType};
 }
 
 function finishRequest(response) {
@@ -28,11 +31,12 @@ function addFriendsFinish(response) {
   return {type: PROFILE_FRIENDS_ADD_FINISH, response};
 }
 
-export function getUserFriends() {
+// listType: 'following' (people I follow) or 'followers'; the 'find' tab is opened by openFindFriends
+export function getUserFriends(listType = 'following') {
   return (dispatch) => {
-    dispatch(startRequest());
+    dispatch(startRequest(listType));
 
-    return dispatch(api.getUserFriends())
+    return dispatch(api.getUserFriends(1, listType))
       .then((response) => {
         dispatch(finishRequest(response.body));
       })
@@ -41,25 +45,45 @@ export function getUserFriends() {
 }
 
 export function loadFriends(page) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(addFriendsStart());
 
-    dispatch(api.getUserFriends(page))
+    dispatch(api.getUserFriends(page, getState().userFriends.get('listType')))
       .then((response) => dispatch(addFriendsFinish(response.body)));
   };
 }
 
-export function toggleSubscribe(friendId) {
-  return (dispatch) => {
-    dispatch({
-      type: TOGGLE_FRIEND_SUBSCRIBE_START,
-      friendId
-    });
+// Follow / unfollow any user; every list holding this user (profile, friends, search) updates on finish
+export function subscribe(userId, subscribed) {
+  return (dispatch) => dispatch(api.subscribe(userId, subscribed))
+    .then((response) => dispatch({
+      type: USER_SUBSCRIBE_FINISH,
+      userId: response.body.userId,
+      subscribed: response.body.subscribed
+    }));
+}
 
-    dispatch(api.toggleSubscribe(friendId))
-      .then((response) => dispatch({
-        type: TOGGLE_FRIEND_SUBSCRIBE_FINISH,
-        response: response.body
-      }));
+export function searchUsers(query) {
+  return (dispatch) => {
+    dispatch({type: USERS_SEARCH_START, query});
+
+    if (query.trim().length < 2) {
+      return Promise.resolve(dispatch({type: USERS_SEARCH_FINISH, query, results: []}));
+    }
+
+    return dispatch(api.searchUsers(query.trim()))
+      .then((response) => dispatch({type: USERS_SEARCH_FINISH, query, results: response.body.results}))
+      .catch(() => dispatch({type: USERS_SEARCH_FINISH, query, results: []}));
+  };
+}
+
+// "Найти друзей" tab: people search plus recommended users (reloaded on every open)
+export function openFindFriends() {
+  return (dispatch) => {
+    dispatch({type: PROFILE_FRIENDS_FIND_OPEN});
+
+    return dispatch(api.getRecommendations())
+      .then((response) => dispatch({type: RECOMMENDATIONS_FINISH, results: response.body.results}))
+      .catch(() => dispatch({type: RECOMMENDATIONS_FINISH, results: []}));
   };
 }

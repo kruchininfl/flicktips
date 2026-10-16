@@ -6,21 +6,43 @@ import {
   PROFILE_FRIENDS_LOADING_FINISH,
   PROFILE_FRIENDS_ADD_START,
   PROFILE_FRIENDS_ADD_FINISH,
-  TOGGLE_FRIEND_SUBSCRIBE_START,
-  TOGGLE_FRIEND_SUBSCRIBE_FINISH
+  USER_SUBSCRIBE_FINISH,
+  USERS_SEARCH_START,
+  USERS_SEARCH_FINISH,
+  PROFILE_FRIENDS_FIND_OPEN,
+  RECOMMENDATIONS_FINISH
 } from 'redux/actions/profileFriendsActions';
 
 const initialState = Immutable.fromJS({
   response: null,
+  listType: 'following',
   errors  : null,
   loading : false,
-  pending : false
+  pending : false,
+  search  : {
+    query  : '',
+    results: [],
+    loading: false
+  },
+  recommendations: {
+    items  : [],
+    pending: false
+  }
 });
 
+function setSubscribed(users, userId, subscribed) {
+  if (!users) {
+    return users;
+  }
+
+  return users.map((user) => (user.get('id') === userId ? user.set('subscribed', subscribed) : user));
+}
+
 export default createReducer(initialState, {
-  [PROFILE_FRIENDS_LOADING_START]: state => state.merge({
-    pending: true,
-    errors : null
+  [PROFILE_FRIENDS_LOADING_START]: (state, {listType}) => state.merge({
+    pending : true,
+    errors  : null,
+    listType
   }),
 
   [PROFILE_FRIENDS_LOADING_FINISH]: (state, action) => state.merge({
@@ -36,40 +58,34 @@ export default createReducer(initialState, {
     return state.merge({loading: false, response: action.response.results});
   },
 
-  [TOGGLE_FRIEND_SUBSCRIBE_START]: (state, {friendId}) => {
-    let friendIndex = null;
-    const friends = state.getIn(['response', 'entities']);
+  [USER_SUBSCRIBE_FINISH]: (state, {userId, subscribed}) => {
+    const nextState = state
+      .updateIn(['search', 'results'], (users) => setSubscribed(users, userId, subscribed))
+      .updateIn(['recommendations', 'items'], (users) => setSubscribed(users, userId, subscribed));
 
-    if (friends && friends.size) {
-      friends.forEach((friend, index) => {
-        if (friend.get('id') === friendId) {
-          friendIndex = index;
-        }
-      });
-
-      return state
-        .setIn(['response', 'entities', friendIndex, 'loading'], true);
+    if (!state.get('response')) {
+      return nextState;
     }
 
-    return state;
+    return nextState.updateIn(['response', 'entities'], (users) => setSubscribed(users, userId, subscribed));
   },
 
-  [TOGGLE_FRIEND_SUBSCRIBE_FINISH]: (state, action) => {
-    let friendIndex = null;
-    const friends = state.getIn(['response', 'entities']);
+  [PROFILE_FRIENDS_FIND_OPEN]: (state) => state
+    .set('listType', 'find')
+    .setIn(['recommendations', 'pending'], true),
 
-    if (friends && friends.size) {
-      friends.forEach((friend, index) => {
-        if (friend.get('id') === action.response.friendId) {
-          friendIndex = index;
-        }
-      });
+  [RECOMMENDATIONS_FINISH]: (state, {results}) => state
+    .setIn(['recommendations', 'pending'], false)
+    .setIn(['recommendations', 'items'], Immutable.fromJS(results)),
 
-      return state
-        .setIn(['response', 'entities', friendIndex, 'subscribed'], action.response.subscribed)
-        .setIn(['response', 'entities', friendIndex, 'loading'], false);
+  [USERS_SEARCH_START]: (state, {query}) => state.mergeIn(['search'], {query, loading: true}),
+
+  // answers to older queries arrive late and are dropped
+  [USERS_SEARCH_FINISH]: (state, {query, results}) => {
+    if (state.getIn(['search', 'query']) !== query) {
+      return state;
     }
 
-    return state;
+    return state.mergeIn(['search'], {loading: false}).setIn(['search', 'results'], Immutable.fromJS(results));
   }
 });

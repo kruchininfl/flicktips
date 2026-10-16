@@ -204,16 +204,36 @@ export default {
     return this._fetch('votes/user/' + uid, {page});
   },
 
-  getUserFriends(page = 1) {
-    return this._fetch('user/friends/', {page});
+  getUserFriends(page = 1, type = 'following') {
+    return this._fetch('user/friends/', {page, type});
+  },
+
+  subscribe(userId, subscribed) {
+    return this._fetch('user/subscribe/', {userId, subscribed: subscribed ? 1 : 0}, 'POST', false, true);
+  },
+
+  searchUsers(q) {
+    return this._fetch('users/search/', {q}, undefined, true);
+  },
+
+  getRecommendations() {
+    return this._fetch('user/recommendations/');
+  },
+
+  getInviteCode() {
+    return this._fetch('user/invite/');
+  },
+
+  getInvite(code) {
+    return this._fetch('invite/' + encodeURIComponent(code));
+  },
+
+  acceptInvite(code) {
+    return this._fetch('user/accept_invite/', {code}, 'POST', true, true);
   },
 
   getUserBookmarks(page = 1) {
     return this._fetch('user/bookmarks/', {page});
-  },
-
-  toggleSubscribe(friendId) {
-    return this._fetch('user/toggle_subscribe/', {friendId}, 'POST');
   },
 
   getFriendsVotes(page = 1) {

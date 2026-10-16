@@ -12,6 +12,7 @@ import {
   VOTE_REQUEST_FINISHED
 } from 'redux/actions/voteActions';
 import {BOOKMARK_REQUEST_FINISHED} from '../actions/bookmarkActions';
+import {USER_SUBSCRIBE_FINISH} from '../actions/profileFriendsActions';
 
 const initialState = Immutable.fromJS({
   user    : null,
@@ -57,6 +58,14 @@ export default createReducer(initialState, {
         return entity;
       })
     );
+  },
+
+  [USER_SUBSCRIBE_FINISH]: (state, {userId, subscribed}) => {
+    if (!state.get('user') || state.getIn(['user', 'id']) !== userId) {
+      return state;
+    }
+
+    return state.setIn(['user', 'subscribed'], subscribed);
   },
 
   [BOOKMARK_REQUEST_FINISHED]: (state, action) => {

@@ -8,7 +8,8 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import Button from 'components/Gui/Button';
 import ProfileLayout from './ProfileLayout';
-import {isUserSignedIn} from '../../redux/models/user';
+import {isUserSignedIn, getUserModel} from '../../redux/models/user';
+import SubscribeButton from 'partitions/SubscribeButton';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -19,7 +20,8 @@ const propTypes = {
   isMyPage    : PropTypes.bool,
   user        : PropTypes.any,
   votes       : PropTypes.any,
-  userSignedIn: PropTypes.bool
+  userSignedIn: PropTypes.bool,
+  myId        : PropTypes.number
 };
 
 @asyncConnect([
@@ -87,6 +89,25 @@ class ProfilePage extends ProfileLayout {
   }
 
 
+  renderRelation() {
+    const {user, isMyPage, myId} = this.props;
+
+    if (isMyPage || user.id === myId) {
+      return false;
+    }
+
+    return (
+      <div className="profile__relation">
+        <SubscribeButton userId={user.id} subscribed={!!user.subscribed} />
+        {user.followsMe
+          ? <div className="profile__relation-note">
+            {pluralGender(user.gender, ['подписан', 'подписана', 'подписан(а)'])} на вас
+          </div>
+          : ''}
+      </div>
+    );
+  }
+
   render() {
     const {user, votes, pending, loading, isMyPage} = this.props;
 
@@ -106,6 +127,8 @@ class ProfilePage extends ProfileLayout {
     return (
       <div className="profile">
         {super.render()}
+
+        {this.renderRelation()}
 
         {votes.total
           ? <div className="profile__votes movie-prev-list">{this.renderVotes(votes)}</div>
@@ -130,8 +153,9 @@ function mapStateToProps(state) {
   const {pending, votes, user, isMyPage, loading} = state.profile.toJS();
   const userSignedIn = isUserSignedIn(state);
   const loaded = state.reduxAsyncConnect.loadState.profile && state.reduxAsyncConnect.loadState.profile.loaded;
+  const myId = userSignedIn ? getUserModel(state).get('id') : undefined;
 
-  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn};
+  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn, myId};
 }
 
 export default ProfilePage;

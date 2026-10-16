@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {IndexLink, Link} from 'react-router';
+import {IndexLink, Link, browserHistory} from 'react-router';
 import Helmet from 'react-helmet';
 import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
@@ -17,6 +17,7 @@ import Toggler from '../Gui/Forms/Toggler';
 import {profileUpdate} from '../../redux/actions/profileActions';
 import {Tooltip} from 'react-tippy';
 import {openSignInPopup} from '../../redux/actions/appActions';
+import {acceptInvite, takeRememberedInvite} from '../../redux/actions/inviteActions';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -35,6 +36,14 @@ class App extends Component {
     this.props.socket.on('vote-changed', (data) => {
       this.props.dispatch(voteUpdateCounters(data));
     });
+
+    this.acceptRememberedInvite();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.userSignedIn && !prevProps.userSignedIn) {
+      this.acceptRememberedInvite();
+    }
   }
 
   handleToggleViewedFilter = () => {
@@ -46,6 +55,25 @@ class App extends Component {
   handleSignIn = () => {
     this.props.dispatch(openSignInPopup());
   };
+
+  // a guest opened an invite link (InvitePage) and has signed in since
+  acceptRememberedInvite() {
+    if (!this.props.userSignedIn) {
+      return;
+    }
+
+    const code = takeRememberedInvite();
+
+    if (code) {
+      this.props.dispatch(acceptInvite(code))
+        .then((inviterId) => {
+          if (inviterId !== this.props.user.id) {
+            browserHistory.push('/user/' + inviterId);
+          }
+        })
+        .catch(() => false);
+    }
+  }
 
   renderAdv() {
     const {userSignedIn} = this.props;

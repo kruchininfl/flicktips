@@ -1,0 +1,28 @@
+.p-invite {
+    padding: 40px 20px;
+    text-align: center;
+    background: #ffffff;
+}
+.p-invite__pic {
+    display: inline-block;
+}
+.p-invite__title {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: 600;
+}
+.p-invite__text {
+    margin: 10px auto 20px;
+    max-width: 400px;
+    font-size: 14px;
+    color: #a0a0a0;
+}
+.p-invite__hint {
+    font-size: 14px;
+}
+.p-invite__btn .btn__inn {
+    padding: 0 30px;
+    height: 40px;
+    line-height: 38px;
+    font-size: 14px;
+}

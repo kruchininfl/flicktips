@@ -11,6 +11,7 @@ import profileBookmarksReducer from './profileBookmarksReducer';
 import lastGradedReducer from './lastGraded';
 import movieReducer from './movieReducer';
 import personReducer from './personReducer';
+import inviteReducer from './inviteReducer';
 import {loadingBarReducer} from 'react-redux-loading-bar';
 
 export default combineReducers({
@@ -26,5 +27,6 @@ export default combineReducers({
   loadingBar   : loadingBarReducer,
   movie        : movieReducer,
   person       : personReducer,
+  invite       : inviteReducer,
   reduxAsyncConnect
 });

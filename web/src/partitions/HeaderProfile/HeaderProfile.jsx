@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import {getUserModel} from 'redux/models/user';
 import {Link} from 'react-router';
 import {signOut} from '../../partitions/redux-oauth';
+import InviteButton from '../InviteButton/InviteButton';
 
 import './HeaderProfile.scss';
 
@@ -64,6 +65,9 @@ class HeaderProfile extends Component {
               <span style={{backgroundImage: (avatar ? `url(${avatar})` : null)}} />
               <div className={'header-profile__menu' + (opened ? ' m-active' : '')}>
                 <div className="header-profile__menu-inn">
+                  <div className="header-profile__menu-links header-profile__menu-invite">
+                    <InviteButton buttonClass="header-profile__invite-btn" />
+                  </div>
                   <ul className="header-profile__menu-links">
                     <li><Link to={'/profile/friends/'} className="header-profile__menu-link">Мои друзья</Link></li>
                     <li><Link to={'/profile/bookmarks/'} className="header-profile__menu-link">Мои закладки</Link></li>

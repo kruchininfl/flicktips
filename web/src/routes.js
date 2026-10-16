@@ -8,6 +8,7 @@ import {ProfilePage, ProfileFriendsPage, ProfileBookmarksPage} from 'components/
 import MoviePage from 'components/MoviePage';
 import PersonPage from 'components/PersonPage';
 import AboutPage from 'components/AboutPage';
+import InvitePage from 'components/InvitePage';
 
 import {isUserSignedIn} from 'redux/models/user';
 
@@ -36,6 +37,7 @@ export default function routes(storeRef) {
       <Route component={ProfilePage} path="user/:id"/>
       <Route component={MoviePage} path="movie/:id"/>
       <Route component={PersonPage} path="person/:id"/>
+      <Route component={InvitePage} path="invite/:code"/>
       <Route component={ProfileFriendsPage} path="profile/friends/" onEnter={requireAuth}/>
       <Route component={ProfileBookmarksPage} path="profile/bookmarks/" onEnter={requireAuth}/>
     </Route>

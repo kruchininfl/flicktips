@@ -67,3 +67,20 @@
         color: #000000;
     }
 }
+
+.header-profile__menu-invite {
+    padding: 10px 15px;
+}
+.header-profile__invite-btn.btn {
+    display: block;
+
+    .btn__inn {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        height: 36px;
+        line-height: 34px;
+        font-size: 14px;
+    }
+}

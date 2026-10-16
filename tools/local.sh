@@ -9,6 +9,7 @@
 #
 # Needs SSH access to the server and DB_USER/DB_PASSWORD (plus the other API secrets) in .env,
 # LOCAL_HOST -> 127.0.0.1 in /etc/hosts and mkcert (brew install mkcert && mkcert -install, once).
+# `up` starts Colima if the Docker daemon is not running.
 # Env: DEPLOY_HOST (default root@45.15.252.159), LOCAL_DB_PORT (default 3307),
 #      LOCAL_HOST (default flicktips.local).
 set -euo pipefail
@@ -53,6 +54,16 @@ certs_up() {
   cp "$(mkcert -CAROOT)/rootCA.pem" "$CERTS/rootCA.pem"
 }
 
+# start Colima if the Docker daemon is not reachable (left running on `down`: other projects may use it)
+docker_up() {
+  if docker info >/dev/null 2>&1; then
+    return
+  fi
+  command -v colima >/dev/null || { echo "Docker daemon is not running; start it first" >&2; exit 1; }
+  echo "Docker daemon is not running, starting Colima"
+  colima start
+}
+
 tunnel_down() {
   ssh -S "$CONTROL" -O exit "$DEPLOY_HOST" 2>/dev/null || true
 }
@@ -64,6 +75,7 @@ case "$cmd" in
   up)
     [[ -f .env ]] || { echo ".env is missing: copy .env.example and fill in the secrets" >&2; exit 1; }
     certs_up
+    docker_up
     tunnel_up
     echo "Site: https://$LOCAL_HOST"
     "${COMPOSE[@]}" up --build --renew-anon-volumes "$@"

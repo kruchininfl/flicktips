@@ -39,8 +39,7 @@ env_value() {
 
 # credentials go through a 0600 option file, not the command line (visible in ps)
 CNF="$(mktemp)"
-DUMP="$(mktemp)"
-trap 'rm -f "$CNF" "$DUMP"' EXIT
+trap 'rm -f "$CNF"' EXIT
 chmod 600 "$CNF"
 printf '[client]\nhost=127.0.0.1\nport=3306\nuser=%s\npassword="%s"\n' \
   "$(env_value DB_USER || true)" "$(env_value DB_PASSWORD)" > "$CNF"
@@ -52,15 +51,12 @@ MYSQLDUMP=(mysqldump --defaults-extra-file="$CNF" --single-transaction --quick
 
 mkdir -p "$BACKUP_DIR"
 BACKUP="$BACKUP_DIR/flicktips_test-$(date +%Y%m%d-%H%M%S).sql.gz"
+df -h / | tail -n 1 | awk '{print "Free disk space: " $4}'
 echo "Backing up flicktips_test to $BACKUP"
 "${MYSQLDUMP[@]}" flicktips_test | gzip > "$BACKUP"
 
 IGNORE=()
 for t in $EXCLUDE_TABLES; do IGNORE+=("--ignore-table=flicktips.$t"); done
-
-echo "Dumping flicktips (read-only, single transaction)"
-"${MYSQLDUMP[@]}" "${IGNORE[@]}" flicktips > "$DUMP"
-echo "Dump size: $(du -h "$DUMP" | cut -f1)"
 
 echo "Dropping tables and views in flicktips_test"
 DROP="$("${MYSQL[@]}" -N -B -e "
@@ -68,8 +64,9 @@ DROP="$("${MYSQL[@]}" -N -B -e "
   FROM information_schema.tables WHERE table_schema = 'flicktips_test'")"
 "${MYSQL[@]}" flicktips_test -e "SET FOREIGN_KEY_CHECKS = 0; $DROP"
 
-echo "Loading the dump into flicktips_test"
-"${MYSQL[@]}" --default-character-set=utf8mb4 flicktips_test < "$DUMP"
+# streamed, not saved to a file: the server's disk is nearly full
+echo "Copying flicktips into flicktips_test (prod is read in a single transaction)"
+"${MYSQLDUMP[@]}" "${IGNORE[@]}" flicktips | "${MYSQL[@]}" --default-character-set=utf8mb4 flicktips_test
 
 echo "Row counts (flicktips / flicktips_test):"
 "${MYSQL[@]}" -N -B -e "

@@ -420,6 +420,218 @@ class UserRepository {
         return $result;
     }
 
+    /**
+     * Sign-in methods a user can have; each is a `<service>_id` column (unique) on `user`.
+     */
+    const LOGIN_SERVICES = ['vkontakte', 'yandex'];
+
+    /**
+     * [service => linked?] for every sign-in method.
+     */
+    public function getLoginServices($uid)
+    {
+        $sth = $this->pdo->prepare('SELECT ' . $this->serviceColumns() . ' FROM user WHERE id = :uid');
+        $sth->execute(['uid' => (int) $uid]);
+        $row = $sth->fetch();
+
+        $services = [];
+        foreach (self::LOGIN_SERVICES as $service) {
+            $services[$service] = $row && $row[$service . '_id'] !== null;
+        }
+
+        return $services;
+    }
+
+    public function findIdByService($service, $serviceId)
+    {
+        $this->assertService($service);
+        $sth = $this->pdo->prepare('SELECT id FROM user WHERE ' . $service . '_id = :sid');
+        $sth->execute(['sid' => (string) $serviceId]);
+        $id = $sth->fetchColumn();
+
+        return $id === false ? null : (int) $id;
+    }
+
+    /**
+     * Links a provider account nobody uses yet. False if $uid already has another account of that service.
+     */
+    public function linkService($uid, $service, $serviceId)
+    {
+        $this->assertService($service);
+        $sth = $this->pdo->prepare('UPDATE user SET ' . $service . '_id = :sid WHERE id = :uid AND ' . $service . '_id IS NULL');
+        $sth->execute(['uid' => (int) $uid, 'sid' => (string) $serviceId]);
+
+        return $sth->rowCount() > 0;
+    }
+
+    /**
+     * False if it is the user's last sign-in method.
+     */
+    public function unlinkService($uid, $service)
+    {
+        $this->assertService($service);
+        $others = array_diff(self::LOGIN_SERVICES, [$service]);
+        $sth = $this->pdo->prepare('UPDATE user SET ' . $service . '_id = NULL WHERE id = :uid AND ('
+            . implode(' OR ', array_map(function ($other) { return $other . '_id IS NOT NULL'; }, $others)) . ')');
+        $sth->execute(['uid' => (int) $uid]);
+
+        return $sth->rowCount() > 0;
+    }
+
+    /**
+     * What merging $otherId into $uid would bring: the other user's profile, counts of votes, bookmarks and
+     * follows, how many movies both have rated (`conflicts`), and the services both have linked to different
+     * provider accounts (`blocking`, merge is refused then: a user has one account per service).
+     */
+    public function getMergeSummary($uid, $otherId)
+    {
+        $user = $this->findById($otherId);
+        settype($user['id'], 'int');
+
+        $count = function ($sql) use ($uid, $otherId) {
+            $sth = $this->pdo->prepare($sql);
+            $sth->execute(strpos($sql, ':uid') === false ? ['other' => (int) $otherId] : ['uid' => (int) $uid, 'other' => (int) $otherId]);
+            return (int) $sth->fetchColumn();
+        };
+
+        return [
+            'user' => $user,
+            'votes' => $count('SELECT COUNT(*) FROM movie_vote WHERE user_id = :other'),
+            'bookmarks' => $count('SELECT COUNT(*) FROM bookmark WHERE user_id = :other'),
+            'following' => $count('SELECT COUNT(*) FROM user_friends WHERE user_1 = :other AND user_2 <> :uid AND subscribed = 1'),
+            'conflicts' => $count('SELECT COUNT(*) FROM movie_vote a
+                INNER JOIN movie_vote b ON b.movie_id = a.movie_id AND b.user_id = :other
+                WHERE a.user_id = :uid AND a.vote <> b.vote'),
+            'blocking' => $this->getBlockingServices($uid, $otherId)
+        ];
+    }
+
+    /**
+     * Moves everything of $otherId into $uid and deletes $otherId. $uid keeps its name, avatar, settings and
+     * id (profile URL); it takes over the other user's sign-in methods, and its invite code if $uid has none.
+     * A movie rated in both accounts keeps the newer vote (the current account's on a tie); movie counters
+     * lose the dropped vote. Bookmarks and follows are united, follows between the two accounts are dropped.
+     */
+    public function mergeInto($uid, $otherId)
+    {
+        $uid = (int) $uid;
+        $otherId = (int) $otherId;
+        $ids = ['uid' => $uid, 'other' => $otherId];
+        $pdo = $this->pdo;
+
+        $pdo->beginTransaction();
+        try {
+            $sth = $pdo->prepare('SELECT * FROM user WHERE id IN (:uid, :other) FOR UPDATE');
+            $sth->execute($ids);
+            $users = [];
+            foreach ($sth->fetchAll() as $row) {
+                $users[(int) $row['id']] = $row;
+            }
+            if (!isset($users[$uid], $users[$otherId]) || $this->getBlockingServices($uid, $otherId)) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            // votes for the same movie: drop the older one
+            $sth = $pdo->prepare('SELECT a.movie_id, a.vote AS my_vote, b.vote AS other_vote,
+                b.timestamp > a.timestamp AS other_is_newer
+                FROM movie_vote a
+                INNER JOIN movie_vote b ON b.movie_id = a.movie_id AND b.user_id = :other
+                WHERE a.user_id = :uid');
+            $sth->execute($ids);
+            $columns = ['dislikes', 'neutral', 'likes', 'super'];
+            $deleteVote = $pdo->prepare('DELETE FROM movie_vote WHERE movie_id = :mid AND user_id = :user');
+            foreach ($sth->fetchAll() as $row) {
+                $otherIsNewer = (bool) $row['other_is_newer'];
+                $deleteVote->execute(['mid' => $row['movie_id'], 'user' => $otherIsNewer ? $uid : $otherId]);
+                $column = $columns[(int) ($otherIsNewer ? $row['my_vote'] : $row['other_vote'])];
+                $pdo->prepare('UPDATE movie SET ' . $column . ' = GREATEST(' . $column . ' - 1, 0) WHERE id = :mid')
+                    ->execute(['mid' => $row['movie_id']]);
+            }
+            // `timestamp = timestamp` keeps the vote/bookmark time in case the column auto-updates
+            $pdo->prepare('UPDATE movie_vote SET user_id = :uid, timestamp = timestamp WHERE user_id = :other')->execute($ids);
+
+            $pdo->prepare('DELETE b FROM bookmark b
+                INNER JOIN bookmark a ON a.movie_id = b.movie_id AND a.user_id = :uid
+                WHERE b.user_id = :other')->execute($ids);
+            $pdo->prepare('UPDATE bookmark SET user_id = :uid, timestamp = timestamp WHERE user_id = :other')->execute($ids);
+
+            // follows both ways; a follow wins over an unfollow
+            $pdo->prepare('INSERT INTO user_friends (user_1, user_2, subscribed)
+                SELECT :uid, src.user_2, src.subscribed FROM user_friends src
+                WHERE src.user_1 = :other AND src.user_2 NOT IN (:uid, :other)
+                ON DUPLICATE KEY UPDATE subscribed = GREATEST(user_friends.subscribed, VALUES(subscribed))')->execute($ids);
+            $pdo->prepare('INSERT INTO user_friends (user_1, user_2, subscribed)
+                SELECT src.user_1, :uid, src.subscribed FROM user_friends src
+                WHERE src.user_2 = :other AND src.user_1 NOT IN (:uid, :other)
+                ON DUPLICATE KEY UPDATE subscribed = GREATEST(user_friends.subscribed, VALUES(subscribed))')->execute($ids);
+            $pdo->prepare('DELETE FROM user_friends WHERE user_1 = :other OR user_2 = :other')->execute(['other' => $otherId]);
+
+            // unique columns move over: clear them on the other user first
+            $mine = $users[$uid];
+            $theirs = $users[$otherId];
+            $take = [];
+            foreach (self::LOGIN_SERVICES as $service) {
+                if ($mine[$service . '_id'] === null && $theirs[$service . '_id'] !== null) {
+                    $take[$service . '_id'] = $theirs[$service . '_id'];
+                }
+            }
+            if (!$mine['invite_code'] && $theirs['invite_code']) {
+                $take['invite_code'] = $theirs['invite_code'];
+            }
+            if (!$mine['avatar_source'] && $theirs['avatar_source']) {
+                $take['avatar_source'] = $theirs['avatar_source'];
+            }
+
+            $pdo->prepare('DELETE FROM user WHERE id = :other')->execute(['other' => $otherId]);
+
+            $set = ['registration_date = LEAST(COALESCE(registration_date, :registered), COALESCE(:registered, registration_date))'];
+            $params = ['uid' => $uid, 'registered' => $theirs['registration_date']];
+            foreach ($take as $column => $value) {
+                $set[] = $column . ' = :' . $column;
+                $params[$column] = $value;
+            }
+            $pdo->prepare('UPDATE user SET ' . implode(', ', $set) . ' WHERE id = :uid')->execute($params);
+
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+
+        return true;
+    }
+
+    /**
+     * Services linked in both accounts to different provider accounts.
+     */
+    private function getBlockingServices($uid, $otherId)
+    {
+        $sth = $this->pdo->prepare('SELECT id, ' . $this->serviceColumns() . ' FROM user WHERE id IN (:uid, :other)');
+        $sth->execute(['uid' => (int) $uid, 'other' => (int) $otherId]);
+        $rows = $sth->fetchAll();
+        if (count($rows) !== 2) {
+            return [];
+        }
+
+        return array_values(array_filter(self::LOGIN_SERVICES, function ($service) use ($rows) {
+            $column = $service . '_id';
+            return $rows[0][$column] !== null && $rows[1][$column] !== null && $rows[0][$column] !== $rows[1][$column];
+        }));
+    }
+
+    private function serviceColumns()
+    {
+        return implode(', ', array_map(function ($service) { return $service . '_id'; }, self::LOGIN_SERVICES));
+    }
+
+    private function assertService($service)
+    {
+        if (!in_array($service, self::LOGIN_SERVICES, true)) {
+            throw new \InvalidArgumentException('Unknown sign-in service ' . $service);
+        }
+    }
+
     private function castUsers($rows)
     {
         foreach ($rows as &$row) {

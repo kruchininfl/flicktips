@@ -22,6 +22,7 @@ class UserModel implements UserInterface
     private $vkontakteToken;
     private $facebookId;
     private $facebookToken;
+    private $linkIdentity;
 
     public function __construct($attributes)
     {
@@ -36,6 +37,7 @@ class UserModel implements UserInterface
         $this->vkontakteToken = isset($attributes['vkontakte_token']) ? $attributes['vkontakte_token'] : null;
         $this->facebookId = isset($attributes['facebook_id']) ? $attributes['facebook_id'] : null;
         $this->facebookToken = isset($attributes['facebook_token']) ? $attributes['facebook_token'] : null;
+        $this->linkIdentity = isset($attributes['link_identity']) ? $attributes['link_identity'] : null;
     }
 
     public function getId()
@@ -86,6 +88,15 @@ class UserModel implements UserInterface
     public function getFacebookToken()
     {
         return $this->facebookToken;
+    }
+
+    /**
+     * Set instead of a real user when the OAuth flow was started to link a sign-in method:
+     * [service, id, username, avatar, gender] of the provider account.
+     */
+    public function getLinkIdentity()
+    {
+        return $this->linkIdentity;
     }
 
     /**

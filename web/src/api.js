@@ -244,6 +244,26 @@ export default {
     return this._fetch('user/', {data}, 'PUT');
   },
 
+  checkUser() {
+    return this._fetch('checkUser/');
+  },
+
+  getAccounts() {
+    return this._fetch('user/accounts/');
+  },
+
+  linkAccount(proof) {
+    return this._fetch('user/accounts/link/', {proof}, 'POST', false, true);
+  },
+
+  mergeAccount(proof) {
+    return this._fetch('user/accounts/merge/', {proof}, 'POST', false, true);
+  },
+
+  unlinkAccount(service) {
+    return this._fetch('user/accounts/unlink/', {service}, 'POST', false, true);
+  },
+
   getMovie(id) {
     return this._fetch('get_film/' + id);
   },

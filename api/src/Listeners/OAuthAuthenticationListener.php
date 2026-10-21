@@ -154,6 +154,11 @@ class OAuthAuthenticationListener extends AbstractAuthenticationListener
             if (($oauthService instanceof VkId || $oauthService instanceof Yandex) && null !== $session) {
                 $session->set('oauth.auth_origin_url', $authOriginUrl);
             }
+            // ?link=1 comes from the profile's "Способы входа": prove the identity instead of signing in,
+            // see OAuthUserProvider and AuthenticationSuccessHandler
+            if (null !== $session) {
+                $session->set('oauth.link', (bool) $request->get('link'));
+            }
 
             $authorizationUri = $oauthService->getAuthorizationUri($authorizationParameters);
 

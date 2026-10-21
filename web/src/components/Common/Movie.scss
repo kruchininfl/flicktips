@@ -5,17 +5,15 @@
     position: relative;
     border-radius: $radius-sm;
     overflow: hidden;
+    background: $color-surface-2;
+
+    // the placeholder icon shows until the poster loads (or when it can't); faint so a row of them doesn't shout
     &:before {
         content: '';
         display: block;
         padding-top: 150%;
-        background: {
-            image: url(../../img/ph-movie.svg);
-            size: 40% auto;
-            position: 50% 50%;
-            color: $color-surface-2;
-            repeat: no-repeat;
-        };
+        opacity: .12;
+        background: url(../../img/ph-movie.svg) 50% 50% / 30% auto no-repeat;
     }
 }
 .movie-cover-inn {

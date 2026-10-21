@@ -32,6 +32,17 @@ tools/local.sh logs [сервис]  # логи (web, assets, api, nginx)
 tools/local.sh down           # остановить стек и закрыть туннель
 ```
 
+### Что подхватывается на лету
+
+После `up` стек сам следит за изменениями, пересобирать ничего не нужно:
+
+- `web/src` (клиент, стили): webpack-dev-server пересобирает бандл и обновляет страницу в браузере (hot reload).
+- `web/src`, `web/views`, `web/server.js` (SSR): nodemon перезапускает сервер рендеринга при изменении `.js`, `.jsx`, `.ejs`, `.json`.
+- `api/` (PHP): код смонтирован в контейнер, изменения видны со следующего запроса (opcache перечитывает файлы раз в пару секунд).
+
+Перезапуск `tools/local.sh up` нужен только после изменения `web/package-lock.json`, `api/composer.*`,
+`api/Dockerfile`, `docker/local/nginx.conf.template` или `docker-compose.local.yml`.
+
 ### Порты и переменные
 
 - На localhost должны быть свободны порты 443 (nginx) и 8050 (webpack-dev-server).

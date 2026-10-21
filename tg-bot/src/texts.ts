@@ -17,8 +17,9 @@ export interface Movie {
   kp_id: number | null;
 }
 
-// movie_vote.vote: 0 dislike, 1 neutral, 2 like, 3 super
-const VOTES = ['👎 Не нравится', '😐 Нейтрально', '👍 Нравится', '🔥 Супер'];
+// movie_vote.vote: 0 dislike, 1 neutral, 2 like, 3 super. Emoji closest to the site's icons (VoteIcon.jsx):
+// poop, half-filled grey heart, red heart, flame
+const VOTES = ['💩 Не нравится', '🩶 Нейтрально', '❤️ Нравится', '🔥 Супер'];
 
 export function escapeHtml(text: string) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

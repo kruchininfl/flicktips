@@ -41,6 +41,9 @@ async function main() {
 
   bot.start({
     allowed_updates: ['message', 'callback_query', 'my_chat_member'],
+    // short long-poll: through the relay (TELEGRAM_API_ROOT) a long one sometimes hangs until the
+    // request timeout in bot.ts and delays updates by about a minute
+    timeout: 10,
     onStart: (me) => console.log(`Bot @${me.username} started`)
   }).catch((e) => {
     console.error('Polling stopped:', e);

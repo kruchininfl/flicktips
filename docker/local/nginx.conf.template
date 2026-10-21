@@ -19,6 +19,24 @@ server {
         fastcgi_param DOCUMENT_ROOT /var/www/api/web;
     }
 
+    # Posters from Кинопоиск with a TMDb fallback, as in prod (nginx/conf.d/flicktips.conf), without the cache
+    location ~ ^/poster/kp/(\d+)\.jpg$ {
+        set $kp_poster_id $1;
+        resolver 77.88.8.8 1.1.1.1 valid=300s ipv6=off;
+        proxy_pass https://kinopoiskapiunofficial.tech/images/posters/kp_small/$kp_poster_id.jpg;
+        proxy_ssl_server_name on;
+        proxy_set_header Host kinopoiskapiunofficial.tech;
+        proxy_intercept_errors on;
+        error_page 403 404 500 502 503 504 = @poster_tmdb;
+    }
+
+    location @poster_tmdb {
+        if ($arg_tmdb ~ "^/[A-Za-z0-9_-]+\.(jpg|png)$") {
+            return 302 https://image.tmdb.org/t/p/w342$arg_tmdb;
+        }
+        return 404;
+    }
+
     # webpack-dev-server bundles and its live-reload socket, so the https page loads them from
     # its own origin instead of http://localhost:8050
     location ~ ^/(public/assets|sockjs-node)/ {

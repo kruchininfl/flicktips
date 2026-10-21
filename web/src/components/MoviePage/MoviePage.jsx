@@ -4,7 +4,7 @@ import './MoviePage.scss';
 import {asyncConnect} from 'redux-connect';
 import {getFilm} from 'redux/actions/movieActions';
 import MovieStatExternal from '../../partitions/MovieStatExternal/MovieStatExternal';
-import config from '../../config';
+import {getPosterUrl} from '../../helpers';
 import moment from 'moment';
 import 'moment/locale/ru';
 import 'moment-duration-format';
@@ -126,7 +126,7 @@ class MoviePage extends Component {
     }
 
     const movie = Object.assign({}, response.movie);
-    const poster = config.tmdb.posterPath342 + movie.tmdb_poster_path;
+    const poster = getPosterUrl(movie);
 
     movie.date = movie.release_date || movie.first_air_date;
     movie.descr = movie.tmdb_overview || movie.kp_overview;
@@ -165,7 +165,7 @@ class MoviePage extends Component {
           <link rel="canonical" href={url} />
         </Helmet>
 
-        {movie.tmdb_poster_path ? <div className="movie__backdrop" style={{backgroundImage: `url(${poster})`}} /> : null}
+        {poster ? <div className="movie__backdrop" style={{backgroundImage: `url(${poster})`}} /> : null}
 
         <div className="movie__head">
           <div className="movie-cover movie__cover">

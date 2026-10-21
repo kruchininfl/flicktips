@@ -28,7 +28,7 @@ if [[ "${1:-}" != "-y" ]]; then
   [[ "$answer" == "yes" ]] || { echo "Aborted"; exit 1; }
 fi
 
-ssh -o BatchMode=yes -o ConnectTimeout=15 "$DEPLOY_HOST" \
+ssh -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 "$DEPLOY_HOST" \
   DEPLOY_PATH="'$DEPLOY_PATH'" BACKUP_DIR="'$BACKUP_DIR'" EXCLUDE_TABLES="'$EXCLUDE_TABLES'" \
   bash -s <<'REMOTE'
 set -euo pipefail

@@ -31,6 +31,10 @@ $app->get('/api/users/search/', '\Controllers\UserController::searchUsers');
 $app->get('/api/invite/{code}', '\Controllers\UserController::getInvite');
 $app->post('/api/user/toggle_bookmark/', '\Controllers\UserController::toggleBookmark');
 $app->put('/api/user/', '\Controllers\UserController::updateUser');
+$app->get('/api/user/accounts/', '\Controllers\UserController::getAccounts');
+$app->post('/api/user/accounts/link/', '\Controllers\UserController::linkAccount');
+$app->post('/api/user/accounts/merge/', '\Controllers\UserController::mergeAccount');
+$app->post('/api/user/accounts/unlink/', '\Controllers\UserController::unlinkAccount');
 
 $app->get('/api/user/telegram/', '\Controllers\TelegramController::get');
 $app->post('/api/user/telegram/link/', '\Controllers\TelegramController::link');

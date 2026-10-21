@@ -20,6 +20,22 @@ class AuthenticationSuccessHandler extends DefaultAuthenticationSuccessHandler
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token)
     {
+        $session = $request->getSession();
+        $linkIdentity = $token->getUser()->getLinkIdentity();
+        if (null !== $session) {
+            $session->remove('oauth.link');
+        }
+
+        if ($linkIdentity && null !== $session) {
+            $authOriginUrl = $request->get('auth_origin_url');
+            if ($authOriginUrl && $this->isOwnUrl($authOriginUrl, $request)) {
+                $params = array('link_proof' => AccountLinkProof::create($linkIdentity, $session));
+                return $this->httpUtils->createRedirectResponse($request, $authOriginUrl . '?' . http_build_query($params));
+            }
+
+            return $this->httpUtils->createRedirectResponse($request, $this->determineTargetUrl($request));
+        }
+
         $params = array(
             'auth_token' => $token->getUser()->getToken(),
             'uid' => $token->getUser()->getId()

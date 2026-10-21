@@ -6,3 +6,6 @@ export {ProfileFriendsPage};
 
 import ProfileBookmarksPage from './ProfileBookmarksPage';
 export {ProfileBookmarksPage};
+
+import ProfileAccountsPage from './ProfileAccountsPage';
+export {ProfileAccountsPage};

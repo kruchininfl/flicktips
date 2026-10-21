@@ -4,7 +4,7 @@ import App from 'components/App';
 import LastGradedPage from 'components/LastGradedPage';
 import LayoutPage from 'components/LayoutPage';
 import SignInPage from 'components/SignInPage';
-import {ProfilePage, ProfileFriendsPage, ProfileBookmarksPage} from 'components/ProfilePage';
+import {ProfilePage, ProfileFriendsPage, ProfileBookmarksPage, ProfileAccountsPage} from 'components/ProfilePage';
 import MoviePage from 'components/MoviePage';
 import PersonPage from 'components/PersonPage';
 import AboutPage from 'components/AboutPage';
@@ -42,6 +42,7 @@ export default function routes(storeRef) {
       <Route component={TelegramPage} path="telegram"/>
       <Route component={ProfileFriendsPage} path="profile/friends/" onEnter={requireAuth}/>
       <Route component={ProfileBookmarksPage} path="profile/bookmarks/" onEnter={requireAuth}/>
+      <Route component={ProfileAccountsPage} path="profile/accounts/" onEnter={requireAuth}/>
     </Route>
   );
 }

@@ -10,6 +10,7 @@ import Button from 'components/Gui/Button';
 import ProfileLayout from './ProfileLayout';
 import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import SubscribeButton from 'partitions/SubscribeButton';
+import {Link} from 'react-router';
 import TelegramBlock from 'partitions/TelegramBlock';
 
 const propTypes = {
@@ -93,7 +94,11 @@ class ProfilePage extends ProfileLayout {
     const {user, isMyPage, myId} = this.props;
 
     if (isMyPage || user.id === myId) {
-      return false;
+      return (
+        <div className="profile__relation">
+          <Link to="/profile/accounts/" className="profile__accounts-link">Способы входа</Link>
+        </div>
+      );
     }
 
     return (

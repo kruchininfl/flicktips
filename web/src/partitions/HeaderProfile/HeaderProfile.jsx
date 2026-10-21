@@ -72,6 +72,7 @@ class HeaderProfile extends Component {
                     <li><Link to={'/user/' + id} className="header-profile__menu-link">Мои оценки</Link></li>
                     <li><Link to={'/profile/bookmarks/'} className="header-profile__menu-link">Мои закладки</Link></li>
                     <li><Link to={'/profile/friends/'} className="header-profile__menu-link">Мои друзья</Link></li>
+                    <li><Link to={'/profile/accounts/'} className="header-profile__menu-link">Способы входа</Link></li>
                   </ul>
 
                   <div className="header-profile__menu-links">

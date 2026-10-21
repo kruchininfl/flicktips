@@ -51,9 +51,14 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
       .test(e.description));
   }
 
+  // «Участвовать» is handled by the same 'join' callback as on the welcome message
+  function postKeyboard(movie: Movie) {
+    return new InlineKeyboard().url('Открыть на FlickTips', movieUrl(movie)).text('Участвовать', 'join');
+  }
+
   async function sendPost(chatId: string, user: User, movie: Movie, vote: number) {
     const text = postText(user, movie, vote);
-    const keyboard = new InlineKeyboard().url('Открыть на FlickTips', movieUrl(movie));
+    const keyboard = postKeyboard(movie);
     const cached = await selectOne<{file_id: string}>('SELECT file_id FROM tg_poster WHERE movie_id = ?', [movie.id]);
     const photo = cached?.file_id || posterUrl(movie);
 
@@ -91,7 +96,7 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
   // false when the post is gone (deleted by someone) and has to be sent again
   async function editPost(chatId: string, messageId: number, user: User, movie: Movie, vote: number) {
     const text = postText(user, movie, vote);
-    const keyboard = new InlineKeyboard().url('Открыть на FlickTips', movieUrl(movie));
+    const keyboard = postKeyboard(movie);
     const attempts = [
       () => api.editMessageCaption(chatId, messageId, {caption: text, parse_mode: 'HTML', reply_markup: keyboard}),
       // posts without a poster are plain text

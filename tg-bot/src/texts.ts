@@ -18,7 +18,8 @@ export interface Movie {
 }
 
 // movie_vote.vote: 0 dislike, 1 neutral, 2 like, 3 super
-const VOTES = ['👎 Не нравится', '😐 Нейтрально', '👍 Нравится', '🔥 Супер'];
+// emoji closest to the site icons (web/src/components/Gui/VoteIcon.jsx), labels from web/src/helpers.js
+const VOTES = ['💩 Очень плохо', '🩶 Средне', '❤️ Хорошо', '🔥 Супер'];
 
 export function escapeHtml(text: string) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

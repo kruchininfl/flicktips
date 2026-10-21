@@ -57,3 +57,101 @@
         text-decoration: none;
     }
 }
+
+.tg-block__steps {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.tg-block__step {
+    position: relative;
+    display: flex;
+    padding-bottom: 18px;
+
+    // the line between the step marks
+    &:not(:last-child):before {
+        content: '';
+        position: absolute;
+        top: 30px;
+        bottom: 4px;
+        left: 13px;
+        width: 2px;
+        background: $color-line;
+    }
+    &:last-child {
+        padding-bottom: 0;
+    }
+}
+.tg-block__step-mark {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    border: 2px solid $color-glass-line;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    color: $color-text-soft;
+
+    .m-done & {
+        border-color: $color-accent;
+        background: $color-accent;
+        color: $color-bg;
+    }
+}
+.tg-block__step-body {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+}
+.tg-block__step-title {
+    font-size: 14px;
+    font-weight: 600;
+
+    .m-done & {
+        color: $color-text-soft;
+    }
+}
+
+// the opener in the header user menu, in Telegram colors like the invite popup's share button
+.tg-open-btn .btn__inn {
+    background: #2aa3df;
+    color: #ffffff;
+
+    &:hover {
+        background: darken(#2aa3df, 10);
+    }
+}
+.tg-open-btn__icn {
+    margin-right: 6px;
+    font-size: 16px;
+    line-height: 0;
+    vertical-align: -3px;
+}
+
+// inside the popup (TelegramButton): no card, the popup is the frame
+.tg-popup {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 460px;
+    text-align: left;
+
+    .tg-block {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+    .tg-block__title {
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+    }
+    > .tg-block > .tg-block__text {
+        text-align: center;
+    }
+}

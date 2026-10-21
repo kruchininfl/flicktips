@@ -57,14 +57,6 @@ class TelegramBlock extends Component {
   renderGroups() {
     const {groups, leaving} = this.state;
 
-    if (!groups.length) {
-      return (
-        <div className="tg-block__text">
-          Пока нет групп. Добавьте бота в группу и нажмите там «Участвовать».
-        </div>
-      );
-    }
-
     return (
       <ul className="tg-block__groups">
         {groups.map((group) => (
@@ -86,40 +78,74 @@ class TelegramBlock extends Component {
     );
   }
 
+  // a done step shows a check instead of its number; the steps can be done in any order
+  renderStep(number, done, title, body) {
+    return (
+      <li className={'tg-block__step' + (done ? ' m-done' : '')}>
+        <span className="tg-block__step-mark">
+          {done
+            ? <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
+            </svg>
+            : number}
+        </span>
+        <div className="tg-block__step-body">
+          <div className="tg-block__step-title">{title}</div>
+          {body}
+        </div>
+      </li>
+    );
+  }
+
   render() {
-    const {loaded, linked, username, botUsername, links} = this.state;
+    const {loaded, linked, username, botUsername, groups, links} = this.state;
 
     if (!loaded || !links) {
       return false;
     }
 
+    const inGroup = groups.some((group) => group.active);
+
     return (
       <div className="tg-block">
         <div className="tg-block__title">Оценки в Telegram</div>
-
-        {linked
-          ? <div className="tg-block__text">
-            Telegram привязан{username ? <span>: <b>@{username}</b></span> : ''}.
-            {' '}<span className="tg-block__link" onClick={this.handleUnlink}>Отвязать</span>
-          </div>
-          : <div className="tg-block__text">
-            Добавьте бота @{botUsername} в группу с друзьями, и он будет публиковать там ваши оценки фильмов.
-          </div>
-        }
-
-        {linked ? this.renderGroups() : ''}
-
-        <div className="tg-block__actions">
-          <Button componentClass="a" href={links.groupUrl} target="_blank" rel="noopener noreferrer" color="green">
-            Добавить бота в группу
-          </Button>
-          {linked
-            ? ''
-            : <Button componentClass="a" href={links.startUrl} target="_blank" rel="noopener noreferrer" color="light-gray">
-              Привязать Telegram
-            </Button>
-          }
+        <div className="tg-block__text">
+          Бот @{botUsername} публикует ваши оценки фильмов в группах Telegram с друзьями.
         </div>
+
+        <ol className="tg-block__steps">
+          {this.renderStep(1, linked, 'Привяжите Telegram', linked
+            ? <div className="tg-block__text">
+              Привязан{username ? <span> <b>@{username}</b></span> : ''}.
+              {' '}<span className="tg-block__link" onClick={this.handleUnlink}>Отвязать</span>
+            </div>
+            : <div className="tg-block__actions">
+              <Button componentClass="a" href={links.startUrl} target="_blank" rel="noopener noreferrer" color="green">
+                Привязать Telegram
+              </Button>
+            </div>
+          )}
+          {this.renderStep(2, inGroup, 'Добавьте бота в группу', (
+            <div>
+              <div className="tg-block__text">
+                Добавленный этой кнопкой бот сразу начнёт публиковать ваши оценки.
+                Если бот уже есть в группе, нажмите там «Участвовать».
+              </div>
+              {groups.length ? this.renderGroups() : ''}
+              <div className="tg-block__actions">
+                <Button
+                  componentClass="a"
+                  href={links.groupUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color={inGroup ? 'light-gray' : 'green'}
+                >
+                  {inGroup ? 'Добавить в ещё одну группу' : 'Добавить бота в группу'}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </ol>
       </div>
     );
   }

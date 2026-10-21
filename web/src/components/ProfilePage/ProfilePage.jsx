@@ -11,7 +11,7 @@ import ProfileLayout from './ProfileLayout';
 import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import SubscribeButton from 'partitions/SubscribeButton';
 import {Link} from 'react-router';
-import TelegramBlock from 'partitions/TelegramBlock';
+import {TelegramButton, canUseTelegram} from 'partitions/TelegramBlock';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -23,7 +23,8 @@ const propTypes = {
   user        : PropTypes.any,
   votes       : PropTypes.any,
   userSignedIn: PropTypes.bool,
-  myId        : PropTypes.number
+  myId        : PropTypes.number,
+  telegram    : PropTypes.bool
 };
 
 @asyncConnect([
@@ -95,8 +96,11 @@ class ProfilePage extends ProfileLayout {
 
     if (isMyPage || user.id === myId) {
       return (
-        <div className="profile__relation">
+        // on desktop these are in the header user menu, which phones do not have
+        <div className="profile__relation profile__phone-only">
           <Link to="/profile/accounts/" className="profile__accounts-link">Способы входа</Link>
+          {this.props.telegram ? <span className="profile__links-sep">·</span> : ''}
+          <TelegramButton className="profile__accounts-link" />
         </div>
       );
     }
@@ -114,7 +118,7 @@ class ProfilePage extends ProfileLayout {
   }
 
   render() {
-    const {user, votes, pending, loading, isMyPage, myId} = this.props;
+    const {user, votes, pending, loading, isMyPage} = this.props;
 
     if (pending || !user || !votes) {
       return false;
@@ -134,8 +138,6 @@ class ProfilePage extends ProfileLayout {
         {super.render()}
 
         {this.renderRelation()}
-
-        {isMyPage || (myId && String(user.id) === String(myId)) ? <TelegramBlock /> : ''}
 
         {votes.total
           ? <div className="profile__votes movie-prev-list">{this.renderVotes(votes)}</div>
@@ -162,7 +164,7 @@ function mapStateToProps(state) {
   const loaded = state.reduxAsyncConnect.loadState.profile && state.reduxAsyncConnect.loadState.profile.loaded;
   const myId = userSignedIn ? getUserModel(state).get('id') : undefined;
 
-  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn, myId};
+  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn, myId, telegram: canUseTelegram(state)};
 }
 
 export default ProfilePage;

@@ -86,6 +86,7 @@
 }
 .profile__accounts-link {
     display: inline-block;
+    cursor: pointer;
     margin-top: 8px;
     font-size: 12px;
     color: $color-muted;
@@ -93,6 +94,16 @@
 
     &:hover {
         color: $color-text;
+    }
+}
+.profile__links-sep {
+    margin: 0 6px;
+    font-size: 12px;
+    color: $color-muted;
+}
+.profile__phone-only {
+    @media screen and (min-width: 768px) {
+        display: none;
     }
 }
 .profile__relation-note {

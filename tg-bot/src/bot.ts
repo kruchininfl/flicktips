@@ -24,7 +24,9 @@ function siteLinkKeyboard(code: string) {
 
 // apiRoot: a self-hosted Bot API server (TELEGRAM_API_ROOT), api.telegram.org by default
 export function createBot(token: string, apiRoot?: string) {
-  const bot = new Bot(token, apiRoot ? {client: {apiRoot}} : undefined);
+  // A request hanging on the relay would stall all updates (they are handled one by one), so give
+  // up well before grammY's default of 500 s. Long polling waits 30 s, which stays inside the limit.
+  const bot = new Bot(token, {client: {timeoutSeconds: 45, ...(apiRoot ? {apiRoot} : {})}});
 
   // The welcome message lists who takes part; it is edited in place, or sent again if it is gone.
   async function refreshWelcome(chatId: string) {
@@ -103,8 +105,11 @@ export function createBot(token: string, apiRoot?: string) {
       (member.status === 'restricted' && member.is_member && member.can_send_messages);
 
     if (isIn) {
+      // also covers a join the bot missed while offline: the update then looks like a status change
+      const known = await store.getChat(String(chat.id));
+
       await store.saveChat(String(chat.id), chat.title);
-      if (!wasIn) {
+      if (!wasIn || !known || !known.active || !known.welcome_message_id) {
         await sendWelcome(String(chat.id));
       }
     } else {

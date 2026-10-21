@@ -38,9 +38,9 @@
 .header-profile__menu-inn {
     background: $color-surface-2;
     border: 1px solid $color-glass-line;
-    width: 200px;
+    width: 220px;
     position: absolute;
-    left: -180px;
+    left: -200px;
     padding: 5px 0;
     box-sizing: border-box;
     border-radius: $radius;
@@ -58,6 +58,7 @@
 }
 .header-profile__menu-link {
     display: block;
+    cursor: pointer;
     color: $color-muted;
     text-decoration: none;
     padding: 10px 20px;
@@ -78,9 +79,15 @@
         display: block;
         width: 100%;
         box-sizing: border-box;
+        padding: 0 10px;
         text-align: center;
+        white-space: nowrap;
         height: 36px;
         line-height: 34px;
         font-size: 14px;
     }
+}
+
+.header-profile__tg-btn.btn {
+    margin-top: 8px;
 }

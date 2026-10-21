@@ -24,6 +24,9 @@ subproject is installed and run independently from its own directory.
   already open). Needs the secrets in `.env`, SSH to the server and `docker compose`.
   `tools/local.sh down` / `logs [svc]`. Parsers are not included. VK login only works if the
   local URL is allowed in the VK ID app (VK ID requires https, hence the local TLS).
+- Refresh test data: `tools/copy-prod-to-test.sh` copies `flicktips` into `flicktips_test` on the
+  server (runs there over SSH; backs up `flicktips_test` to `/root/db-backups` first, then drops
+  its tables). Prod is only read via `mysqldump --single-transaction`.
 
 The rest run inside the subproject dir (`npm install` first; there is no root install).
 

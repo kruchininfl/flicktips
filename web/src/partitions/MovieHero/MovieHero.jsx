@@ -19,7 +19,9 @@ const propTypes = {
 export default function MovieHero({movie, label}) {
   const date = movie.release_date || movie.first_air_date;
   const year = date && moment(date).isValid() ? moment(date).format('YYYY') : '';
-  const genres = (movie.genres || []).map((g) => g.name || g).slice(0, 3).join(', ');
+  // genres come as {id, name} from the API or as names once MoviePreview has mapped them; a genre without a name is skipped
+  const genres = (movie.genres || []).map((g) => (typeof g === 'string' ? g : g && g.name)).filter(Boolean)
+    .slice(0, 3).join(', ');
   const meta = [year, genres].filter(Boolean).join(' · ');
   const poster = movie.tmdb_poster_path ? config.tmdb.posterPath342 + movie.tmdb_poster_path : null;
 

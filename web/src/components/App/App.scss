@@ -743,11 +743,23 @@ html, body, .react-view, .layout {
     background: linear-gradient(90deg, $color-orange, $color-accent);
     box-shadow: 0 0 8px rgba($color-accent, .6);
 }
+// wordmark from the redesign mockup: Unbounded, "Tips" in the accent color
+.logo {
+    font-family: $font-display;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    white-space: nowrap;
+
+    em {
+        font-style: normal;
+        color: $color-accent;
+    }
+}
 .header__logo {
     color: $color-text;
     text-decoration: none;
     cursor: pointer;
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
     transition: opacity 200ms;
 

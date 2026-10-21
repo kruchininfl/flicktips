@@ -41,7 +41,9 @@ class MoviePreview extends Component {
   render() {
     const {movie, votesFilter, className} = this.props;
 
-    movie.genres = movie.genres ? movie.genres.map((el) => el.name || el) : [];
+    movie.genres = movie.genres
+      ? movie.genres.map((el) => (typeof el === 'string' ? el : el && el.name)).filter(Boolean)
+      : [];
     movie.date = movie.release_date || movie.first_air_date;
 
     const year = movie.date && moment(movie.date).isValid() ? moment(movie.date).format('YYYY') : '';

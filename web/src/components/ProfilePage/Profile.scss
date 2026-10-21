@@ -17,18 +17,12 @@
     margin-top: 10px;
 }
 .profile__votes-group {
-    flex: 0 0 100%;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
     color: $color-muted;
-    padding: 4px 0;
-    display: none;
-
-    &.m-unique {
-        display: block;
-    }
+    padding: 18px 10px 6px;
 }
 .profile__votes-item {
     transition: opacity 300ms;

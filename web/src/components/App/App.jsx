@@ -130,7 +130,7 @@ class App extends Component {
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
           <div className="wrapper header__inn">
-            <IndexLink to="/" className="header__logo"><span className="icn icn_logo" /></IndexLink>
+            <IndexLink to="/" className="header__logo logo">Flick<em>Tips</em></IndexLink>
 
             {this.renderNav()}
 
@@ -170,7 +170,7 @@ class App extends Component {
           <div className="wrapper">
             <a href="mailto:support@flicktips.ru" className="footer__link">Контакты</a>
             <Link to="/about" className="footer__link">О Проекте</Link>
-            <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
+            <IndexLink to="/" className="footer__logo logo">Flick<em>Tips</em></IndexLink>
           </div>
         </div>
 

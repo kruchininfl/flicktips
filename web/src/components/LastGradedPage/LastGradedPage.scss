@@ -9,12 +9,11 @@
 .lg-header {
     display: flex;
     justify-content: center;
-    padding: 12px 10px 8px;
+    padding: 16px 10px;
 }
 
 @media screen and (min-width: 768px) {
     .lg-header {
-        justify-content: flex-start;
-        padding: 4px 0 20px;
+        padding: 20px 0 28px;
     }
 }

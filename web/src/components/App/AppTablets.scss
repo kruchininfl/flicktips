@@ -12,29 +12,6 @@
     .header {
         height: 64px;
     }
-    .header__nav {
-        display: flex;
-        gap: 4px;
-    }
-    .header__nav-link {
-        padding: 7px 14px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 700;
-        color: $color-muted;
-        text-decoration: none;
-        transition: color 200ms, background-color 200ms;
-
-        &:hover {
-            color: $color-text;
-            background: $color-glass;
-        }
-
-        &.m-active {
-            color: $color-bg;
-            background: $color-text;
-        }
-    }
     .content {
         padding: 20px;
         margin: 0 -20px;

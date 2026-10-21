@@ -101,7 +101,7 @@ class HeaderSearch extends Component {
         <div className="header-search">
           <div onClick={this.handleOpenSearch} className="header-search__toggle">
             <span className="icn icn_loupe"/>
-            <span className="header-search__toggle-text">Найти фильм или сериал</span>
+            <span className="header-search__toggle-text">Поиск</span>
           </div>
           <div className={'header-search__container' + (opened ? ' m-opened' : '')}>
             <div className="header-search__head">

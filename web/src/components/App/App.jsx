@@ -98,22 +98,6 @@ class App extends Component {
     );
   }
 
-  renderNav() {
-    const {userSignedIn} = this.props;
-
-    return (
-      <nav className="header__nav">
-        <IndexLink to="/" className="header__nav-link" activeClassName="m-active">Лента</IndexLink>
-        {userSignedIn ? (
-          // friends and own votes live in the avatar menu, so the header keeps only the main sections
-          <Link to="/profile/bookmarks/" className="header__nav-link" activeClassName="m-active">Закладки</Link>
-        ) : (
-          <Link to="/about" className="header__nav-link" activeClassName="m-active">О проекте</Link>
-        )}
-      </nav>
-    );
-  }
-
   render() {
     return (
       <div className="layout">
@@ -128,8 +112,6 @@ class App extends Component {
           <LoadingBar updateTime={100} className="header__loader" />
           <div className="wrapper header__inn">
             <IndexLink to="/" className="header__logo logo">Flick<em>Tips</em></IndexLink>
-
-            {this.renderNav()}
 
             <div className="header__right">
               {this.props.userSignedIn ? (

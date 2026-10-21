@@ -103,8 +103,11 @@ export function createBot(token: string, apiRoot?: string) {
       (member.status === 'restricted' && member.is_member && member.can_send_messages);
 
     if (isIn) {
+      // also covers a join the bot missed while offline: the update then looks like a status change
+      const known = await store.getChat(String(chat.id));
+
       await store.saveChat(String(chat.id), chat.title);
-      if (!wasIn) {
+      if (!wasIn || !known || !known.active || !known.welcome_message_id) {
         await sendWelcome(String(chat.id));
       }
     } else {

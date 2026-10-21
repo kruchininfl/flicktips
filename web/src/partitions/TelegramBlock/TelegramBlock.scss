@@ -117,6 +117,22 @@
     }
 }
 
+// the opener in the header user menu, in Telegram colors like the invite popup's share button
+.tg-open-btn .btn__inn {
+    background: #2aa3df;
+    color: #ffffff;
+
+    &:hover {
+        background: darken(#2aa3df, 10);
+    }
+}
+.tg-open-btn__icn {
+    margin-right: 6px;
+    font-size: 16px;
+    line-height: 0;
+    vertical-align: -3px;
+}
+
 // inside the popup (TelegramButton): no card, the popup is the frame
 .tg-popup {
     box-sizing: border-box;

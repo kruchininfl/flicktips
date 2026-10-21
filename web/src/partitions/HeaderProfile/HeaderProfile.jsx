@@ -5,6 +5,7 @@ import {getUserModel} from 'redux/models/user';
 import {Link} from 'react-router';
 import {signOut} from '../../partitions/redux-oauth';
 import InviteButton from '../InviteButton/InviteButton';
+import {TelegramButton} from '../TelegramBlock';
 
 import './HeaderProfile.scss';
 
@@ -67,6 +68,7 @@ class HeaderProfile extends Component {
                 <div className="header-profile__menu-inn">
                   <div className="header-profile__menu-links header-profile__menu-invite">
                     <InviteButton buttonClass="header-profile__invite-btn" />
+                    <TelegramButton buttonClass="header-profile__invite-btn header-profile__tg-btn" />
                   </div>
                   <ul className="header-profile__menu-links">
                     <li><Link to={'/user/' + id} className="header-profile__menu-link">Мои оценки</Link></li>

@@ -97,8 +97,11 @@ class ProfilePage extends ProfileLayout {
       return (
         <div className="profile__relation">
           <Link to="/profile/accounts/" className="profile__accounts-link">Способы входа</Link>
-          <span className="profile__links-sep">·</span>
-          <TelegramButton className="profile__accounts-link" />
+          {/* on desktop it is in the header user menu, which phones do not have */}
+          <span className="profile__phone-only">
+            <span className="profile__links-sep">·</span>
+            <TelegramButton className="profile__accounts-link" />
+          </span>
         </div>
       );
     }

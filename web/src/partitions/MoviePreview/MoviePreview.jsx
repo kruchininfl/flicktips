@@ -4,7 +4,7 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import MovieStat from 'partitions/MovieStat';
 import MovieStatExternal from 'partitions/MovieStatExternal';
-import config from 'config';
+import {getPosterUrl} from 'helpers';
 
 import './MoviePreview.scss';
 import VoteIcon from 'components/Gui/VoteIcon';
@@ -29,7 +29,14 @@ class MoviePreview extends Component {
 
   componentDidMount() {
     const {movie} = this.props;
-    const poster = config.tmdb.posterPath342 + movie.tmdb_poster_path;
+    const poster = getPosterUrl(movie);
+
+    // no poster at all: ask the API to look for one right away
+    if (!poster) {
+      this.props.dispatch(updateAndGetFilmPoster(movie.id));
+      return;
+    }
+
     const img = document.createElement('img');
 
     img.addEventListener('error', () => {
@@ -47,6 +54,7 @@ class MoviePreview extends Component {
     movie.date = movie.release_date || movie.first_air_date;
 
     const year = movie.date && moment(movie.date).isValid() ? moment(movie.date).format('YYYY') : '';
+    const poster = getPosterUrl(movie);
     const meta = [year, movie.genres.slice(0, 2).join(', ')].filter(Boolean).join(' · ');
 
     return (
@@ -56,12 +64,12 @@ class MoviePreview extends Component {
         <Link to={'/movie/' + movie.id} className="movie-prev__link">подробнее</Link>
 
         <div className="movie-cover movie-cover__prev">
-          {movie.tmdb_poster_path
+          {poster
             ? <div
-              style={{backgroundImage: `url(${config.tmdb.posterPath342 + movie.tmdb_poster_path})`}}
+              style={{backgroundImage: `url(${poster})`}}
               className="movie-cover-inn"
             >
-              <img src={config.tmdb.posterPath342 + movie.tmdb_poster_path}
+              <img src={poster}
                 alt={movie.title}
               />
             </div>

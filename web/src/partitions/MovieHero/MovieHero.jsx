@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import {Link} from 'react-router';
-import config from 'config';
+import {getPosterUrl} from 'helpers';
 import MovieStat from 'partitions/MovieStat';
 import MovieStatExternal from 'partitions/MovieStatExternal';
 import MovieBookmark from '../MovieBookmark/MovieBookmark';
@@ -23,7 +23,7 @@ export default function MovieHero({movie, label}) {
   const genres = (movie.genres || []).map((g) => (typeof g === 'string' ? g : g && g.name)).filter(Boolean)
     .slice(0, 3).join(', ');
   const meta = [year, genres].filter(Boolean).join(' · ');
-  const poster = movie.tmdb_poster_path ? config.tmdb.posterPath342 + movie.tmdb_poster_path : null;
+  const poster = getPosterUrl(movie);
 
   return (
     <div className="movie-hero">

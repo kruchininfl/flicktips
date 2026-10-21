@@ -1,0 +1,154 @@
+@import "../../components/base";
+
+.accounts {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    box-sizing: border-box;
+}
+.accounts__title {
+    font-family: $font-display;
+    font-size: 18px;
+    font-weight: 600;
+    color: $color-text;
+}
+.accounts__hint {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $color-muted;
+}
+.accounts__notice {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: $radius-sm;
+    font-size: 13px;
+    color: $color-text;
+    background: rgba($color-accent, .1);
+    border: 1px solid rgba($color-accent, .35);
+
+    &.m-error {
+        background: rgba($color-like, .1);
+        border-color: rgba($color-like, .4);
+    }
+}
+.accounts__loading {
+    padding: 30px 0;
+    text-align: center;
+}
+.accounts__list {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    border-radius: $radius;
+    border: 1px solid $color-glass-line;
+    background: $color-surface-2;
+    overflow: hidden;
+}
+.accounts__item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+
+    & + & {
+        border-top: 1px solid $color-line;
+    }
+}
+.accounts__badge {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    line-height: 40px;
+    text-align: center;
+    font: 700 15px/40px Arial, sans-serif;
+    color: #ffffff;
+
+    &_vk {
+        background: #0077ff;
+    }
+    &_ya {
+        background: #000000;
+        color: #fc3f1d;
+        font-size: 18px;
+        box-shadow: inset 0 0 0 1px $color-glass-line;
+    }
+}
+.accounts__info {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 12px;
+}
+.accounts__name,
+.accounts__status {
+    display: block;
+}
+.accounts__name {
+    font-size: 15px;
+    font-weight: 600;
+    color: $color-text;
+}
+.accounts__status {
+    margin-top: 2px;
+    font-size: 12px;
+    color: $color-muted;
+
+    &.m-linked {
+        color: $color-accent;
+    }
+}
+
+.accounts__merge {
+    margin-top: 20px;
+    padding: 18px 16px;
+    border-radius: $radius;
+    border: 1px solid rgba($color-accent, .35);
+    background: linear-gradient(180deg, rgba($color-accent, .08), rgba($color-accent, 0) 70%), $color-surface-2;
+    box-shadow: $shadow;
+}
+.accounts__merge-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: $color-text;
+}
+.accounts__merge-user {
+    display: flex;
+    align-items: center;
+    margin-top: 14px;
+}
+.accounts__merge-photo {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
+}
+.accounts__merge-name,
+.accounts__merge-stats {
+    display: block;
+}
+.accounts__merge-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: $color-text;
+}
+.accounts__merge-stats {
+    margin-top: 2px;
+    font-size: 12px;
+    color: $color-muted;
+}
+.accounts__merge-text {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $color-text-soft;
+}
+.accounts__merge-actions {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 16px;
+
+    .btn {
+        margin: 0 10px 10px 0;
+    }
+}

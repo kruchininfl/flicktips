@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use Exception;
+use Security\AccountLinkProof;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -584,5 +585,172 @@ class UserController
             'success' => true,
             'inviterId' => $inviter['id']
         ]);
+    }
+
+    /**
+     * Sign-in methods of the current user: {vkontakte: bool, yandex: bool}.
+     */
+    public function getAccounts(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        return $app->json([
+            'success' => true,
+            'services' => $app['user.repository']->getLoginServices($user['id'])
+        ]);
+    }
+
+    /**
+     * Links the VK/Yandex account from `proof` (see AccountLinkProof) to the current user. If that account
+     * already signs in to another FlickTips user, nothing changes and `status: conflict` comes back with
+     * what merging would bring; the page then asks and calls mergeAccount with the same proof.
+     */
+    public function linkAccount(Request $request, Application $app)
+    {
+        list($user, $identity, $error) = $this->resolveLinkRequest($request, $app);
+        if ($error) {
+            return $error;
+        }
+
+        $repository = $app['user.repository'];
+        $ownerId = $repository->findIdByService($identity['service'], $identity['id']);
+
+        if ($ownerId === $user['id']) {
+            $status = 'linked';
+        } elseif ($ownerId === null) {
+            if (!$repository->linkService($user['id'], $identity['service'], $identity['id'])) {
+                return $app->json([
+                    'success' => false,
+                    'msg' => 'another account of this service is already linked'
+                ], 409);
+            }
+            $status = 'linked';
+        } else {
+            return $app->json([
+                'success' => true,
+                'status' => 'conflict',
+                'service' => $identity['service'],
+                'merge' => $repository->getMergeSummary($user['id'], $ownerId)
+            ]);
+        }
+
+        AccountLinkProof::consume($request->getSession());
+
+        return $app->json([
+            'success' => true,
+            'status' => $status,
+            'service' => $identity['service'],
+            'services' => $repository->getLoginServices($user['id'])
+        ]);
+    }
+
+    /**
+     * Merges the user that signs in with the account from `proof` into the current user and deletes it.
+     */
+    public function mergeAccount(Request $request, Application $app)
+    {
+        list($user, $identity, $error) = $this->resolveLinkRequest($request, $app);
+        if ($error) {
+            return $error;
+        }
+
+        $repository = $app['user.repository'];
+        $ownerId = $repository->findIdByService($identity['service'], $identity['id']);
+
+        if ($ownerId === null || $ownerId === $user['id']) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'nothing to merge'
+            ], 409);
+        }
+
+        if (!$repository->mergeInto($user['id'], $ownerId)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'accounts cannot be merged'
+            ], 409);
+        }
+
+        AccountLinkProof::consume($request->getSession());
+
+        return $app->json([
+            'success' => true,
+            'status' => 'merged',
+            'service' => $identity['service'],
+            'services' => $repository->getLoginServices($user['id'])
+        ]);
+    }
+
+    public function unlinkAccount(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401);
+        }
+
+        $service = (string) $request->get('service');
+        if (!in_array($service, \Repositories\UserRepository::LOGIN_SERVICES, true)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'unknown service'
+            ], 400);
+        }
+
+        if (!$app['user.repository']->unlinkService($user['id'], $service)) {
+            return $app->json([
+                'success' => false,
+                'msg' => 'cannot unlink the last sign-in method'
+            ], 409);
+        }
+
+        return $app->json([
+            'success' => true,
+            'services' => $app['user.repository']->getLoginServices($user['id'])
+        ]);
+    }
+
+    /**
+     * [user, identity, null] for an authorized request with a valid link proof, or [.., .., error response].
+     */
+    private function resolveLinkRequest(Request $request, Application $app)
+    {
+        $user = $app['user.repository']->getByCredentials(
+            $request->headers->get('uid'),
+            $request->headers->get('access-token')
+        );
+
+        if (!$user) {
+            return [null, null, $app->json([
+                'success' => false,
+                'msg' => 'authorization required'
+            ], 401)];
+        }
+
+        $identity = AccountLinkProof::verify($request->get('proof'), $request->getSession());
+        if (!$identity || !in_array($identity['service'], \Repositories\UserRepository::LOGIN_SERVICES, true)) {
+            return [$user, null, $app->json([
+                'success' => false,
+                'msg' => 'sign-in expired, try again'
+            ], 400)];
+        }
+
+        return [$user, $identity, null];
     }
 }

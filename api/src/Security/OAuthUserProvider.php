@@ -71,6 +71,19 @@ class OAuthUserProvider implements UserProviderInterface, OAuthUserProviderInter
     public function loadUserByOAuthCredentials(OAuthTokenInterface $token)
     {
         $userInfo = $token->getAttribute('userInfo');
+
+        // linking a sign-in method from the profile: never create or sign in a user here, the identity
+        // is handed to the page as a signed proof and linked through /api/user/accounts/link/
+        if ($this->app['session']->get('oauth.link')) {
+            return new UserModel(array('link_identity' => array(
+                'service' => strtolower($token->getService()),
+                'id' => (string) $userInfo['id'],
+                'username' => $userInfo['username'],
+                'avatar' => $userInfo['avatar_source'],
+                'gender' => $userInfo['gender']
+            )));
+        }
+
         $user = $this->pdo->query('SELECT * FROM user WHERE ' . strtolower($token->getService()) . '_id = ' . $userInfo['id'])->fetch();
         if (!$user || 1) {
             $user = $this->createUser($token);

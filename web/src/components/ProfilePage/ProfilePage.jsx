@@ -95,13 +95,11 @@ class ProfilePage extends ProfileLayout {
 
     if (isMyPage || user.id === myId) {
       return (
-        <div className="profile__relation">
+        // on desktop these are in the header user menu, which phones do not have
+        <div className="profile__relation profile__phone-only">
           <Link to="/profile/accounts/" className="profile__accounts-link">Способы входа</Link>
-          {/* on desktop it is in the header user menu, which phones do not have */}
-          <span className="profile__phone-only">
-            <span className="profile__links-sep">·</span>
-            <TelegramButton className="profile__accounts-link" />
-          </span>
+          <span className="profile__links-sep">·</span>
+          <TelegramButton className="profile__accounts-link" />
         </div>
       );
     }

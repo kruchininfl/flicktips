@@ -127,7 +127,10 @@ class TelegramBlock extends Component {
           )}
           {this.renderStep(2, inGroup, 'Добавьте бота в группу', (
             <div>
-              <div className="tg-block__text">И нажмите там «Участвовать».</div>
+              <div className="tg-block__text">
+                Добавленный этой кнопкой бот сразу начнёт публиковать ваши оценки.
+                Если бот уже есть в группе, нажмите там «Участвовать».
+              </div>
               {groups.length ? this.renderGroups() : ''}
               <div className="tg-block__actions">
                 <Button

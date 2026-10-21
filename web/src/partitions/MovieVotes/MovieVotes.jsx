@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import './MovieVotes.scss';
 import {connect} from 'react-redux';
-import {getVoteIconClassById} from '../../helpers';
+import VoteIcon from 'components/Gui/VoteIcon';
 import {Link} from 'react-router';
 import {isUserSignedIn} from '../../redux/models/user';
 import moment from 'moment';
@@ -54,14 +54,14 @@ class MovieVotes extends Component {
           >
             <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
             <div className="movie-user-votes__item-vote">
-              <span className={getVoteIconClassById(value, true)} />
+              <VoteIcon vote={value} active />
             </div>
           </div>
 
           <div className="movie-user-votes__item-content">
             <div className={`movie-user-votes__item-head ${userId === 4 && 'movie-user-votes__item-head_gold'}`}>
               <span>{userName}</span>
-              <span className={getVoteIconClassById(value, true)} />
+              <VoteIcon vote={value} active />
             </div>
             <div className="movie-user-votes__item-date">{time}</div>
           </div>

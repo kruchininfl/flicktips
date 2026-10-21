@@ -4,7 +4,7 @@ import {voteRequest} from 'redux/actions/voteActions';
 
 import './MovieStat.scss';
 import {connect} from 'react-redux';
-import {getVoteIconClassById} from '../../helpers';
+import VoteIcon from 'components/Gui/VoteIcon';
 
 const propTypes = {
   dispatch   : PropTypes.func.isRequired,
@@ -32,63 +32,64 @@ const defaultProps = {
   inBookmarks: false
 };
 
+const VOTES = [
+  {name: 'super', id: 3, active: 'isSuper', counter: 'super'},
+  {name: 'like', id: 2, active: 'isLiked', counter: 'likes'},
+  {name: 'neutral', id: 1, active: 'isNeutral', counter: 'neutral'},
+  {name: 'dislike', id: 0, active: 'isDisliked', counter: 'dislikes'}
+];
+
 class MovieStat extends Component {
   constructor(props) {
     super(props);
 
+    // Animation runs only after a click, not when the page renders an existing vote.
+    // The vote is applied after the API responds, so the clicked icon is shown optimistically meanwhile.
+    this.state = {animated: null, animatedOn: false};
+
     this.handleSendVote = this.handleSendVote.bind(this);
+    this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
   }
 
-  handleSendVote(entityId, vote) {
+  handleSendVote(entityId, vote, isActive) {
+    this.setState({animated: vote, animatedOn: !isActive});
     this.props.dispatch(voteRequest(entityId, vote));
+  }
+
+  handleAnimationEnd(e) {
+    if (e.target === e.currentTarget && !e.nativeEvent.pseudoElement) {
+      this.setState({animated: null});
+    }
   }
 
   render() {
     return (
       <div className="movie-votes">
-        <div
-          onClick={() => this.handleSendVote(this.props.id, 'super')}
-          className={'movie-vote' + (this.props.isSuper ? ' m-active' : '')}
-        >
-          <div className="movie-vote__icn">
-            <span className={getVoteIconClassById(3, this.props.isSuper)}/>
-          </div>
+        {VOTES.map(({name, id, active, counter}) => {
+          const isAnimated = this.state.animated === name;
+          const isActive = isAnimated ? this.state.animatedOn : this.props[active];
+          let className = 'movie-vote movie-vote_' + name;
 
-          <div className="movie-vote__counter">{this.props.super}</div>
-        </div>
+          className += isActive ? ' m-active' : '';
 
-        <div
-          onClick={() => this.handleSendVote(this.props.id, 'like')}
-          className={'movie-vote' + (this.props.isLiked ? ' m-active' : '')}
-        >
-          <div className="movie-vote__icn">
-            <span className={getVoteIconClassById(2, this.props.isLiked)}/>
-          </div>
+          if (isAnimated) {
+            className += isActive ? ' m-pop' : ' m-unpop';
+          }
 
-          <div className="movie-vote__counter">{this.props.likes}</div>
-        </div>
+          return (
+            <div
+              key={name}
+              onClick={() => this.handleSendVote(this.props.id, name, this.props[active])}
+              className={className}
+            >
+              <div className="movie-vote__icn" onAnimationEnd={this.handleAnimationEnd}>
+                <VoteIcon vote={id} active={isActive} />
+              </div>
 
-        <div
-          onClick={() => this.handleSendVote(this.props.id, 'neutral')}
-          className={'movie-vote' + (this.props.isNeutral ? ' m-active' : '')}
-        >
-          <div className="movie-vote__icn">
-            <span className={getVoteIconClassById(1, this.props.isNeutral)}/>
-          </div>
-
-          <div className="movie-vote__counter">{this.props.neutral}</div>
-        </div>
-
-        <div
-          onClick={() => this.handleSendVote(this.props.id, 'dislike')}
-          className={'movie-vote' + (this.props.isDisliked ? ' m-active' : '')}
-        >
-          <div className="movie-vote__icn">
-            <span className={getVoteIconClassById(0, this.props.isDisliked)}/>
-          </div>
-
-          <div className="movie-vote__counter">{this.props.dislikes}</div>
-        </div>
+              <div className="movie-vote__counter">{this.props[counter]}</div>
+            </div>
+          );
+        })}
       </div>
     );
   }

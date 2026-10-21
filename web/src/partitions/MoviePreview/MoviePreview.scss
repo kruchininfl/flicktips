@@ -10,7 +10,7 @@
     padding: 10px;
 
     .movie-prev-list & {
-        border-bottom: 3px solid #f1f1f1;
+        border-bottom: 1px solid $color-line;
 
         &:last-child {
             border-bottom: none;

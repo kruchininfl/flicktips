@@ -5,7 +5,8 @@ import Modal from 'react-modal';
 import {connect} from 'react-redux';
 import {getFilmVotes} from '../../redux/actions/movieActions';
 import {Link} from 'react-router';
-import {getStringByVoteId, getTextByVoteId, getVoteIconClassById} from '../../helpers';
+import {getStringByVoteId, getTextByVoteId} from '../../helpers';
+import VoteIcon from '../Gui/VoteIcon';
 import moment from 'moment';
 
 @connect(null)
@@ -81,7 +82,7 @@ class MovieVotes extends Component {
                 </Link>
 
                 <div className={'vote-details__value' + ' m-' + getStringByVoteId(vote.vote)}>
-                  <span className={getVoteIconClassById(vote.vote, true)} />
+                  <VoteIcon vote={vote.vote} active />
                   <span>{getTextByVoteId(vote.vote)}</span>
                 </div>
 

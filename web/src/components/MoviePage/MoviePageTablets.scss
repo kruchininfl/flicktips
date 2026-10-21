@@ -5,12 +5,16 @@
     .movie__cover {
         width: 220px;
     }
+    .movie__cover {
+        border-radius: $radius-lg;
+        box-shadow: $shadow-lg;
+    }
     .movie-eStat.m-details {
         .movie-eStat__item {
             font-size: 18px;
             margin: 0;
             width: 50%;
-            background: #f1f1f1;
+            background: $color-bg;
         }
         .movie-eStat__item-icn {
             margin-right: 15px;
@@ -24,6 +28,8 @@
         padding: 10px 0 0;
         background: transparent;
         box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
 
         .movie-vote__counter {
             color: inherit;

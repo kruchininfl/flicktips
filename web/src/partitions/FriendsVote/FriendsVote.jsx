@@ -8,7 +8,7 @@ import {connect} from 'react-redux';
 import moment from 'moment';
 import 'moment/locale/ru';
 import {Link} from 'react-router';
-import {getVoteIconClassById} from '../../helpers';
+import VoteIcon from 'components/Gui/VoteIcon';
 
 const propTypes = {
   dispatch    : PropTypes.func.isRequired,
@@ -68,7 +68,7 @@ class FriendsVote extends Component {
 
           <div className="friend-vote__main-text">
             <span className="friend-vote__username link">{user.name}</span>
-            <span className="friend-vote__vote"><span className={getVoteIconClassById(vote, true)} /></span>
+            <span className="friend-vote__vote"><VoteIcon vote={vote} active /></span>
 
             <div className="friend-vote__movie-title movie-prev__title">
               {movie.title

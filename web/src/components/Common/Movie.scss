@@ -3,6 +3,8 @@
 .movie-cover {
     float: left;
     position: relative;
+    border-radius: $radius-sm;
+    overflow: hidden;
     &:before {
         content: '';
         display: block;
@@ -11,7 +13,7 @@
             image: url(../../img/ph-movie.svg);
             size: 50% auto;
             position: 50% 50%;
-            color: #d9e1ea;
+            color: #e4e8ee;
             repeat: no-repeat;
         };
     }
@@ -42,9 +44,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #ffffff;
+    z-index: 1;
+    background: rgba(#ffffff, .92);
     border-radius: 50%;
-    box-shadow: 0 0 3px 0 rgba(#000000, .8);
+    box-shadow: 0 2px 8px rgba(#000000, .35);
+    animation: movie-vote-icn-in 400ms $ease-spring both;
 
     > .vote-icn {
         width: 16px;
@@ -55,9 +59,19 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1em;
+    letter-spacing: -.01em;
+    color: $color-text;
     margin: 0;
+}
+@keyframes movie-vote-icn-in {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 .movie-ot,
 .movie-y {
@@ -71,7 +85,7 @@
 }
 .movie-y {
     position: relative;
-    color: #c0c0c0;
+    color: $color-muted;
 
     .movie-ot + & {
         &:before {
@@ -83,7 +97,7 @@
 .movie-duration,
 .movie-genres {
     margin: .25em 0;
-    color: #c0c0c0;
+    color: $color-muted;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

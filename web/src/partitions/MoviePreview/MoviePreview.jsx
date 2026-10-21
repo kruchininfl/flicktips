@@ -7,7 +7,7 @@ import MovieStatExternal from 'partitions/MovieStatExternal';
 import config from 'config';
 
 import './MoviePreview.scss';
-import {getVoteIconClassById} from '../../helpers';
+import VoteIcon from 'components/Gui/VoteIcon';
 import {Link} from 'react-router';
 import MovieBookmark from '../MovieBookmark/MovieBookmark';
 import MovieVotes from '../MovieVotes';
@@ -65,7 +65,7 @@ class MoviePreview extends Component {
             : ''
           }
           {typeof movie.vote !== 'undefined'
-            ? <div className="movie-vote-icn"><span className={getVoteIconClassById(movie.vote, true)} /></div>
+            ? <div className="movie-vote-icn"><VoteIcon vote={movie.vote} active /></div>
             : ''
           }
           <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />

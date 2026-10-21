@@ -34,6 +34,9 @@
 .movie__cover {
     width: 95px;
     float: none;
+    border-radius: $radius-sm;
+    overflow: hidden;
+    box-shadow: $shadow;
 }
 .movie__head-data {
     flex: 1 1 auto;
@@ -84,8 +87,11 @@
     right: 0;
     bottom: 0;
     z-index: 1;
-    background: #ffffff;
-    box-shadow: 0 0 2px 1px rgba(#000000, .2);
+    background: rgba(#ffffff, .88);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    box-shadow: 0 -1px 0 $color-line, 0 -8px 24px -12px rgba(#101828, .2);
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
 
     .movie-votes {
         margin: 0;
@@ -99,7 +105,7 @@
     }
 
     .movie-vote__counter {
-        color: #000000;
+        color: $color-text;
     }
 }
 .movie__trailer-btn {
@@ -135,7 +141,7 @@
 .movie__friends-votes {
     margin: 10px -10px -10px;
     padding: 15px 10px;
-    border-top: 1px solid #f1f1f1;
+    border-top: 1px solid $color-line;
 }
 .movie__descr {
     font-size: 14px;
@@ -145,7 +151,8 @@
     border-top: 1px solid #f1f1f1;
     border-bottom: 1px solid #f1f1f1;
     position: relative;
-    line-height: 1.4em;
+    line-height: 1.6em;
+    color: #3b4048;
 }
 .movie__staff-group {
     margin: 20px 0;
@@ -156,9 +163,10 @@
     overflow-y: hidden;
 }
 .movie__staff-group-title {
-    margin-bottom: 10px;
-    font-size: 16px;
-    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.01em;
 }
 .movie-person_details {
     width: 90px;
@@ -175,13 +183,18 @@
         }
     }
 
+    .movie-person__photo {
+        border-radius: $radius;
+        overflow: hidden;
+    }
     .movie-person__photo-inn {
-        transition: filter 200ms;
+        transition: transform 400ms $ease-out, filter 200ms;
     }
 
     &:hover {
         .movie-person__photo-inn {
-            filter: brightness(120%);
+            transform: scale(1.05);
+            filter: brightness(108%);
         }
     }
 }
@@ -275,6 +288,7 @@
     margin: 0 auto;
     padding: 30px 20px;
     box-sizing: border-box;
+    border-radius: $radius-lg;
 
     .vote-details {
         box-sizing: border-box;

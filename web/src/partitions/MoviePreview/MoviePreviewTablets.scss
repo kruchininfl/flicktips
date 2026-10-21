@@ -11,22 +11,26 @@
             width: var(--tile-width, 50%);
             box-sizing: border-box;
             background: transparent;
+            overflow: visible;
             transition: var(--tile-transition, all) 300ms;
         }
         .movie-cover.movie-cover__prev {
             float: none;
             width: 100%;
+            border-radius: $radius-lg $radius-lg 0 0;
+            overflow: hidden;
+            transition: transform 350ms $ease-out, box-shadow 350ms $ease-out;
 
             .movie-cover-inn {
-                transition: all 300ms;
+                transition: transform 500ms $ease-out, filter 300ms;
             }
         }
         .movie-prev__content {
             display: block;
             margin: 0;
-            padding: 15px 10px 5px;
-            background: #ffffff;
-            border-top: 1px solid #f1f1f1;
+            padding: 15px 12px 5px;
+            background: $color-surface;
+            transition: transform 350ms $ease-out;
 
             .movie-votes {
                 text-align: center;
@@ -41,30 +45,45 @@
                 margin: 0;
             }
             .movie-eStat__item {
-                padding: 3px 5px;
-                background: rgba(#ffffff, .9);
-                border-radius: 3px;
+                padding: 3px 8px;
+                background: rgba(#ffffff, .85);
+                backdrop-filter: blur(6px);
+                -webkit-backdrop-filter: blur(6px);
+                border-radius: 999px;
+                box-shadow: $shadow-sm;
             }
         }
 
         .movie-prev__votes {
-            background: #ffffff;
-            padding: 10px;
-            margin-top: 1px;
+            background: $color-surface;
+            padding: 8px 6px 10px;
+            margin-top: 0;
+            border-radius: 0 0 $radius-lg $radius-lg;
+            border-top: 1px solid $color-line;
         }
 
-        .movie-prev__link:hover {
-            & ~ .movie-cover .movie-cover-inn {
-                filter: brightness(120%);
-            }
-
+        // Card shadow lives on the full-size link so cover, content and votes lift together
+        .movie-prev__link {
             &:after {
                 position: absolute;
                 top: 10px;
                 bottom: 10px;
                 left: 10px;
                 right: 10px;
-                box-shadow: 0 0 5px 0 rgba(#18476d, .2);
+                border-radius: $radius-lg;
+                box-shadow: $shadow-sm;
+                transition: box-shadow 350ms $ease-out, transform 350ms $ease-out;
+            }
+
+            &:hover {
+                & ~ .movie-cover .movie-cover-inn {
+                    transform: scale(1.04);
+                    filter: brightness(108%);
+                }
+
+                &:after {
+                    box-shadow: $shadow-lg;
+                }
             }
         }
     }

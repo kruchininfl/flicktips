@@ -1,15 +1,31 @@
 @import "../../components/base";
 
-@keyframes movie-votes-hover {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
+$vote-colors: (
+    super: $color-super,
+    like: $color-like,
+    neutral: $color-neutral,
+    dislike: $color-dislike
+);
+
+// The icon parts animate in components/Gui/VoteIcon.scss; this squash of the whole icon also defines
+// how long .m-pop stays on (MovieStat clears it on animationend), so keep it the longest
+@keyframes vote-press {
+    0% { transform: scale(1); }
+    12% { transform: scale(.82); }
+    30% { transform: scale(1.12); }
+    45% { transform: scale(.98); }
+    60%, 100% { transform: scale(1); }
+}
+@keyframes vote-unpop {
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(.65); opacity: .6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes vote-counter-bump {
+    0% { transform: translateY(0); }
+    35% { transform: translateY(-6px); }
+    70% { transform: translateY(1px); }
+    100% { transform: translateY(0); }
 }
 
 .movie-votes {
@@ -17,12 +33,32 @@
     user-select: none;
 }
 .movie-vote {
-    display: inline-block;
-    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
     cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 999px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 200ms, transform 150ms;
 
     .movie-votes & {
-        margin: 0 10px;
+        margin: 0 4px;
+    }
+
+    &:hover {
+        background: rgba(#000000, .05);
+    }
+    &:active {
+        transform: scale(.94);
+    }
+
+    @each $name, $color in $vote-colors {
+        &_#{$name} {
+            &.m-active {
+                background: rgba($color, .12);
+                color: darken($color, 8);
+            }
+        }
     }
 }
 .movie-vote__icn {
@@ -33,14 +69,65 @@
     position: relative;
     font-size: 20px;
     line-height: 0;
+    transition: transform 250ms cubic-bezier(.34, 1.56, .64, 1);
+    animation: {
+        duration: 700ms;
+        timing-function: cubic-bezier(.36, .07, .19, .97);
+        fill-mode: both;
+    }
 
-    &:hover {
-        animation: movie-votes-hover 1200ms infinite;
+    > .vote-icn {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+    }
+
+    .movie-vote:hover & {
+        transform: scale(1.18) translateY(-1px);
+    }
+
+    .movie-vote.m-pop & {
+        animation-name: vote-press;
+        animation-duration: 1400ms;
+    }
+    .movie-vote.m-unpop & {
+        animation-name: vote-unpop;
+        animation-duration: 350ms;
     }
 }
 .movie-vote__counter {
     display: inline-block;
     vertical-align: middle;
-    font-size: 18px;
-    margin-left: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: 8px;
+    font-variant-numeric: tabular-nums;
+    transition: color 200ms;
+
+    .movie-vote.m-pop & {
+        animation: vote-counter-bump 450ms 150ms ease-out;
+    }
+}
+
+// The icon itself softens its motion in VoteIcon.scss; the container only keeps a still animation
+// of the same length so animationend fires and MovieStat drops .m-pop
+@keyframes vote-still {
+    from { opacity: 1; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .movie-vote.m-pop .movie-vote__icn,
+    .movie-vote.m-unpop .movie-vote__icn {
+        animation-name: vote-still;
+        animation-duration: 400ms;
+    }
+    .movie-vote__icn,
+    .movie-vote__counter {
+        transition: none !important;
+    }
+    .movie-vote.m-pop .movie-vote__counter {
+        animation: none;
+    }
 }

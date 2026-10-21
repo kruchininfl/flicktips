@@ -53,7 +53,7 @@ tools/local.sh down           # остановить стек и закрыть 
 
 ## Деплой
 
-Каждый push в `master` деплоит все сервисы через GitHub Actions (workflow `Deploy`). Вручную:
-Actions → Deploy → Run workflow, там можно указать только нужные сервисы или откатиться на
-предыдущий релиз. Подробности и список секретов в разделе Deploy в [AGENTS.md](AGENTS.md).
+Деплой запускается вручную через GitHub Actions: Actions → Deploy → Run workflow. Там можно
+указать только нужные сервисы или откатиться на предыдущий релиз. Push в `master` сам ничего
+не деплоит. Подробности и список секретов в разделе Deploy в [AGENTS.md](AGENTS.md).
 Скрипт `tools/deploy.sh` по-прежнему можно запустить и локально.

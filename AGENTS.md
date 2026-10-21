@@ -67,9 +67,9 @@ The rest run inside the subproject dir (`npm install` first; there is no root in
 
 ## Deploy
 
-GitHub Actions (`.github/workflows/deploy.yml`) runs `tools/deploy.sh` on every push to
-`master`; a manual run (Actions → Deploy → Run workflow) can rebuild only some services or roll
-back. The same script still works by hand from a dev Mac (needs `docker login` as
+GitHub Actions (`.github/workflows/deploy.yml`) runs `tools/deploy.sh`, started by hand only
+(Actions → Deploy → Run workflow; pushes to `master` do not deploy). A run can rebuild only
+some services or roll back. The same script still works by hand from a dev Mac (needs `docker login` as
 `infamoustill`). The server only runs Docker Compose (pm2 was removed).
 
 - Workflow secrets (environment `production` or repo level): `DEPLOY_SSH_KEY` (private key

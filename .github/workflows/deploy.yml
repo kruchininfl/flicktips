@@ -1,15 +1,13 @@
 # Production deploy: runs tools/deploy.sh on a GitHub runner instead of a dev Mac.
 # Images are built here for linux/amd64 and pushed to Docker Hub; the server only pulls
-# them (see docker/deploy.sh). Same behaviour as the old Bitbucket pipeline: every push
-# to master deploys all services. A manual run can pick services or roll back.
+# them (see docker/deploy.sh). Manual only (Actions → Deploy → Run workflow): pick
+# services or leave empty for all, or roll back.
 #
 # Secrets: DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS, DOCKERHUB_TOKEN; optional DEPLOY_HOST,
 # DEPLOY_PATH (defaults live in tools/deploy.sh).
 name: Deploy
 
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
     inputs:
       services:

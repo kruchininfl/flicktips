@@ -2,9 +2,10 @@
 
 // Live vote icons (see VoteIcon.jsx). Three kinds of motion:
 //  - pop: one-shot after a click (.movie-vote.m-pop);
-//  - idle: a calm loop while the vote is chosen in the voting control (.movie-vote.m-active);
+//  - idle: a calm loop while the vote is chosen in the voting control (.movie-vote.m-active)
+//    and on the vote badge of a poster (.movie-vote-icn);
 //  - hover: a preview of the motion on a not yet chosen icon.
-// Elsewhere (badges, friends' votes) the icons are static.
+// Elsewhere (friends' votes) the icons are static.
 
 .vote-icn {
     display: inline-block;
@@ -164,6 +165,25 @@
     stroke-dasharray: 100;
 }
 
+// Idle loops of a chosen vote
+@mixin vote-icn-idle {
+    .vote-icn__flame_outer { animation: vi-flicker-a 1.7s ease-in-out infinite; }
+    .vote-icn__flame_middle { animation: vi-flicker-b 1.1s ease-in-out infinite; }
+    .vote-icn__flame_core { animation: vi-flicker-c .8s ease-in-out infinite; }
+    .vote-icn__spark { animation: vi-spark 2.6s ease-out infinite; }
+    .vote-icn__spark_2 { animation-delay: .9s; }
+    .vote-icn__spark_3 { animation-delay: 1.7s; }
+
+    .vote-icn__heart { animation: vi-heartbeat 2.6s ease-in-out infinite; }
+
+    .vote-icn__sway { animation: vi-sway 3.2s ease-in-out infinite; }
+
+    .vote-icn__poop { animation: vi-jiggle 3s ease-in-out infinite; }
+    .vote-icn__stink-line { stroke-dasharray: none; animation: vi-stink 2.4s ease-in-out infinite; }
+    .vote-icn__stink-line_2 { animation-delay: .8s; }
+    .vote-icn__stink-line_3 { animation-delay: 1.6s; }
+}
+
 .movie-vote {
     // Hover preview
     &:not(.m-active):hover .vote-icn__outline {
@@ -172,21 +192,7 @@
 
     // Idle loops of the chosen vote
     &.m-active:not(.m-pop) {
-        .vote-icn__flame_outer { animation: vi-flicker-a 1.7s ease-in-out infinite; }
-        .vote-icn__flame_middle { animation: vi-flicker-b 1.1s ease-in-out infinite; }
-        .vote-icn__flame_core { animation: vi-flicker-c .8s ease-in-out infinite; }
-        .vote-icn__spark { animation: vi-spark 2.6s ease-out infinite; }
-        .vote-icn__spark_2 { animation-delay: .9s; }
-        .vote-icn__spark_3 { animation-delay: 1.7s; }
-
-        .vote-icn__heart { animation: vi-heartbeat 2.6s ease-in-out infinite; }
-
-        .vote-icn__sway { animation: vi-sway 3.2s ease-in-out infinite; }
-
-        .vote-icn__poop { animation: vi-jiggle 3s ease-in-out infinite; }
-        .vote-icn__stink-line { stroke-dasharray: none; animation: vi-stink 2.4s ease-in-out infinite; }
-        .vote-icn__stink-line_2 { animation-delay: .8s; }
-        .vote-icn__stink-line_3 { animation-delay: 1.6s; }
+        @include vote-icn-idle;
     }
 
     // One-shot after a click
@@ -211,4 +217,9 @@
         .vote-icn__stink-line_2 { animation-delay: 430ms; }
         .vote-icn__stink-line_3 { animation-delay: 510ms; }
     }
+}
+
+// The vote badge on a poster loops the same way
+.movie-vote-icn {
+    @include vote-icn-idle;
 }

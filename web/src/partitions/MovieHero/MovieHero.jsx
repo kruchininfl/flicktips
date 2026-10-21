@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import {Link} from 'react-router';
-import {getPosterUrl} from 'helpers';
+import {formatVoteTime, getLastVoteTime, getPosterUrl} from 'helpers';
 import MovieStat from 'partitions/MovieStat';
 import MovieStatExternal from 'partitions/MovieStatExternal';
 import MovieBookmark from '../MovieBookmark/MovieBookmark';
@@ -24,6 +24,7 @@ export default function MovieHero({movie, label}) {
     .slice(0, 3).join(', ');
   const meta = [year, genres].filter(Boolean).join(' · ');
   const poster = getPosterUrl(movie);
+  const voteTime = formatVoteTime(getLastVoteTime(movie));
 
   return (
     <div className="movie-hero">
@@ -41,7 +42,7 @@ export default function MovieHero({movie, label}) {
       </div>
 
       <div className="movie-hero__body">
-        {label ? <div className="movie-hero__label">{label}</div> : null}
+        {label ? <div className="movie-hero__label">{label}{voteTime ? ' · ' + voteTime : ''}</div> : null}
         <h2 className="movie-hero__title">{movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}</h2>
         {meta ? <div className="movie-hero__meta">{meta}</div> : null}
         <MovieStatExternal
@@ -50,6 +51,8 @@ export default function MovieHero({movie, label}) {
           additionClass="m-prev"
         />
         <MovieVotes votes={movie.votes} limit={5} className="movie-hero__voters" />
+        {/* phones have no room for the named voters, so they get the compact userpic strip */}
+        <MovieVotes votes={movie.votes} limit={4} className="movie-hero__voters-compact m-compact" />
         <div className="movie-hero__votes">
           <MovieStat {...movie} />
         </div>

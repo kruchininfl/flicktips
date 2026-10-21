@@ -98,6 +98,11 @@
         display: none;
     }
 }
+@media screen and (min-width: 768px) {
+    .movie-user-votes.movie-hero__voters-compact {
+        display: none;
+    }
+}
 
 @media screen and (min-width: 768px) {
     .movie-hero {

@@ -19,7 +19,7 @@
 
 .header-notifications__list {
     .friend-vote {
-        border-bottom: 1px solid #f1f1f1;
+        border-bottom: 1px solid $color-line;
 
         &:last-child {
             border-bottom: none;

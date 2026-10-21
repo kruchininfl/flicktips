@@ -5,6 +5,7 @@ import Helmet from 'react-helmet';
 import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
 import HeaderProfile from 'partitions/HeaderProfile';
+import TabBar from 'partitions/TabBar';
 import LoadingBar from 'react-redux-loading-bar';
 import './App.scss';
 import {connect} from 'react-redux';
@@ -85,18 +86,34 @@ class App extends Component {
     return (
       <div className="about-ttip">
         <div className="about-ttip__inn">
-          <div className="about-ttip__title">ЛЮБИШЬ ХОРОШЕЕ КИНО?</div>
-          <div className="about-ttip__icons">
-            <i className="about-ttip__icon icn icn_friends" />
-            <i className="about-ttip__icon icn icn_heart-like-fill" />
-            <i className="about-ttip__icon icn icn_film" />
+          <div className="about-ttip__body">
+            <div className="about-ttip__title">Любишь хорошее кино?</div>
+            <div className="about-ttip__text">Оценивай фильмы и смотри, что понравилось друзьям.</div>
           </div>
-          <div className="about-ttip__text">Смотри и оценивай фильмы.<br />
-            Следи за оценками друзей.
-          </div>
-          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" color="blue">Присоединиться</Button>
+          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" size="big" color="blue">
+            Присоединиться
+          </Button>
         </div>
       </div>
+    );
+  }
+
+  renderNav() {
+    const {user, userSignedIn} = this.props;
+
+    return (
+      <nav className="header__nav">
+        <IndexLink to="/" className="header__nav-link" activeClassName="m-active">Лента</IndexLink>
+        {userSignedIn ? [
+          <Link key="friends" to="/profile/friends/" className="header__nav-link" activeClassName="m-active">Друзья</Link>,
+          <Link key="bookmarks" to="/profile/bookmarks/" className="header__nav-link" activeClassName="m-active">
+            Закладки
+          </Link>,
+          <Link key="votes" to={'/user/' + user.id} className="header__nav-link" activeClassName="m-active">Мои оценки</Link>
+        ] : (
+          <Link to="/about" className="header__nav-link" activeClassName="m-active">О проекте</Link>
+        )}
+      </nav>
     );
   }
 
@@ -112,8 +129,10 @@ class App extends Component {
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
-          <div className="wrapper">
+          <div className="wrapper header__inn">
             <IndexLink to="/" className="header__logo"><span className="icn icn_logo" /></IndexLink>
+
+            {this.renderNav()}
 
             <div className="header__right">
               {this.props.userSignedIn ? (
@@ -154,6 +173,8 @@ class App extends Component {
             <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
           </div>
         </div>
+
+        <TabBar />
 
         <YaMetrica />
       </div>

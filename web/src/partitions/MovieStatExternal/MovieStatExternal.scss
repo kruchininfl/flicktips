@@ -1,7 +1,20 @@
 @import "../../components/base";
 
 .movie-eStat.m-prev {
-    margin-top: 7px;
+    font-size: 12px;
+
+    .movie-eStat__item {
+        margin-right: 10px;
+    }
+    .movie-eStat__item-icn {
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+        background-size: 14px 14px;
+    }
+    .movie-eStat__item-val {
+        font-size: 12px;
+    }
 }
 
 .movie-eStat__item,
@@ -23,13 +36,12 @@
     font-weight: 600;
     font-size: 16px;
 
-    &.m-high { color: #33a501; }
-    &.m-medium { color: #cea103; }
-    &.m-low { color: #a90b0b; }
+    &.m-high { color: #5fcb6a; }
+    &.m-medium { color: #e3b341; }
+    &.m-low { color: #ec6a5a; }
     &.m-na {
-        color: #c0c0c0;
+        color: $color-muted;
         font-weight: normal;
-        font-size: 14px;
     }
 }
 .movie-eStat__item-icn {

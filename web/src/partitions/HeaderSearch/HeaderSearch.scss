@@ -7,7 +7,7 @@
     left: 0;
     right: 0;
     height: 100%;
-    background: #ffffff;
+    background: $color-surface;
     transition: top 300ms;
 
     &.m-opened {
@@ -20,17 +20,19 @@
     line-height: 0;
 
     &:hover {
-        color: #ffffff;
+        color: $color-accent;
     }
 }
 .header-search__head {
     height: 100%;
     position: relative;
     z-index: 1;
-    border-bottom: 1px solid #f1f1f1;
+    border-bottom: 1px solid $color-line;
 }
 .header-search__head-input {
     border: none;
+    border-radius: 0;
+    background: transparent;
     height: 100%;
     padding: 0 55px;
     font-size: 18px;
@@ -44,7 +46,7 @@
     width: 20px;
     height: 20px;
     font-size: 20px;
-    color: #333b41;
+    color: $color-text;
     margin: auto 0;
     line-height: 1;
 }
@@ -67,7 +69,7 @@
     height: 20px;
     margin: auto 0;
     font-size: 20px;
-    color: #333b41;
+    color: $color-text;
 
     &:hover {
         opacity: .6;
@@ -91,13 +93,24 @@
     visibility: hidden;
     transition: opacity 300ms, top 300ms;
 
+    // the header's backdrop-filter makes it the containing block of this fixed layer, so size it from the header down
     .header-search__container.m-opened & {
         visibility: visible;
         opacity: 1;
-        top: 70px;
+        top: 100%;
+        bottom: auto;
+        height: calc(100vh - 60px);
+
+        @media screen and (min-width: 768px) {
+            height: calc(100vh - 64px);
+        }
     }
 }
 .header-search__result {
+    max-width: 720px;
+    margin: 0 auto;
+    background: $color-surface;
+    border-radius: 0 0 $radius-lg $radius-lg;
     max-height: 0;
     overflow: hidden;
     transition: max-height 100ms;
@@ -105,17 +118,22 @@
 
     .header-search__container.m-opened & {
         max-height: 100%;
+        box-sizing: border-box;
         transition-delay: 200ms;
+
+        @media screen and (max-width: 767px) {
+            padding-bottom: calc(#{$tabbar-height} + env(safe-area-inset-bottom));
+        }
         transition-duration: 500ms;
     }
 }
 .header-search__result-item {
-    border-bottom: 1px solid #f1f1f1;
+    border-bottom: 1px solid $color-line;
 }
 .header-search__result-empty {
     padding: 20px;
     color: $color-gray;
     text-align: center;
-    background: #ffffff;
-    border-top: 1px solid #f1f1f1;
+    background: $color-surface;
+    border-top: 1px solid $color-line;
 }

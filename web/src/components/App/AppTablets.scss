@@ -2,12 +2,37 @@
 
 @media screen and (min-width: 768px) {
     .container {
-        background: transparent;
-        padding-left: 20px;
-        padding-right: 20px;
+        padding-top: 64px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .wrapper {
+        padding: 0 24px;
+    }
+    .header {
+        height: 64px;
+    }
+    .header__nav {
+        display: flex;
+        gap: 4px;
+    }
+    .header__nav-link {
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        color: $color-muted;
+        text-decoration: none;
+        transition: color 200ms, background-color 200ms;
 
-        &.m-movie {
-            padding-bottom: 50px;
+        &:hover {
+            color: $color-text;
+            background: $color-glass;
+        }
+
+        &.m-active {
+            color: $color-bg;
+            background: $color-text;
         }
     }
     .content {
@@ -19,19 +44,13 @@
         font-size: 18px;
         text-transform: none;
         text-align: left;
-        color: #000000;
-    }
-
-    .footer {
-        .container.m-movie ~ & {
-            margin-top: -50px;
-        }
+        border-bottom: none;
     }
 
     .static-page {
         max-width: 768px;
-        border-radius: 10px;
-        background: #ffffff;
+        border-radius: $radius-lg;
+        background: $color-surface;
         margin: 20px auto;
         box-sizing: border-box;
     }

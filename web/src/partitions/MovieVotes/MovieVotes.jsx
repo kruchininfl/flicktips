@@ -1,109 +1,61 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import './MovieVotes.scss';
-import {connect} from 'react-redux';
 import VoteIcon from 'components/Gui/VoteIcon';
 import {Link} from 'react-router';
-import {isUserSignedIn} from '../../redux/models/user';
 import moment from 'moment';
 import 'moment/locale/ru';
-import CustomScrollbars from 'components/Gui/CustomScrollbars';
-import {Tooltip} from 'react-tippy';
+
+import './MovieVotes.scss';
 
 const propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  votes: PropTypes.array,
+  votes    : PropTypes.array,
   className: PropTypes.any,
-  userSignedIn: PropTypes.bool,
-  filter: PropTypes.number // 0 - hidden, 1 - all users, 2 - only friends
+  limit    : PropTypes.number,
+  filter   : PropTypes.number // 0 - hidden, 1 - all users, 2 - only friends
 };
 
-const defaultPropTypes = {
-  filter: 1 // 0 - hidden, 1 - all users, 2 - only friends
+const defaultProps = {
+  filter: 1,
+  limit : 3
 };
 
-const PLACEHOLDER_TEXT_ALL = 'Наши пользователи пока не оценивали этот фильм';
-const PLACEHOLDER_TEXT_FRIENDS = 'Ваши друзья пока не оценивали этот фильм';
-
+// Latest voters as userpics with their vote; the card puts them over the poster, the movie page lists them with names
 class MovieVotes extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   static renderItem(item, key) {
     const {user_avatar: userAvatar, user_name: userName, user_id: userId, value, timestamp} = item;
     const time = moment(timestamp * 1000)
       .from((global ? new Date().getTime() : window.SERVER_TIMESTAMP));
 
     return (
-      <Tooltip
-        title={time}
-        position="top"
-        trigger="mouseenter"
-        arrow
-        distance={36}
-        delay={300}
-        hideDelay={100}
-        className="movie-user-votes__item"
-        key={key}
-      >
-        <Link to={'/user/' + userId}>
-          <div
-            onClick={this.handleOpenSearch}
-            className="movie-user-votes__item-photo userpic header-profile__photo"
-          >
-            <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
-            <div className="movie-user-votes__item-vote">
-              <VoteIcon vote={value} active />
-            </div>
-          </div>
-
-          <div className="movie-user-votes__item-content">
-            <div className={`movie-user-votes__item-head ${userId === 4 && 'movie-user-votes__item-head_gold'}`}>
-              <span>{userName}</span>
-              <VoteIcon vote={value} active />
-            </div>
-            <div className="movie-user-votes__item-date">{time}</div>
-          </div>
-        </Link>
-      </Tooltip>
+      <Link to={'/user/' + userId} title={userName + ', ' + time} className="movie-user-votes__item" key={key}>
+        <span className="movie-user-votes__item-photo userpic">
+          <span style={{backgroundImage: (userAvatar ? `url(${userAvatar})` : null)}} />
+          <i className="movie-user-votes__item-vote"><VoteIcon vote={value} active /></i>
+        </span>
+        <span className="movie-user-votes__item-name">{(userName || '').split(' ')[0]}</span>
+      </Link>
     );
   }
 
   render() {
-    const {votes, className, filter} = this.props;
+    const {votes, className, filter, limit} = this.props;
 
-    if (filter === 0) {
+    if (filter === 0 || !votes || !votes.length) {
       return false;
     }
 
-    if (!votes || !votes.length) {
-      return (
-        <div className={'movie-user-votes ' + (className || '')}>
-          <div className="movie-user-votes-ph">{filter === 1 ? PLACEHOLDER_TEXT_ALL : PLACEHOLDER_TEXT_FRIENDS}</div>
-        </div>
-      );
-    }
+    const rest = votes.length - limit;
 
     return (
       <div className={'movie-user-votes ' + (className || '')}>
-        <div className="movie-user-votes__list">
-          <CustomScrollbars>
-            {votes.map((v, key) => MovieVotes.renderItem(v, key))}
-          </CustomScrollbars>
-        </div>
+        {votes.slice(0, limit).map((v, key) => MovieVotes.renderItem(v, key))}
+        {rest > 0 ? <span className="movie-user-votes__more">+{rest}</span> : null}
       </div>
     );
   }
 }
 
 MovieVotes.propTypes = propTypes;
-MovieVotes.defaultProps = defaultPropTypes;
+MovieVotes.defaultProps = defaultProps;
 
-function mapStateToProps(state) {
-  const userSignedIn = isUserSignedIn(state);
-
-  return {userSignedIn};
-}
-
-export default connect(mapStateToProps)(MovieVotes);
+export default MovieVotes;

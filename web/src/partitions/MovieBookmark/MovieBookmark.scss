@@ -3,70 +3,57 @@
 .movie-bookmark {
     cursor: pointer;
     position: absolute;
-    top: 0;
-    left: 10px;
-    width: 20px;
-    height: 20px;
-    background: rgba(#bdebf3, .9);
-    z-index: 1;
-    transition: background 200ms;
+    top: 6px;
+    left: 6px;
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $color-text;
+    @include glass();
+    box-shadow: 0 0 0 1px $color-glass-line;
+    opacity: 0;
+    transition: opacity 200ms, background-color 200ms, transform 150ms $ease-out;
 
-    &:after,
-    &:before {
-        content: '';
-        position: absolute;
-        top: 100%;
-        transition: border-color 200ms;
+    // empty bookmarks show on hover only, so posters stay clean; touch screens always show them
+    .movie-prev:hover &,
+    .movie__cover &,
+    &.m-active {
+        opacity: 1;
     }
-
-    &:before {
-        left: 0;
-        border-left: 10px solid rgba(#bdebf3, .9);
-        border-bottom: 10px solid transparent;
-        border-right: 10px solid transparent;
-    }
-
-    &:after {
-        right: 0;
-        border-right: 10px solid rgba(#bdebf3, .9);
-        border-bottom: 10px solid transparent;
-        border-left: 10px solid transparent;
+    @media (hover: none) {
+        opacity: 1;
     }
 
     &.m-active {
-        background: rgba(#ba4b4b, .9);
-
-        &:before {
-            border-left-color: rgba(#ba4b4b, .9);
-        }
-        &:after {
-            border-right-color: rgba(#ba4b4b, .9);
-        }
+        color: $color-bg;
+        background: $color-accent;
+        box-shadow: $glow-accent;
     }
 
     &:hover {
-        opacity: .8;
+        transform: scale(1.08);
+    }
+    &:active {
+        transform: scale(.94);
     }
 }
 .movie-bookmark__icn {
-    position: absolute;
-    color: #ffffff;
-    text-shadow: 0 1px rgba(#000000, .2);
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-
-    > .icn {
-        position: absolute;
-        top: 0;
-        left: 0;
-        transition: opacity 300ms;
-    }
+    font-size: 13px;
+    line-height: 1;
 }
 
-@import "MovieBookmarkTablets";
+@media screen and (min-width: 768px) {
+    .movie-bookmark {
+        top: 8px;
+        left: 8px;
+        width: 32px;
+        height: 32px;
+    }
+    .movie-bookmark__icn {
+        font-size: 15px;
+    }
+}

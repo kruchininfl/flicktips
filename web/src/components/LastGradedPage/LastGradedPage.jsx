@@ -1,10 +1,11 @@
-import React, {Component, createRef} from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import './LastGradedPage.scss';
 import {asyncConnect} from 'redux-connect';
 import {addLastGraded, getLastGraded} from 'redux/actions/lastGradedActions';
 import Button from '../Gui/Button';
 import MoviePreview from '../../partitions/MoviePreview/MoviePreview';
+import MovieHero from '../../partitions/MovieHero';
 import {getUserModel, isUserSignedIn} from '../../redux/models/user';
 import InviteButton from '../../partitions/InviteButton/InviteButton';
 
@@ -41,18 +42,13 @@ class LastGradedPage extends Component {
   constructor(props) {
     super(props);
 
-    this.ref = createRef();
-
     this.renderEmptyPage = this.renderEmptyPage.bind(this);
     this.handleLoadData = this.handleLoadData.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
-    this.handleResize = this.handleResize.bind(this);
   }
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    window.addEventListener('resize', this.handleResize);
-    this.handleResize(true);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -62,25 +58,6 @@ class LastGradedPage extends Component {
     ) {
       this.props.dispatch(getLastGraded(1, nextProps.userSignedIn));
     }
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
-  }
-
-  handleResize(first) {
-    const windowWidth = document.documentElement.clientWidth;
-    const minTileWidth = 270;
-    const actualTileWidthPercents = (100 / Math.floor(windowWidth / minTileWidth)) + '%';
-
-    const style = this.ref.current.style;
-
-    if (first === true) {
-      style.setProperty('--tile-transition', 'none');
-      setTimeout(() => style.setProperty('--tile-transition', 'all'), 10);
-    }
-
-    style.setProperty('--tile-width', actualTileWidthPercents);
   }
 
   handleLoadData() {
@@ -139,25 +116,28 @@ class LastGradedPage extends Component {
 
     // return this.renderEmptyPage();
 
+    const entities = response.results.entities || [];
+    const [first, ...rest] = entities;
+
     return (
-      <div className="home-page" ref={this.ref}>
+      <div className="home-page">
         <div className="lg-header">
-          <span
-            onClick={() => this.handleFilter(false)}
-            className={'lg-toggle-btn' + (onlyFriends ? '' : ' m-active')}
-          >все оценки</span>
-          <span
-            onClick={() => this.handleFilter(true)}
-            className={'lg-toggle-btn' + (!onlyFriends ? '' : ' m-active')}
-          >оценки друзей</span>
+          <div className="segmented">
+            <span
+              onClick={() => this.handleFilter(true)}
+              className={'segmented__item' + (onlyFriends ? ' m-active' : '')}
+            >Друзья</span>
+            <span
+              onClick={() => this.handleFilter(false)}
+              className={'segmented__item' + (onlyFriends ? '' : ' m-active')}
+            >Все оценки</span>
+          </div>
         </div>
 
-        {response.results.entities && response.results.entities.length
-          ? <div
-            className="lg-list movie-prev-list"
-          >
-            {this.renderMovies(response.results.entities)}
-          </div>
+        {first ? <MovieHero movie={first} label={onlyFriends ? 'Свежая оценка друзей' : 'Свежая оценка'} /> : null}
+
+        {first
+          ? <div className="lg-list movie-prev-list">{this.renderMovies(rest)}</div>
           : this.renderEmptyPage()
         }
 

@@ -2,115 +2,129 @@
 @import "../Common/Movie";
 @import "../Common/MovieTablets";
 
-.movie__head {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
+.movie {
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+}
+// blurred poster behind the head of the page, fading into the background
+.movie__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 360px;
+    z-index: -1;
+    overflow: hidden;
+    background: {
+        size: cover;
+        position: 50% 25%;
+    };
+    filter: blur(40px) saturate(140%);
+    opacity: .5;
+    transform: scale(1.2);
+    -webkit-mask-image: linear-gradient(180deg, #000000 30%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000000 30%, transparent 100%);
+}
 
+// Phones: poster and facts side by side, everything else full width; tablets and up keep the poster in its own column
+.movie__head {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-areas:
+        "cover info"
+        "votes votes"
+        "voters voters"
+        "buttons buttons"
+        "descr descr";
+    gap: 16px 14px;
+    padding-top: 6px;
+}
+.movie-cover.movie__cover {
+    grid-area: cover;
+    float: none;
+    width: 100%;
+    align-self: start;
+    border-radius: $radius;
+    box-shadow: $shadow-lg;
+}
+.movie__info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: $color-text-soft;
+
+    .movie-ot-y,
     .movie-countries,
     .movie-duration,
     .movie-genres {
         white-space: normal;
         overflow: visible;
+        margin: 0;
+    }
+    .movie-eStat {
+        margin-top: 6px;
     }
 }
-.movie__head-left {
-    width: 95px;
-
-    .movie-eStat__item {
-        margin-right: 7px;
-
-        &:last-child {
-            margin-right: 0;
-        }
-    }
-    .movie-eStat__item-icn {
-        margin-right: 5px;
-    }
-    .movie-eStat__item-val.m-na {
-        font-size: 12px;
-    }
-}
-.movie__cover {
-    width: 95px;
-    float: none;
-    border-radius: $radius-sm;
-    overflow: hidden;
-    box-shadow: $shadow;
-}
-.movie__head-data {
-    flex: 1 1 auto;
-    padding: 0 10px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    max-width: calc(100% - 105px);
-
-    .movie-title,
-    .movie-ot {
-        overflow: auto;
-        white-space: normal;
-    }
-    .movie-ot {
-        display: inline;
-    }
-}
-.movie__head-data__inn {
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-}
-.movie__head-row {
-    margin: 5px 0;
-
-    &.m-buttons {
-        margin-top: auto;
-        margin-left: -105px;
-
-        .btn {
-            margin: 10px 15px 0 0;
-
-            &:last-child {
-                margin-right: 0;
-            }
-        }
-    }
-
-    &.m-desc {
-        margin-left: -95px;
-    }
+.movie-title.movie__title {
+    font-family: $font-display;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    white-space: normal;
+    overflow: visible;
+    text-wrap: balance;
+    margin-bottom: 4px;
 }
 .movie__votes {
-    padding: 10px;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    background: rgba(#ffffff, .88);
-    backdrop-filter: saturate(180%) blur(16px);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
-    box-shadow: 0 -1px 0 $color-line, 0 -8px 24px -12px rgba(#101828, .2);
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    grid-area: votes;
 
-    .movie-votes {
-        margin: 0;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-
-        .movie-vote {
-            margin: 0 5px;
-        }
+    .movie-vote {
+        flex-direction: column;
+        gap: 2px;
+        padding: 10px 0 8px;
+        border-radius: $radius-lg;
     }
-
+    .movie-vote__icn {
+        width: 24px;
+        height: 24px;
+        font-size: 24px;
+    }
     .movie-vote__counter {
-        color: $color-text;
+        margin-left: 0;
+        font-size: 13px;
     }
 }
-.movie__trailer-btn {
-    margin-top: 20px;
+.movie__voters {
+    grid-area: voters;
+    min-width: 0;
+}
+.movie__section-title {
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: $color-muted;
+}
+.movie-user-votes.movie__voters-list {
+    gap: 14px;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    scrollbar-width: none;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+.movie__buttons {
+    grid-area: buttons;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.movie__trailer-btn {
     .btn__inn {
         padding-right: 35px;
 
@@ -123,36 +137,19 @@
             bottom: 0;
             right: 15px;
             margin: auto;
-            border-left: 6px solid $color-blue;
+            border-left: 6px solid $color-accent;
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
-            transition: border-color 300ms;
         }
     }
-
-    &:hover {
-        .btn__inn {
-            &:after {
-                border-left-color: #0f6099;
-            }
-        }
-    }
-}
-.movie__friends-votes {
-    margin: 10px -10px -10px;
-    padding: 15px 10px;
-    border-top: 1px solid $color-line;
 }
 .movie__descr {
+    grid-area: descr;
     font-size: 14px;
-    text-align: justify;
-    margin: 10px -10px;
-    padding: 15px 10px;
-    border-top: 1px solid #f1f1f1;
-    border-bottom: 1px solid #f1f1f1;
     position: relative;
-    line-height: 1.6em;
-    color: #3b4048;
+    line-height: 1.65;
+    max-width: 68ch;
+    color: $color-text-soft;
 }
 .movie__staff-group {
     margin: 20px 0;
@@ -214,10 +211,10 @@
     margin-top: 2px;
 }
 .movie-person__original-name {
-    color: #666666;
+    color: $color-muted;
 }
 .movie-person__descr {
-    color: #f0be0f;
+    color: $color-accent;
 }
 /* <editor-fold desc="Popup trailer"> */
 .p-trailer {
@@ -234,7 +231,7 @@
 .p-trailer__content-video {
     width: calc(100% - 100px);
     max-width: 600px;
-    background: #ffffff;
+    background: #000000;
 }
 .p-trailer__content-video-inn {
     padding-top: 56.25%;
@@ -284,7 +281,7 @@
 .p-votes__content {
     width: 600px;
     max-width: 100%;
-    background: #ffffff;
+    background: $color-surface;
     margin: 0 auto;
     padding: 30px 20px;
     box-sizing: border-box;

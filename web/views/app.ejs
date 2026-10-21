@@ -16,7 +16,7 @@
 	<%- helmet.title.toString(); %>
 	<%- helmet.meta.toString(); %>
 	<% } %>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Unbounded:wght@500;700&amp;display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/public/icons/style.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
 	<link rel="stylesheet" href="<%= assetUrl %>/public/assets/styles.css<%- process.env.NODE_ENV === 'production' ? '?v' + hash : '' %>">
 	<link rel="shortcut icon" href="/public/favicon.ico?3" type="image/x-icon" />
@@ -28,7 +28,7 @@
 	<link rel="manifest" href="/public/site.webmanifest">
 	<link rel="mask-icon" href="/public/safari-pinned-tab.svg" color="#5bbad5">
 	<meta name="msapplication-TileColor" content="#333b41">
-	<meta name="theme-color" content="#ffffff">
+	<meta name="theme-color" content="#0d0e12">
 
 	<script type="application/javascript">
         window.REDUX_INITIAL_STATE = <%- JSON.stringify(initialState) %>;

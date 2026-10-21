@@ -44,13 +44,14 @@ class MoviePreview extends Component {
     movie.genres = movie.genres ? movie.genres.map((el) => el.name || el) : [];
     movie.date = movie.release_date || movie.first_air_date;
 
+    const year = movie.date && moment(movie.date).isValid() ? moment(movie.date).format('YYYY') : '';
+    const meta = [year, movie.genres.slice(0, 2).join(', ')].filter(Boolean).join(' · ');
+
     return (
       <div className={'movie-prev ' + (className ? className : '')}>
         {this.props.children}
 
         <Link to={'/movie/' + movie.id} className="movie-prev__link">подробнее</Link>
-
-        <MovieVotes filter={votesFilter} className="movie-prev__friends-votes" votes={movie.votes} />
 
         <div className="movie-cover movie-cover__prev">
           {movie.tmdb_poster_path
@@ -69,6 +70,7 @@ class MoviePreview extends Component {
             : ''
           }
           <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />
+          <MovieVotes filter={votesFilter} className="movie-prev__friends-votes m-compact" votes={movie.votes} />
         </div>
 
         <div className="movie-prev__content">
@@ -77,25 +79,7 @@ class MoviePreview extends Component {
             : ''
           }
 
-          {movie.original_title || movie.date
-            ? <div className="movie-ot-y">
-              {movie.original_title
-                ? <div className="movie-ot" title={movie.original_title}>{movie.original_title}</div>
-                : ''
-              }
-
-              {movie.date && moment(movie.date).isValid()
-                ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
-                : ''
-              }
-            </div>
-            : ''
-          }
-
-          {movie.genres.length
-            ? <div className="movie-genres">{movie.genres.join(', ')}</div>
-            : ''
-          }
+          {meta ? <div className="movie-prev__meta" title={movie.original_title}>{meta}</div> : ''}
 
           <MovieStatExternal
             kpValue={movie.kp_rating_value}

@@ -6,7 +6,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #ffffff;
+    background: $color-surface;
     text-align: center;
     white-space: nowrap;
     z-index: 99;
@@ -23,7 +23,7 @@
 .p-signin__inn {
     display: inline-block;
     vertical-align: middle;
-    background: #ffffff;
+    background: $color-surface;
     white-space: normal;
     padding: 20px;
 }

@@ -63,14 +63,19 @@ The rest run inside the subproject dir (`npm install` first; there is no root in
   and toggles Tor/proxy via `ENABLE_TOR`/`ENABLE_PROXY` constants.
 - `kp-parser` uses `mysql2@3.x` (needed for MySQL 8.4 `caching_sha2_password`); its entry
   still loads `babel-core/register`, so `require('mysql2/promise')` must stay CJS-compatible.
-- Repo remote is Bitbucket, not GitHub.
+- Repo remote is GitHub (`kruchininfl/flicktips`, default branch `master`); it moved from Bitbucket.
 
 ## Deploy
 
-No CI/CD (CircleCI and Bitbucket Pipelines were dropped). Deploys are manual from a dev Mac
-(needs `docker login` as `infamoustill`) with `tools/deploy.sh`; the server only runs Docker
-Compose (pm2 was removed).
+GitHub Actions (`.github/workflows/deploy.yml`) runs `tools/deploy.sh` on every push to
+`master`; a manual run (Actions → Deploy → Run workflow) can rebuild only some services or roll
+back. The same script still works by hand from a dev Mac (needs `docker login` as
+`infamoustill`). The server only runs Docker Compose (pm2 was removed).
 
+- Workflow secrets (environment `production` or repo level): `DEPLOY_SSH_KEY` (private key
+  for the server), `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan` line of the server), `DOCKERHUB_TOKEN`
+  (Docker Hub access token of `infamoustill`); optional `DEPLOY_HOST`, `DEPLOY_PATH` override
+  the defaults below. In CI the build uses the GitHub Actions cache (`BUILDX_CACHE=gha`).
 - Server: `root@45.15.252.159`, project in `/var/www/flicktips.ru`. 1 vCPU, <1 GB RAM,
   ~20 GB disk that is nearly full — never build images there.
 - `tools/deploy.sh [service...]` builds images locally for `linux/amd64` (`docker buildx`,

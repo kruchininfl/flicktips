@@ -113,25 +113,3 @@ $vote-colors: (
         animation: vote-counter-bump 450ms 150ms ease-out;
     }
 }
-
-// The icon itself softens its motion in VoteIcon.scss; the container only keeps a still animation
-// of the same length so animationend fires and MovieStat drops .m-pop
-@keyframes vote-still {
-    from { opacity: 1; }
-    to { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .movie-vote.m-pop .movie-vote__icn,
-    .movie-vote.m-unpop .movie-vote__icn {
-        animation-name: vote-still;
-        animation-duration: 400ms;
-    }
-    .movie-vote__icn,
-    .movie-vote__counter {
-        transition: none !important;
-    }
-    .movie-vote.m-pop .movie-vote__counter {
-        animation: none;
-    }
-}

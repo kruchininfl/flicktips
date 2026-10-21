@@ -212,27 +212,3 @@
         .vote-icn__stink-line_3 { animation-delay: 510ms; }
     }
 }
-
-// Reduced motion: no loops, bounces or particles; a click only fades the chosen icon in
-@keyframes vi-soft-in {
-    0% { opacity: 0; transform: scale(.85); }
-    100% { opacity: 1; transform: scale(1); }
-}
-@keyframes vi-soft-wipe {
-    0% { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .movie-vote .vote-icn * {
-        animation: none !important;
-    }
-    .movie-vote.m-pop {
-        .vote-icn__fill:not(.vote-icn__half) {
-            animation: vi-soft-in 350ms ease-out both !important;
-        }
-        .vote-icn__half {
-            animation: vi-soft-wipe 350ms ease-out both !important;
-        }
-    }
-}

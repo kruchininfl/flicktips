@@ -23,6 +23,38 @@
         color: $color-accent;
     }
 }
+.header-search__toggle-text {
+    display: none;
+}
+
+// on desktop the search is a visible field-like pill, the main entry point of the header
+@media screen and (min-width: 768px) {
+    .header-search__toggle {
+        @include glass($color-glass);
+        border: 1px solid $color-glass-line;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 280px;
+        height: 38px;
+        box-sizing: border-box;
+        padding: 0 16px;
+        border-radius: 999px;
+        color: $color-muted;
+        font-size: 14px;
+        line-height: 1;
+        transition: border-color 200ms, color 200ms;
+
+        &:hover {
+            color: $color-text;
+            border-color: rgba($color-accent, .5);
+        }
+    }
+    .header-search__toggle-text {
+        display: block;
+        font-size: 14px;
+    }
+}
 .header-search__head {
     height: 100%;
     position: relative;

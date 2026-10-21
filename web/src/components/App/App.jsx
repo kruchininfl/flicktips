@@ -99,18 +99,15 @@ class App extends Component {
   }
 
   renderNav() {
-    const {user, userSignedIn} = this.props;
+    const {userSignedIn} = this.props;
 
     return (
       <nav className="header__nav">
         <IndexLink to="/" className="header__nav-link" activeClassName="m-active">Лента</IndexLink>
-        {userSignedIn ? [
-          <Link key="friends" to="/profile/friends/" className="header__nav-link" activeClassName="m-active">Друзья</Link>,
-          <Link key="bookmarks" to="/profile/bookmarks/" className="header__nav-link" activeClassName="m-active">
-            Закладки
-          </Link>,
-          <Link key="votes" to={'/user/' + user.id} className="header__nav-link" activeClassName="m-active">Мои оценки</Link>
-        ] : (
+        {userSignedIn ? (
+          // friends and own votes live in the avatar menu, so the header keeps only the main sections
+          <Link to="/profile/bookmarks/" className="header__nav-link" activeClassName="m-active">Закладки</Link>
+        ) : (
           <Link to="/about" className="header__nav-link" activeClassName="m-active">О проекте</Link>
         )}
       </nav>

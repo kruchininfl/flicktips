@@ -11,7 +11,7 @@ import ProfileLayout from './ProfileLayout';
 import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import SubscribeButton from 'partitions/SubscribeButton';
 import {Link} from 'react-router';
-import {TelegramButton} from 'partitions/TelegramBlock';
+import {TelegramButton, canUseTelegram} from 'partitions/TelegramBlock';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -23,7 +23,8 @@ const propTypes = {
   user        : PropTypes.any,
   votes       : PropTypes.any,
   userSignedIn: PropTypes.bool,
-  myId        : PropTypes.number
+  myId        : PropTypes.number,
+  telegram    : PropTypes.bool
 };
 
 @asyncConnect([
@@ -98,7 +99,7 @@ class ProfilePage extends ProfileLayout {
         // on desktop these are in the header user menu, which phones do not have
         <div className="profile__relation profile__phone-only">
           <Link to="/profile/accounts/" className="profile__accounts-link">Способы входа</Link>
-          <span className="profile__links-sep">·</span>
+          {this.props.telegram ? <span className="profile__links-sep">·</span> : ''}
           <TelegramButton className="profile__accounts-link" />
         </div>
       );
@@ -163,7 +164,7 @@ function mapStateToProps(state) {
   const loaded = state.reduxAsyncConnect.loadState.profile && state.reduxAsyncConnect.loadState.profile.loaded;
   const myId = userSignedIn ? getUserModel(state).get('id') : undefined;
 
-  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn, myId};
+  return {pending, loaded, user, votes, isMyPage, loading, userSignedIn, myId, telegram: canUseTelegram(state)};
 }
 
 export default ProfilePage;

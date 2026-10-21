@@ -1,5 +1,5 @@
 import TelegramBlock from './TelegramBlock';
-import TelegramButton from './TelegramButton';
+import TelegramButton, {canUseTelegram} from './TelegramButton';
 
-export {TelegramButton};
+export {TelegramButton, canUseTelegram};
 export default TelegramBlock;

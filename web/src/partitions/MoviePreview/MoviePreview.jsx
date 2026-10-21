@@ -13,6 +13,7 @@ import MovieBookmark from '../MovieBookmark/MovieBookmark';
 import MovieVotes from '../MovieVotes';
 import {updateAndGetFilmPoster} from '../../redux/actions/movieActions';
 import {connect} from 'react-redux';
+import {formatVoteTime, getLastVoteTime} from 'helpers';
 
 const propTypes = {
   children   : PropTypes.node,
@@ -56,6 +57,7 @@ class MoviePreview extends Component {
     const year = movie.date && moment(movie.date).isValid() ? moment(movie.date).format('YYYY') : '';
     const poster = getPosterUrl(movie);
     const meta = [year, movie.genres.slice(0, 2).join(', ')].filter(Boolean).join(' · ');
+    const voteTime = formatVoteTime(getLastVoteTime(movie));
 
     return (
       <div className={'movie-prev ' + (className ? className : '')}>
@@ -90,6 +92,7 @@ class MoviePreview extends Component {
           }
 
           {meta ? <div className="movie-prev__meta" title={movie.original_title}>{meta}</div> : ''}
+          {voteTime ? <div className="movie-prev__time">Оценка {voteTime}</div> : ''}
 
           <MovieStatExternal
             kpValue={movie.kp_rating_value}

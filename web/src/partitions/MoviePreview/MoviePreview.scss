@@ -47,6 +47,13 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.movie-prev__time {
+    font-size: 12px;
+    color: $color-text-soft;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 .movie-prev__votes {
     position: relative;
     z-index: 2;

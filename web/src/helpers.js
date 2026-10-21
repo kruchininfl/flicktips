@@ -1,3 +1,5 @@
+import moment from 'moment';
+import 'moment/locale/ru';
 import config from 'config';
 
 export function pluralGender(gender, phrases) {
@@ -37,4 +39,29 @@ export function getPosterUrl(movie) {
   }
 
   return movie.tmdb_poster_path ? config.tmdb.posterPath342 + movie.tmdb_poster_path : null;
+}
+// When the movie was last voted on: the profile's own vote (movie.timestamp) or the latest of the listed votes
+export function getLastVoteTime(movie) {
+  const times = (movie.votes || []).map((v) => v.timestamp || 0);
+
+  return movie.timestamp || (times.length ? Math.max(...times) : 0);
+}
+
+// "сегодня в 14:32", "вчера в 09:05", "12 окт в 21:10", with the year once it's not the current one
+export function formatVoteTime(timestamp) {
+  if (!timestamp) {
+    return '';
+  }
+
+  const time = moment(timestamp * 1000);
+  const now = moment();
+
+  if (time.isSame(now, 'day')) {
+    return time.format('[сегодня в] HH:mm');
+  }
+  if (time.isSame(now.clone().subtract(1, 'day'), 'day')) {
+    return time.format('[вчера в] HH:mm');
+  }
+
+  return time.format(time.isSame(now, 'year') ? 'D MMM [в] HH:mm' : 'D MMM YYYY [в] HH:mm');
 }

@@ -45,10 +45,12 @@ class MovieVotes extends Component {
     }
 
     const rest = votes.length - limit;
+    // the API doesn't sort a feed movie's votes, and these are meant to be the latest voters
+    const latest = votes.slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
     return (
       <div className={'movie-user-votes ' + (className || '')}>
-        {votes.slice(0, limit).map((v, key) => MovieVotes.renderItem(v, key))}
+        {latest.slice(0, limit).map((v, key) => MovieVotes.renderItem(v, key))}
         {rest > 0 ? <span className="movie-user-votes__more">+{rest}</span> : null}
       </div>
     );

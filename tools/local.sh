@@ -44,8 +44,9 @@ certs_up() {
     echo "Add '127.0.0.1 $LOCAL_HOST' (and '::1 $LOCAL_HOST') to /etc/hosts" >&2
     exit 1
   fi
-  if [[ -f "$CERTS/cert.pem" ]] && openssl x509 -in "$CERTS/cert.pem" -noout -checkhost "$LOCAL_HOST" \
-      | grep -q 'does match'; then
+  # macOS ships LibreSSL without -checkhost/-ext, so look for the name in the SAN text instead
+  if [[ -f "$CERTS/cert.pem" ]] && openssl x509 -in "$CERTS/cert.pem" -noout -checkend 86400 >/dev/null \
+      && openssl x509 -in "$CERTS/cert.pem" -noout -text | grep -qF "DNS:$LOCAL_HOST"; then
     return
   fi
   command -v mkcert >/dev/null || { echo "Install mkcert: brew install mkcert && mkcert -install" >&2; exit 1; }
@@ -60,7 +61,13 @@ docker_up() {
     return
   fi
   command -v colima >/dev/null || { echo "Docker daemon is not running; start it first" >&2; exit 1; }
-  echo "Docker daemon is not running, starting Colima"
+  # after sleep/crash Colima may report "Running" with a dead socket, and `colima start` skips it
+  if colima list 2>/dev/null | grep -qE '^default[[:space:]]+Running'; then
+    echo "Docker daemon is not responding though Colima looks running, restarting Colima"
+    colima stop --force
+  else
+    echo "Docker daemon is not running, starting Colima"
+  fi
   colima start
 }
 

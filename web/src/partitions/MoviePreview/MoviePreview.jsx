@@ -92,7 +92,7 @@ class MoviePreview extends Component {
           }
 
           {meta ? <div className="movie-prev__meta" title={movie.original_title}>{meta}</div> : ''}
-          {voteTime ? <div className="movie-prev__time">Оценка {voteTime}</div> : ''}
+          {voteTime ? <div className="movie-prev__time">{voteTime}</div> : ''}
 
           <MovieStatExternal
             kpValue={movie.kp_rating_value}

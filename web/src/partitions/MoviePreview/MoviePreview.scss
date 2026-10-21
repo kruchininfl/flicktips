@@ -53,6 +53,11 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+
+    // "сегодня в 14:32" opens the line on its own here
+    &::first-letter {
+        text-transform: uppercase;
+    }
 }
 .movie-prev__votes {
     position: relative;

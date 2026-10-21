@@ -232,6 +232,27 @@ export default {
     return this._fetch('user/accept_invite/', {code}, 'POST', true, true);
   },
 
+  getTelegram() {
+    return this._fetch('user/telegram/');
+  },
+
+  // a fresh one-time code with the t.me links for linking Telegram and adding the bot to a group
+  createTelegramLink() {
+    return this._fetch('user/telegram/link/', {}, 'POST');
+  },
+
+  confirmTelegram(code) {
+    return this._fetch('user/telegram/confirm/', {code}, 'POST', true, true);
+  },
+
+  leaveTelegramGroup(chatId) {
+    return this._fetch('user/telegram/groups/' + chatId, {}, 'DELETE');
+  },
+
+  unlinkTelegram() {
+    return this._fetch('user/telegram/', {}, 'DELETE');
+  },
+
   getUserBookmarks(page = 1) {
     return this._fetch('user/bookmarks/', {page});
   },

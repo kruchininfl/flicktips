@@ -567,6 +567,14 @@ class UserRepository {
                 ON DUPLICATE KEY UPDATE subscribed = GREATEST(user_friends.subscribed, VALUES(subscribed))')->execute($ids);
             $pdo->prepare('DELETE FROM user_friends WHERE user_1 = :other OR user_2 = :other')->execute(['other' => $otherId]);
 
+            // Telegram bot (tg-bot): group memberships and posts; vote_event rows still waiting for the bot
+            $pdo->prepare('INSERT IGNORE INTO tg_chat_member (chat_id, user_id, joined_at, checked_at)
+                SELECT chat_id, :uid, joined_at, checked_at FROM tg_chat_member WHERE user_id = :other')->execute($ids);
+            $pdo->prepare('DELETE FROM tg_chat_member WHERE user_id = :other')->execute(['other' => $otherId]);
+            $pdo->prepare('UPDATE IGNORE tg_post SET user_id = :uid WHERE user_id = :other')->execute($ids);
+            $pdo->prepare('DELETE FROM tg_post WHERE user_id = :other')->execute(['other' => $otherId]);
+            $pdo->prepare('UPDATE vote_event SET user_id = :uid WHERE user_id = :other')->execute($ids);
+
             // unique columns move over: clear them on the other user first
             $mine = $users[$uid];
             $theirs = $users[$otherId];
@@ -575,6 +583,10 @@ class UserRepository {
                 if ($mine[$service . '_id'] === null && $theirs[$service . '_id'] !== null) {
                     $take[$service . '_id'] = $theirs[$service . '_id'];
                 }
+            }
+            if ($mine['tg_user_id'] === null && $theirs['tg_user_id'] !== null) {
+                $take['tg_user_id'] = $theirs['tg_user_id'];
+                $take['tg_username'] = $theirs['tg_username'];
             }
             if (!$mine['invite_code'] && $theirs['invite_code']) {
                 $take['invite_code'] = $theirs['invite_code'];

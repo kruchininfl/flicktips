@@ -11,6 +11,7 @@ import ProfileLayout from './ProfileLayout';
 import {isUserSignedIn, getUserModel} from '../../redux/models/user';
 import SubscribeButton from 'partitions/SubscribeButton';
 import {Link} from 'react-router';
+import TelegramBlock from 'partitions/TelegramBlock';
 
 const propTypes = {
   dispatch    : PropTypes.func,
@@ -113,7 +114,7 @@ class ProfilePage extends ProfileLayout {
   }
 
   render() {
-    const {user, votes, pending, loading, isMyPage} = this.props;
+    const {user, votes, pending, loading, isMyPage, myId} = this.props;
 
     if (pending || !user || !votes) {
       return false;
@@ -133,6 +134,8 @@ class ProfilePage extends ProfileLayout {
         {super.render()}
 
         {this.renderRelation()}
+
+        {isMyPage || (myId && String(user.id) === String(myId)) ? <TelegramBlock /> : ''}
 
         {votes.total
           ? <div className="profile__votes movie-prev-list">{this.renderVotes(votes)}</div>

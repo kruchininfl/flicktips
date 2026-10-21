@@ -30,6 +30,8 @@ $app['movie.repository'] = new Repositories\MovieRepository($app);
 
 $app['person.repository'] = new Repositories\PersonRepository($app);
 
+$app['telegram.repository'] = new Repositories\TelegramRepository($app);
+
 $app['guzzle'] = new \GuzzleHttp\Client();
 
 $app['tmdb'] = new \Services\TMDBServiceProvider($app);

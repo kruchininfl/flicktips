@@ -36,6 +36,12 @@ $app->post('/api/user/accounts/link/', '\Controllers\UserController::linkAccount
 $app->post('/api/user/accounts/merge/', '\Controllers\UserController::mergeAccount');
 $app->post('/api/user/accounts/unlink/', '\Controllers\UserController::unlinkAccount');
 
+$app->get('/api/user/telegram/', '\Controllers\TelegramController::get');
+$app->post('/api/user/telegram/link/', '\Controllers\TelegramController::link');
+$app->post('/api/user/telegram/confirm/', '\Controllers\TelegramController::confirm');
+$app->delete('/api/user/telegram/groups/{chatId}', '\Controllers\TelegramController::leaveGroup')->assert('chatId', '-?\d+');
+$app->delete('/api/user/telegram/', '\Controllers\TelegramController::unlink');
+
 $app->get('/api/updateGenres/', '\Controllers\IndexController::updateGenres');
 
 $app->get('/api/get_datasets/', '\Controllers\IndexController::getDatasets');

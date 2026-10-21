@@ -62,7 +62,7 @@
     top: 0;
     bottom: 0;
     right: -375px;
-    background: #ffffff;
+    background: $color-surface;
     width: 375px;
     max-width: 100%;
     box-shadow: 0 0 10px 0 rgba(#000000, .2);
@@ -100,13 +100,13 @@
 .sidepanel__head {
     position: relative;
     height: 70px;
-    border-bottom: 1px solid #f1f1f1;
+    border-bottom: 1px solid $color-line;
     box-sizing: border-box;
-    color: #333b41;
+    color: $color-text;
 }
 .sidepanel__head-title {
     position: absolute;
-    border: 1px solid #333b41;
+    border: 1px solid $color-text;
     padding: 4px 10px;
     top: 0;
     bottom: 0;

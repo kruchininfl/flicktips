@@ -29,24 +29,26 @@ $vote-colors: (
 }
 
 .movie-votes {
-    margin: 0 -10px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
     user-select: none;
 }
 .movie-vote {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 6px 10px;
+    padding: 6px 0;
     border-radius: 999px;
+    background: $color-glass;
+    border: 1px solid transparent;
+    color: $color-text-soft;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 200ms, transform 150ms;
-
-    .movie-votes & {
-        margin: 0 4px;
-    }
+    transition: background-color 200ms, border-color 200ms, box-shadow 300ms, transform 150ms;
 
     &:hover {
-        background: rgba(#000000, .05);
+        background: rgba(#ffffff, .12);
     }
     &:active {
         transform: scale(.94);
@@ -55,8 +57,10 @@ $vote-colors: (
     @each $name, $color in $vote-colors {
         &_#{$name} {
             &.m-active {
-                background: rgba($color, .12);
-                color: darken($color, 8);
+                background: rgba($color, .16);
+                border-color: rgba($color, .55);
+                box-shadow: 0 0 18px rgba($color, .28);
+                color: lighten($color, 10);
             }
         }
     }
@@ -64,10 +68,10 @@ $vote-colors: (
 .movie-vote__icn {
     display: inline-block;
     vertical-align: middle;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     position: relative;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 0;
     transition: transform 250ms cubic-bezier(.34, 1.56, .64, 1);
     animation: {
@@ -99,9 +103,9 @@ $vote-colors: (
 .movie-vote__counter {
     display: inline-block;
     vertical-align: middle;
-    font-size: 16px;
-    font-weight: 600;
-    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-left: 6px;
     font-variant-numeric: tabular-nums;
     transition: color 200ms;
 

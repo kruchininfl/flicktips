@@ -5,6 +5,7 @@ import Helmet from 'react-helmet';
 import SignInButton from 'partitions/AuthButtons/SignInButton';
 import HeaderSearch from 'partitions/HeaderSearch';
 import HeaderProfile from 'partitions/HeaderProfile';
+import TabBar from 'partitions/TabBar';
 import LoadingBar from 'react-redux-loading-bar';
 import './App.scss';
 import {connect} from 'react-redux';
@@ -85,16 +86,13 @@ class App extends Component {
     return (
       <div className="about-ttip">
         <div className="about-ttip__inn">
-          <div className="about-ttip__title">ЛЮБИШЬ ХОРОШЕЕ КИНО?</div>
-          <div className="about-ttip__icons">
-            <i className="about-ttip__icon icn icn_friends" />
-            <i className="about-ttip__icon icn icn_heart-like-fill" />
-            <i className="about-ttip__icon icn icn_film" />
+          <div className="about-ttip__body">
+            <div className="about-ttip__title">Любишь хорошее кино?</div>
+            <div className="about-ttip__text">Оценивай фильмы и смотри, что понравилось друзьям.</div>
           </div>
-          <div className="about-ttip__text">Смотри и оценивай фильмы.<br />
-            Следи за оценками друзей.
-          </div>
-          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" color="blue">Присоединиться</Button>
+          <Button onClick={this.handleSignIn} additionClass="about-ttip__btn" size="big" color="blue">
+            Присоединиться
+          </Button>
         </div>
       </div>
     );
@@ -112,8 +110,8 @@ class App extends Component {
         </Helmet>
         <div className="header">
           <LoadingBar updateTime={100} className="header__loader" />
-          <div className="wrapper">
-            <IndexLink to="/" className="header__logo"><span className="icn icn_logo" /></IndexLink>
+          <div className="wrapper header__inn">
+            <IndexLink to="/" className="header__logo logo">Flick<em>Tips</em></IndexLink>
 
             <div className="header__right">
               {this.props.userSignedIn ? (
@@ -151,9 +149,11 @@ class App extends Component {
           <div className="wrapper">
             <a href="mailto:support@flicktips.ru" className="footer__link">Контакты</a>
             <Link to="/about" className="footer__link">О Проекте</Link>
-            <IndexLink to="/" className="footer__logo"><span className="icn icn_logo" /></IndexLink>
+            <IndexLink to="/" className="footer__logo logo">Flick<em>Tips</em></IndexLink>
           </div>
         </div>
+
+        <TabBar />
 
         <YaMetrica />
       </div>

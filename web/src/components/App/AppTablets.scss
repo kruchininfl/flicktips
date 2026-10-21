@@ -2,13 +2,15 @@
 
 @media screen and (min-width: 768px) {
     .container {
-        background: transparent;
-        padding-left: 20px;
-        padding-right: 20px;
-
-        &.m-movie {
-            padding-bottom: 50px;
-        }
+        padding-top: 64px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .wrapper {
+        padding: 0 24px;
+    }
+    .header {
+        height: 64px;
     }
     .content {
         padding: 20px;
@@ -19,19 +21,13 @@
         font-size: 18px;
         text-transform: none;
         text-align: left;
-        color: #000000;
-    }
-
-    .footer {
-        .container.m-movie ~ & {
-            margin-top: -50px;
-        }
+        border-bottom: none;
     }
 
     .static-page {
         max-width: 768px;
-        border-radius: 10px;
-        background: #ffffff;
+        border-radius: $radius-lg;
+        background: $color-surface;
         margin: 20px auto;
         box-sizing: border-box;
     }

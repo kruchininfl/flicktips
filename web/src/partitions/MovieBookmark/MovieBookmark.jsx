@@ -30,10 +30,9 @@ class MovieBookmark extends Component {
       <div
         onClick={() => this.handleToggleBookmark(this.props.id)}
         className={'movie-bookmark' + (this.props.inBookmarks ? ' m-active' : '')}
+        title={this.props.inBookmarks ? 'Убрать из закладок' : 'В закладки'}
       >
-        <div className="movie-bookmark__icn">
-          <i className="icn icn_checked"/>
-        </div>
+        <i className={'movie-bookmark__icn icn ' + (this.props.inBookmarks ? 'icn_bookmark-fill' : 'icn_bookmark')}/>
       </div>
     );
   }

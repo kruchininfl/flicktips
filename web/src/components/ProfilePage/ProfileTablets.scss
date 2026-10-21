@@ -6,17 +6,19 @@
         padding-bottom: 20px;
     }
 
-    .profile__votes-group {
-        display: block;
-        background: #ffffff;
-        margin: 0;
-        padding: 10px;
+    .profile .movie-prev-list {
+        padding-top: 24px;
     }
 
+    .profile__votes-group {
+        grid-column: 1 / -1;
+        margin-bottom: -12px;
+        padding: 0;
+    }
+
+    // cards sit in the .movie-prev-list grid like the feed, so no own width here
     .profile__bookmarks-item {
-        display: inline-block;
-        vertical-align: top;
-        width: 33.33%;
+        border-bottom: 0;
     }
 
     .friend__name {

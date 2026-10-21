@@ -1,7 +1,9 @@
+@import "../base";
+
 .p-invite {
     padding: 40px 20px;
     text-align: center;
-    background: #ffffff;
+    background: $color-surface;
 }
 .p-invite__pic {
     display: inline-block;
@@ -15,7 +17,7 @@
     margin: 10px auto 20px;
     max-width: 400px;
     font-size: 14px;
-    color: #a0a0a0;
+    color: $color-muted;
 }
 .p-invite__hint {
     font-size: 14px;

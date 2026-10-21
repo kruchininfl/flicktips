@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import MoviePreview from 'partitions/MoviePreview';
 import {searchRequest, searchRequestClear} from 'redux/actions/searchActions';
 import Spinner from 'components/Gui/Spinner';
+import {closeSearch, openSearch} from 'redux/actions/appActions';
 
 import './HeaderSearch.scss';
 
@@ -34,15 +35,20 @@ class HeaderSearch extends Component {
     this.handleCloseSearchForce = this.handleCloseSearchForce.bind(this);
 
     this.state = {
-      opened : this.props.opened,
       query  : this.props.query,
       pending: this.props.pending
     };
   }
 
+  componentDidUpdate(prevProps) {
+    // focus in the same tick as the click, otherwise mobile browsers don't show the keyboard
+    if (this.props.opened && !prevProps.opened) {
+      this._input.focus();
+    }
+  }
+
   handleOpenSearch() {
-    this.setState({opened: true});
-    this._input.focus();
+    this.props.dispatch(openSearch());
   }
 
   handleCloseSearch(e) {
@@ -53,7 +59,7 @@ class HeaderSearch extends Component {
   }
 
   handleCloseSearchForce() {
-    this.setState({opened: false});
+    this.props.dispatch(closeSearch());
     this.props.dispatch(searchRequestClear());
     this._input.value = '';
   }
@@ -88,14 +94,14 @@ class HeaderSearch extends Component {
   }
 
   render() {
-    const {pending, response} = this.props;
-    const {opened} = this.state;
+    const {pending, response, opened} = this.props;
 
     return (
       <div className="header__right-item">
         <div className="header-search">
           <div onClick={this.handleOpenSearch} className="header-search__toggle">
             <span className="icn icn_loupe"/>
+            <span className="header-search__toggle-text">Поиск</span>
           </div>
           <div className={'header-search__container' + (opened ? ' m-opened' : '')}>
             <div className="header-search__head">
@@ -104,7 +110,7 @@ class HeaderSearch extends Component {
                 onChange={this.handleQueryChange}
                 className="header-search__head-input"
                 type="text"
-                placeholder="Search..."
+                placeholder="Фильм или сериал"
               />
               <Spinner additionClass="header-search__head-spinner" active={pending} size="small"/>
               <span className="header-search__head-icn icn icn_loupe"/>
@@ -128,8 +134,10 @@ HeaderSearch.defaultProps = defaultProps;
 
 function mapStateToProps(state) {
   const {pending, response} = state.search.toJS();
+  // opened from the header and from the mobile tab bar, so it lives in the app store
+  const opened = state.app.get('searchOpened');
 
-  return {pending, response};
+  return {pending, response, opened};
 }
 
 export default connect(mapStateToProps)(HeaderSearch);

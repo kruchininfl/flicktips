@@ -11,9 +11,9 @@
         padding-top: 150%;
         background: {
             image: url(../../img/ph-movie.svg);
-            size: 50% auto;
+            size: 40% auto;
             position: 50% 50%;
-            color: #e4e8ee;
+            color: $color-surface-2;
             repeat: no-repeat;
         };
     }
@@ -37,17 +37,17 @@
 }
 .movie-vote-icn {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 24px;
-    height: 24px;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1;
-    background: rgba(#ffffff, .92);
+    z-index: 2;
+    @include glass();
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(#000000, .35);
+    box-shadow: 0 0 0 1px $color-glass-line;
     animation: movie-vote-icn-in 400ms $ease-spring both;
 
     > .vote-icn {
@@ -116,7 +116,7 @@
         image: url(../../img/ph-people.svg);
         size: 50% auto;
         position: 50% 50%;
-        color: #d9e1ea;
+        color: $color-surface-2;
         repeat: no-repeat;
     };
     position: relative;

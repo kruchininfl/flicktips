@@ -12,10 +12,10 @@ body {
     text-rendering: optimizeLegibility;
 }
 ::selection {
-    background: rgba($color-blue, .2);
+    background: rgba($color-accent, .3);
 }
 :focus-visible {
-    outline: 2px solid rgba($color-blue, .6);
+    outline: 2px solid rgba($color-accent, .7);
     outline-offset: 2px;
 }
 .icn {
@@ -39,15 +39,15 @@ body {
     transition: color 200ms;
 
     &:hover {
-        color: darken($color-link, 12);
+        color: lighten($color-link, 12);
     }
 }
 .title {
+    font-family: $font-display;
     font-weight: 700;
     font-size: 17px;
-    letter-spacing: -.01em;
+    letter-spacing: -.02em;
     color: $color-text;
-    background: $color-surface;
     margin: 0;
     padding: 14px 0;
     text-align: center;
@@ -61,7 +61,7 @@ body {
     justify-content: center;
     text-align: center;
     flex-direction: column;
-    color: #c0c0c0;
+    color: $color-muted;
 }
 .page-ph__icn {
     font-size: 72px;
@@ -95,54 +95,33 @@ body {
 }
 
 /* <editor-fold desc="About block"> */
-@keyframes heartbeat {
-    0%, 28%, 70% {
-        transform: scaleX(1) scaleY(1)
-    }
-    14%, 42% {
-        transform: scaleX(1.3) scaleY(1.3)
-    }
-}
 .about-ttip {
     padding: 10px;
-    background: #ffffff;
 }
 .about-ttip__inn {
-    background: #f0fcfe;
-    border: 1px solid #d9e1ea;
-    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 24px;
+    padding: 18px 20px;
+    border-radius: $radius-lg;
+    border: 1px solid $color-glass-line;
+    background: radial-gradient(120% 160% at 0% 0%, rgba($color-accent, .22), transparent 60%), $color-surface;
 }
 .about-ttip__title {
-    font-size: 16px;
-    text-align: center;
-    font-weight: 600;
-    margin: 0 0 10px;
-}
-.about-ttip__icons {
-    font-size: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0 10px;
-}
-.about-ttip__icon.icn_heart-like-fill {
-    margin: 10px 30px;
-    animation: heartbeat 1.3s ease 0s infinite normal;
+    font-family: $font-display;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin: 0 0 4px;
 }
 .about-ttip__text {
-    text-align: center;
     font-size: 14px;
-    margin: 0 0 20px;
+    color: $color-text-soft;
 }
 .about-ttip__btn {
-    min-width: 140px;
-    width: max-content;
-    display: block !important;
-    margin: 0 auto;
-    padding: 0 20px;
-    text-transform: uppercase;
-    height: 36px;
-    line-height: 36px;
+    flex: none;
 }
 /* </editor-fold> */
 
@@ -151,7 +130,7 @@ body {
     overflow: hidden;
 }
 .ReactModal__Overlay {
-    background: rgba(#0e1116, .72) !important;
+    background: rgba(#000000, .72) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
@@ -164,7 +143,7 @@ body {
     border-radius: 0 !important;
     position: absolute !important;
     overflow-y: auto !important;
-    background: #ffffff;
+    background: $color-bg;
 }
 .ReactModalPortal > div {
     opacity: 0;
@@ -210,12 +189,12 @@ body {
     vertical-align: middle;
     width: 32px;
     height: 32px;
-    border: 2px solid #ffffff;
-    box-shadow: 0 0 0 1px $color-line;
+    border: 2px solid $color-bg;
+    box-shadow: 0 0 0 1px $color-glass-line;
     position: relative;
     border-radius: 50%;
     background: {
-        color: #576671;
+        color: $color-surface-2;
         image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEwMCAxMDA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj48Zz48Zz48cGF0aCBzdHlsZT0iZmlsbDojZWJlYmViOyIgZD0iTTUwLDQwYy04LjI4NSwwLTE1LDYuNzE4LTE1LDE1YzAsOC4yODUsNi43MTUsMTUsMTUsMTVjOC4yODMsMCwxNS02LjcxNSwxNS0xNUM2NSw0Ni43MTgsNTguMjgzLDQwLDUwLDQweiBNOTAsMjVINzhjLTEuNjUsMC0zLjQyOC0xLjI4LTMuOTQ5LTIuODQ2bC0zLjEwMi05LjMwOUM3MC40MjYsMTEuMjgsNjguNjUsMTAsNjcsMTBIMzNjLTEuNjUsMC0zLjQyOCwxLjI4LTMuOTQ5LDIuODQ2bC0zLjEwMiw5LjMwOUMyNS40MjYsMjMuNzIsMjMuNjUsMjUsMjIsMjVIMTBDNC41LDI1LDAsMjkuNSwwLDM1djQ1YzAsNS41LDQuNSwxMCwxMCwxMGg4MGM1LjUsMCwxMC00LjUsMTAtMTBWMzVDMTAwLDI5LjUsOTUuNSwyNSw5MCwyNXogTTUwLDgwYy0xMy44MDcsMC0yNS0xMS4xOTMtMjUtMjVjMC0xMy44MDYsMTEuMTkzLTI1LDI1LTI1YzEzLjgwNSwwLDI1LDExLjE5NCwyNSwyNUM3NSw2OC44MDcsNjMuODA1LDgwLDUwLDgweiBNODYuNSw0MS45OTNjLTEuOTMyLDAtMy41LTEuNTY2LTMuNS0zLjVjMC0xLjkzMiwxLjU2OC0zLjUsMy41LTMuNWMxLjkzNCwwLDMuNSwxLjU2OCwzLjUsMy41QzkwLDQwLjQyNyw4OC40MzMsNDEuOTkzLDg2LjUsNDEuOTkzeiIvPjwvZz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PC9zdmc+);
         position: 50% 50%;
         size: 50% 50%;
@@ -253,15 +232,15 @@ textarea {
     font-family: $font-main;
     font-size: 14px;
     color: $color-text;
-    background: #ffffff;
-    border: 1px solid #d7dbe2;
+    background: $color-surface;
+    border: 1px solid $color-line;
     border-radius: $radius-sm;
     box-sizing: border-box;
     display: block;
     width: 100%;
 }
 ::placeholder {
-    color: #c0c0c0;
+    color: $color-muted;
     opacity: 1;
 }
 .fc {
@@ -270,7 +249,7 @@ textarea {
 }
 .fc__label {
     font-size: 12px;
-    color: #c0c0c0;
+    color: $color-muted;
 }
 .fc__input,
 .fc__select {
@@ -322,7 +301,7 @@ textarea {
         display: inline-block;
         line-height: 20px;
         font-size: 14px;
-        color: #666666;
+        color: $color-muted;
 
         &:before {
             content: '';
@@ -333,14 +312,14 @@ textarea {
             width: 20px;
             height: 20px;
             box-sizing: border-box;
-            background: #ffffff;
+            background: $color-surface;
             border: 1px solid $color-blue;
         }
     }
 
     &:disabled + .fc__label {
         cursor: not-allowed;
-        color: #c0c0c0;
+        color: $color-muted;
         opacity: .7;
 
         &:before {
@@ -423,11 +402,11 @@ textarea {
     box-sizing: border-box;
     font-size: 0;
 
-    border: 1px solid #d7dbe2;
+    border: 1px solid $color-line;
     color: $color-muted;
 
     &:hover {
-        border-color: #9aa1ab;
+        border-color: $color-muted;
         color: $color-text;
     }
 
@@ -442,22 +421,22 @@ textarea {
     }
 
     .btn_color_gray & {
-        background: #5d6c78;
-        color: #ffffff;
-        border-color: transparent;
+        background: $color-glass;
+        color: $color-text;
+        border-color: $color-glass-line;
 
         &:hover {
-            background: #49555e;
+            background: rgba(#ffffff, .12);
         }
     }
     .btn_color_gray.btn_style_border & {
         background: transparent;
-        border-color: #5d6c78;
-        color: #5d6c78;
+        border-color: $color-glass-line;
+        color: $color-text-soft;
 
         &:hover {
-            border-color: #49555e;
-            color: #49555e;
+            border-color: $color-muted;
+            color: $color-text;
         }
     }
 
@@ -481,43 +460,44 @@ textarea {
         }
     }
 
+    // blue is the primary button; in the dark theme it takes the accent
     .btn_color_blue & {
-        background: $color-blue;
-        color: #ffffff;
+        background: $color-accent;
+        color: $color-bg;
         border-color: transparent;
 
         &:hover {
-            background: #0f6099;
+            background: lighten($color-accent, 6);
         }
     }
     .btn_color_blue.btn_style_border & {
-        background: transparent;
-        border-color: $color-blue;
-        color: $color-blue;
+        background: $color-glass;
+        border-color: $color-glass-line;
+        color: $color-text;
 
         &:hover {
-            border-color: #0f6099;
-            color: #0f6099;
+            border-color: rgba($color-accent, .6);
+            background: rgba($color-accent, .1);
         }
     }
 
     .btn_color_light-gray & {
-        background: #f2f2f2;
-        color: #666666;
+        background: $color-glass;
+        color: $color-text-soft;
         border-color: transparent;
 
         &:hover {
-            background: darken(#f2f2f2, 20);
+            background: rgba(#ffffff, .12);
         }
     }
     .btn_color_light-gray.btn_style_border & {
         background: transparent;
-        border-color: #f2f2f2;
-        color: #f2f2f2;
+        border-color: $color-glass-line;
+        color: $color-text-soft;
 
         &:hover {
-            border-color: darken(#f2f2f2, 20);
-            color: darken(#f2f2f2, 20);
+            border-color: $color-muted;
+            color: $color-text;
         }
     }
 }
@@ -545,6 +525,9 @@ textarea {
     &:hover .btn__inn {
         box-shadow: $shadow;
     }
+}
+.btn_color_blue:not(.btn_style_border):hover .btn__inn {
+    box-shadow: $glow-accent;
 }
 .btn__spinner {
     position: absolute;
@@ -590,6 +573,38 @@ textarea {
 }
 /* </editor-fold> */
 
+/* <editor-fold desc="Segmented control"> */
+.segmented {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: $color-glass;
+    border: 1px solid $color-line;
+    user-select: none;
+}
+.segmented__item {
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    color: $color-muted;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 200ms, background-color 250ms $ease-out, box-shadow 250ms;
+
+    &:hover {
+        color: $color-text;
+    }
+
+    &.m-active {
+        cursor: default;
+        color: $color-bg;
+        background: $color-text;
+        box-shadow: $shadow-sm;
+    }
+}
+/* </editor-fold> */
+
 /* <editor-fold desc="Spinners"> */
 .spinner {
     display: inline-block;
@@ -602,7 +617,7 @@ textarea {
     visibility: hidden;
 
     > div {
-        background-color: $color-blue;
+        background-color: $color-accent;
         height: 100%;
         width: 4px;
         margin: 0 1px;
@@ -658,67 +673,66 @@ html, body, .react-view, .layout {
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
-    padding-top: 70px;
+    padding-top: 60px;
     padding-bottom: 50px;
-    background: $color-surface;
     display: flex;
     flex-direction: column;
-
-    &.m-movie {
-        padding-bottom: 94px;
-    }
 }
 .content {
     flex: 1 1 auto;
     padding: 10px;
-    background: #ffffff;
 }
 .wrapper {
-    padding: 0 20px;
+    padding: 0 16px;
 }
 .overlay {
-    background: rgba(#18476d, .9);
+    background: rgba($color-bg, .85);
 }
 .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    color: #f1f1ef;
-    background: rgba($color-header, .86);
-    backdrop-filter: saturate(180%) blur(16px);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
-    box-shadow: 0 1px 0 rgba(#ffffff, .06), 0 8px 24px -12px rgba(#000000, .5);
-    height: 70px;
+    color: $color-text;
+    background: rgba($color-header, .82);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    box-shadow: 0 1px 0 $color-line;
+    height: 60px;
     box-sizing: border-box;
     z-index: 3;
-
-    > .wrapper {
-        height: 100%;
-    }
 
     .toggler {
         > i {
             width: 34px;
             height: 19px;
             background: transparent;
-            border: 1px solid #f1f1f1;
+            border: 1px solid $color-glass-line;
 
             &:after {
-                width: 16px;
-                height: 16px;
-                background: #f1f1f1;
+                width: 15px;
+                height: 15px;
+                left: 2px;
+                background: $color-muted;
             }
         }
 
-        > input:checked ~ i {
-            background: rgba(#ffffff, .15);
+        > input:checked + i {
+            background: $color-accent;
+            border-color: $color-accent;
 
             &:after {
-                left: 17px;
+                left: 15px;
+                background: $color-bg;
             }
         }
     }
+}
+.header__inn {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 .header__loader {
     position: absolute;
@@ -726,56 +740,49 @@ html, body, .react-view, .layout {
     left: 0;
     height: 3px;
     border-radius: 0 3px 3px 0;
-    background: linear-gradient(90deg, $color-orange, #fb4b4b);
-    box-shadow: 0 0 8px rgba(#fb4b4b, .6);
+    background: linear-gradient(90deg, $color-orange, $color-accent);
+    box-shadow: 0 0 8px rgba($color-accent, .6);
+}
+// wordmark from the redesign mockup: Unbounded, "Tips" in the accent color
+.logo {
+    font-family: $font-display;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    white-space: nowrap;
+
+    em {
+        font-style: normal;
+        color: $color-accent;
+    }
 }
 .header__logo {
+    color: $color-text;
     text-decoration: none;
     cursor: pointer;
-    font-size: 22px;
-    float: left;
-    position: relative;
-    top: 24px;
+    font-size: 20px;
     line-height: 1;
     transition: opacity 200ms;
 
     &:hover {
-        color: #ffffff;
         opacity: .8;
     }
 }
 .header__right {
-    float: right;
-    height: 100%;
-    white-space: nowrap;
-
-    &:after {
-        content: '';
-        display: inline-block;
-        vertical-align: middle;
-        height: 100%;
-        margin-left: -4px;
-    }
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 .header__right-item {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 13px;
-    white-space: normal;
-
-    &:last-child {
-        margin-right: 0;
-    }
+    display: flex;
+    align-items: center;
 }
 .footer {
-    background: $color-header;
-    color: rgba(#f1f1ef, .7);
+    color: $color-muted;
+    border-top: 1px solid $color-line;
     height: 50px;
     margin-top: -50px;
-
-    .container.m-movie ~ & {
-        margin-top: -94px;
-    }
+    box-sizing: border-box;
 }
 .footer__copy {
     float: left;
@@ -785,26 +792,42 @@ html, body, .react-view, .layout {
 }
 .footer__link {
     float: left;
-    font-size: 14px;
+    font-size: 13px;
     position: relative;
-    top: 18px;
-    text-decoration: underline;
-    margin-right: 10px;
+    top: 16px;
+    color: $color-muted;
+    text-decoration: none;
+    margin-right: 16px;
+    transition: color 200ms;
 
     &:last-child {
         margin-right: 0;
     }
 
     &:hover {
-        text-decoration: none;
+        color: $color-text;
     }
 }
 .footer__logo {
     font-size: 16px;
     float: right;
     position: relative;
-    top: 18px;
+    top: 17px;
+    color: $color-muted;
     text-decoration: none;
+}
+
+@media screen and (max-width: 767px) {
+    // phones navigate with the tab bar (partitions/TabBar), the header keeps the logo and the viewed filter
+    .layout {
+        box-sizing: border-box;
+        padding-bottom: calc(#{$tabbar-height} + env(safe-area-inset-bottom));
+    }
+    .header-search__toggle,
+    .header-profile,
+    .header__right > .header__right-item > .btn {
+        display: none;
+    }
 }
 /* </editor-fold> */
 

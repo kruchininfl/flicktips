@@ -1,0 +1,66 @@
+@import "../../components/base";
+
+.tab-bar {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    .tab-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        display: flex;
+        height: $tabbar-height;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: content-box;
+        background: rgba($color-bg, .9);
+        backdrop-filter: saturate(160%) blur(18px);
+        -webkit-backdrop-filter: saturate(160%) blur(18px);
+        border-top: 1px solid $color-line;
+    }
+    .tab-bar__item {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: $color-muted;
+        text-decoration: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: color 200ms;
+
+        &.m-active {
+            color: $color-text;
+
+            .tab-bar__icn {
+                color: $color-accent;
+            }
+        }
+        &:active .tab-bar__icn {
+            transform: scale(.9);
+        }
+    }
+    .tab-bar__icn {
+        font-size: 20px;
+        line-height: 1;
+        transition: transform 150ms $ease-out, color 200ms;
+    }
+    .userpic.tab-bar__userpic {
+        width: 22px;
+        height: 22px;
+        border-width: 1px;
+        box-shadow: none;
+
+        .tab-bar__item.m-active & {
+            border-color: $color-accent;
+        }
+    }
+    .tab-bar__text {
+        font-size: 10px;
+        font-weight: 600;
+    }
+}

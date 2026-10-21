@@ -42,7 +42,7 @@ class SignInPage extends Component {
         }
 
         <div className="p-signin__inn">
-          <div className="p-signin__logo"><i className="icn icn_logo">&nbsp;</i></div>
+          <div className="p-signin__logo logo">Flick<em>Tips</em></div>
           <div className="p-signin__slogan">
             <strong>Присоединяйся!</strong>
             <br />И смотри фильмы, <br />

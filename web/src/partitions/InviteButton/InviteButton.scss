@@ -1,3 +1,5 @@
+@import "../../components/base";
+
 .invite {
     box-sizing: border-box;
     width: 100%;
@@ -18,7 +20,7 @@
 .invite__text {
     margin: 8px 0 15px;
     font-size: 13px;
-    color: #a0a0a0;
+    color: $color-muted;
 }
 .invite__qr {
     margin-bottom: 15px;
@@ -27,15 +29,15 @@
         display: block;
         margin: 0 auto;
         padding: 8px;
-        background: #ffffff;
-        border: 1px solid #f1f1f1;
+        background: $color-surface;
+        border: 1px solid $color-line;
         border-radius: 4px;
     }
 }
 .invite__qr-text {
     margin-top: 6px;
     font-size: 12px;
-    color: #a0a0a0;
+    color: $color-muted;
 }
 .invite__link {
     position: relative;
@@ -45,10 +47,10 @@
     width: 100%;
     height: 36px;
     padding: 0 40px 0 10px;
-    border: 1px solid #e1e1e1;
+    border: 1px solid $color-line;
     border-radius: 4px;
     font-size: 13px;
-    color: #333333;
+    color: $color-text;
     outline: none;
 }
 .invite__link-copy {
@@ -61,11 +63,11 @@
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    color: #a0a0a0;
+    color: $color-muted;
     cursor: pointer;
 
     &:hover {
-        color: #333333;
+        color: $color-text;
     }
 
     &.m-copied {

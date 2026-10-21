@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './MoviePage.scss';
 import {asyncConnect} from 'redux-connect';
@@ -16,6 +15,7 @@ import LazyLoad from 'react-lazy-load';
 import {Link} from 'react-router';
 import MovieTrailer from './MovieTrailer';
 import MovieVotes from './MovieVotes';
+import MovieUserVotes from '../../partitions/MovieVotes';
 import {updateAndGetFilmPoster} from '../../redux/actions/movieActions';
 
 const propTypes = {
@@ -51,20 +51,6 @@ class MoviePage extends Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-
-    const node = ReactDOM.findDOMNode(this);
-
-    if (node) {
-      node.parentNode.classList.add('m-movie');
-    }
-  }
-
-  componentWillUnmount() {
-    const node = ReactDOM.findDOMNode(this);
-
-    if (node) {
-      node.parentNode.classList.remove('m-movie');
-    }
   }
 
   handleToggleDesc() {
@@ -179,123 +165,110 @@ class MoviePage extends Component {
           <link rel="canonical" href={url} />
         </Helmet>
 
+        {movie.tmdb_poster_path ? <div className="movie__backdrop" style={{backgroundImage: `url(${poster})`}} /> : null}
+
         <div className="movie__head">
-          <div className="movie__head-left">
-            <div className="movie-cover movie__cover">
-              {poster
-                ? <div
-                  style={{backgroundImage: `url(${poster})`}}
-                  className="movie-cover-inn"
-                >
-                  <img src={poster}
-                    alt={movie.title}
-                    onError={this.handlePosterError}
-                  />
-                </div>
-                : ''
-              }
-              <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />
-            </div>
+          <div className="movie-cover movie__cover">
+            {poster
+              ? <div
+                style={{backgroundImage: `url(${poster})`}}
+                className="movie-cover-inn"
+              >
+                <img src={poster}
+                  alt={movie.title}
+                  onError={this.handlePosterError}
+                />
+              </div>
+              : ''
+            }
+            <MovieBookmark id={movie.id} inBookmarks={movie.inBookmarks} />
+          </div>
+
+          <div className="movie__info">
+            {movie.title
+              ? <h1 className="movie-title movie__title" title={movie.title}>
+                {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
+              </h1>
+              : ''
+            }
+
+            {movie.original_title || movie.date
+              ? <div className="movie-ot-y">
+                {movie.original_title
+                  ? <div className="movie-ot">{movie.original_title}</div>
+                  : ''
+                }
+
+                {movie.date && moment(movie.date).isValid()
+                  ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
+                  : ''
+                }
+              </div>
+              : ''
+            }
+
+            {movie.genres && movie.genres.length
+              ? <div className="movie-genres">{movie.genres.map(g => g.name).join(', ')}</div>
+              : ''
+            }
+
+            {(movie.countries && movie.countries.length) || movie.kp_duration
+              ? <div className="movie-c-d">
+                {movie.countries && movie.countries.length
+                  ? <span className="movie-countries">{movie.countries.map(c => c.name).join(', ')}</span>
+                  : ''
+                }
+                {movie.kp_duration
+                  ? (
+                    <span className="movie-duration">
+                      {moment.duration(+movie.kp_duration, 'minutes').format('HH:mm')}
+                      {+movie.kp_duration < 60 ? ' мин.' : ''}
+                    </span>
+                  )
+                  : ''
+                }
+              </div>
+              : ''
+            }
 
             <MovieStatExternal
               kpValue={movie.kp_rating_value}
               imdbValue={movie.imdb_rating_value}
               additionClass="m-details"
             />
-
-            <div className="movie__votes">
-              <MovieStat {...movie} />
-            </div>
           </div>
 
-          <div className="movie__head-data">
-            <div className="movie__head-data__inn">
-              {movie.title
-                ? <div
-                  className="movie__head-row"
-                >
-                  <h1 className="movie-title" title={movie.title}>
-                    {movie.title}{movie.type === 'tv' ? ' (сериал)' : ''}
-                  </h1>
-                </div>
-                : ''
-              }
-
-              {movie.original_title || movie.date
-                ? <div
-                  className="movie__head-row"
-                >
-                  <div className="movie-ot-y">
-                    {movie.original_title
-                      ? <div className="movie-ot">{movie.original_title}</div>
-                      : ''
-                    }
-
-                    {movie.date && moment(movie.date).isValid()
-                      ? <div className="movie-y">{moment(movie.date).format('YYYY') + 'г'}</div>
-                      : ''
-                    }
-                  </div>
-                </div>
-                : ''
-              }
-
-              {movie.genres && movie.genres.length
-                ? <div
-                  className="movie__head-row"
-                >
-                  <div className="movie-genres">{movie.genres.map(g => g.name).join(', ')}</div>
-                </div>
-                : ''
-              }
-
-              {(movie.countries && movie.countries.length) || movie.kp_duration
-                ? <div
-                  className="movie__head-row movie-c-d"
-                >
-                  {movie.countries && movie.countries.length
-                    ? <span className="movie-countries">{movie.countries.map(c => c.name).join(', ')}</span>
-                    : ''
-                  }
-                  {movie.kp_duration
-                    ? (
-                      <span className="movie-duration">
-                        {moment.duration(+movie.kp_duration, 'minutes').format('HH:mm')}
-                        {+movie.kp_duration < 60 ? ' мин.' : ''}
-                      </span>
-                    )
-                    : ''
-                  }
-                </div>
-                : ''
-              }
-
-              <div className="movie__head-row m-buttons">
-                <MovieVotes
-                  movieId={movie.id}
-                  total={totalVotes}
-                  loading={this.props.pendingVotes}
-                  allVotes={movie.allVotes || []}
-                />
-
-                <MovieTrailer trailers={movie.tmdb_trailers} />
-              </div>
-            </div>
-
-            {movie.descr ? (
-              <div className="movie__head-row m-desc">
-                <div
-                  onClick={this.handleToggleDesc}
-                  className={'movie__descr' + (this.state.openedDesc ? ' m-open' : '')}
-                >
-                  {movie.descr}
-                </div>
-              </div>
-            ) : null}
-
+          <div className="movie__votes">
+            <MovieStat {...movie} />
           </div>
+
+          {movie.votes && movie.votes.length ? (
+            <div className="movie__voters">
+              <div className="movie__section-title">Последние оценки</div>
+              <MovieUserVotes votes={movie.votes} limit={8} className="movie__voters-list" />
+            </div>
+          ) : null}
+
+          <div className="movie__buttons">
+            <MovieVotes
+              movieId={movie.id}
+              total={totalVotes}
+              loading={this.props.pendingVotes}
+              allVotes={movie.allVotes || []}
+            />
+
+            <MovieTrailer trailers={movie.tmdb_trailers} />
+          </div>
+
+          {movie.descr ? (
+            <div
+              onClick={this.handleToggleDesc}
+              className={'movie__descr' + (this.state.openedDesc ? ' m-open' : '')}
+            >
+              {movie.descr}
+            </div>
+          ) : null}
         </div>
-
 
         {movie.staff && movie.staff.length
           ? movie.staff.map((group, key) => this.renderStaffGroup(group, key))

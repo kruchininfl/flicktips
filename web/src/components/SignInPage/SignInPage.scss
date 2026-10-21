@@ -6,7 +6,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #ffffff;
+    background: $color-surface;
     text-align: center;
     white-space: nowrap;
     z-index: 99;
@@ -23,14 +23,14 @@
 .p-signin__inn {
     display: inline-block;
     vertical-align: middle;
-    background: #ffffff;
+    background: $color-surface;
     white-space: normal;
     padding: 20px;
 }
 .p-signin__logo {
-    color: $color-blue;
-    font-size: 36px;
-    line-height: 0;
+    color: $color-text;
+    font-size: 32px;
+    line-height: 1;
     margin-bottom: 50px;
 }
 .p-signin__slogan {

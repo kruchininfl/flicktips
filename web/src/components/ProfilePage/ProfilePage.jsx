@@ -68,24 +68,23 @@ class ProfilePage extends ProfileLayout {
   renderVotes(response) {
     const durations = [];
 
-    return response.entities.map((entity, key) => {
+    // group headings are separate list items so they span a whole grid row above their cards
+    return response.entities.reduce((items, entity, key) => {
       const inactiveClass = this.props.isMyPage && !this.entityIsActive(entity) ? ' m-inactive' : '';
       const duration = moment(entity.timestamp * 1000)
         .from((global ? new Date().getTime() : window.SERVER_TIMESTAMP));
 
-      let isGroupUnique = null;
-
       if (durations.indexOf(duration) === -1) {
-        isGroupUnique = true;
         durations.push(duration);
+        items.push(<div key={'group-' + key} className="profile__votes-group">{duration}</div>);
       }
 
-      return (
-        <MoviePreview key={key} votesFilter={0} movie={entity} className={'profile__votes-item' + inactiveClass}>
-          <div className={'profile__votes-group ' + (isGroupUnique ? 'm-unique' : '')}>{duration}</div>
-        </MoviePreview>
+      items.push(
+        <MoviePreview key={key} votesFilter={0} movie={entity} className={'profile__votes-item' + inactiveClass} />
       );
-    });
+
+      return items;
+    }, []);
   }
 
 

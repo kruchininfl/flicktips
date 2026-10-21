@@ -21,7 +21,7 @@ cd "$(dirname "$0")/.."
 DEPLOY_HOST="${DEPLOY_HOST:-root@45.15.252.159}"
 DEPLOY_PATH="${DEPLOY_PATH:-/var/www/flicktips.ru}"
 SITE_URL="${SITE_URL:-https://flicktips.ru}"
-ALL_SERVICES=(web api kp-parser ft-parser nginx)
+ALL_SERVICES=(web api kp-parser ft-parser tg-bot nginx)
 PREFIX="infamoustill/flicktips-"
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 "$DEPLOY_HOST")
 

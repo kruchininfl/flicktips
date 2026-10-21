@@ -32,6 +32,12 @@ $app->get('/api/invite/{code}', '\Controllers\UserController::getInvite');
 $app->post('/api/user/toggle_bookmark/', '\Controllers\UserController::toggleBookmark');
 $app->put('/api/user/', '\Controllers\UserController::updateUser');
 
+$app->get('/api/user/telegram/', '\Controllers\TelegramController::get');
+$app->post('/api/user/telegram/link/', '\Controllers\TelegramController::link');
+$app->post('/api/user/telegram/confirm/', '\Controllers\TelegramController::confirm');
+$app->delete('/api/user/telegram/groups/{chatId}', '\Controllers\TelegramController::leaveGroup')->assert('chatId', '-?\d+');
+$app->delete('/api/user/telegram/', '\Controllers\TelegramController::unlink');
+
 $app->get('/api/updateGenres/', '\Controllers\IndexController::updateGenres');
 
 $app->get('/api/get_datasets/', '\Controllers\IndexController::getDatasets');

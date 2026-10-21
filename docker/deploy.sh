@@ -12,7 +12,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-SERVICES=(web api kp-parser ft-parser nginx)
+SERVICES=(web api kp-parser ft-parser tg-bot nginx)
 PREFIX="infamoustill/flicktips-"
 
 env_get() {

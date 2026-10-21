@@ -19,12 +19,14 @@ import {profileUpdate} from '../../redux/actions/profileActions';
 import {Tooltip} from 'react-tippy';
 import {openSignInPopup} from '../../redux/actions/appActions';
 import {acceptInvite, takeRememberedInvite} from '../../redux/actions/inviteActions';
+import {confirmTelegram, takeRememberedTelegramCode} from '../../redux/actions/telegramActions';
 
 const propTypes = {
   dispatch    : PropTypes.func,
   socket      : PropTypes.any,
   children    : PropTypes.node,
   user        : PropTypes.object,
+  location    : PropTypes.any,
   userSignedIn: PropTypes.bool
 };
 
@@ -39,11 +41,13 @@ class App extends Component {
     });
 
     this.acceptRememberedInvite();
+    this.confirmRememberedTelegram();
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.userSignedIn && !prevProps.userSignedIn) {
       this.acceptRememberedInvite();
+      this.confirmRememberedTelegram();
     }
   }
 
@@ -72,6 +76,24 @@ class App extends Component {
             browserHistory.push('/user/' + inviterId);
           }
         })
+        .catch(() => false);
+    }
+  }
+
+  // a guest came from the Telegram bot (TelegramPage) and has signed in on another page
+  confirmRememberedTelegram() {
+    const {userSignedIn, location} = this.props;
+
+    // TelegramPage confirms the code itself
+    if (!userSignedIn || (location && location.pathname.indexOf('/telegram') === 0)) {
+      return;
+    }
+
+    const code = takeRememberedTelegramCode();
+
+    if (code) {
+      this.props.dispatch(confirmTelegram(code))
+        .then(() => browserHistory.push('/user/' + this.props.user.id))
         .catch(() => false);
     }
   }

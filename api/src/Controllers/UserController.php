@@ -311,6 +311,14 @@ class UserController
             ], 500);
         }
 
+        // for the Telegram bot (tg-bot); a failure there must not fail the vote itself
+        try {
+            $removed = $currentVote && $actionId == $currentVote['vote'];
+            $app['telegram.repository']->queueVote($user['id'], $entityId, $removed ? null : $actionId);
+        } catch (\Exception $e) {
+            error_log('telegram vote_event: ' . $e->getMessage());
+        }
+
         $entitySth = $pdo->prepare('SELECT id, super, likes, dislikes, neutral FROM movie WHERE id=:entityId');
         $entitySth->execute([
             'entityId' => $entityId

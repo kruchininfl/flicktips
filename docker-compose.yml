@@ -71,6 +71,25 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # @FlickTipsBot (tg-bot/): long polling, no ports. Capped so it never takes memory from the site.
+  tg-bot:
+    image: infamoustill/flicktips-tg-bot:${TAG:-latest}
+    build:
+      context: ./tg-bot
+    network_mode: host
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_OPTIONS: --max-old-space-size=96
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   nginx:
     image: infamoustill/flicktips-nginx:${TAG:-latest}
     build:

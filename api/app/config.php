@@ -33,3 +33,6 @@ define('FILMS_VOTES_SIZE', 50);
 
 define('TMDB_API_KEY', env_var('TMDB_API_KEY'));
 define('TMDB_PROXY', env_var('TMDB_PROXY', ''));
+
+// username of the Telegram bot (tg-bot service) for the t.me links in the profile
+define('TELEGRAM_BOT_USERNAME', env_var('TELEGRAM_BOT_USERNAME', 'FlickTipsBot'));

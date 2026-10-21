@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'Services to rebuild, space-separated (web api kp-parser ft-parser nginx); empty = all'
+        description: 'Services to rebuild, space-separated (web api kp-parser ft-parser tg-bot nginx); empty = all'
         required: false
         default: ''
       rollback:

@@ -12,7 +12,8 @@
 # without credentials. Images must stay secret-free: secrets live only in the server's .env.
 #
 # Env: DEPLOY_HOST (default root@45.15.252.159), DEPLOY_PATH (default /var/www/flicktips.ru),
-#      ALLOW_DIRTY=1 to deploy uncommitted changes (tag gets a -dirty suffix).
+#      ALLOW_DIRTY=1 to deploy uncommitted changes (tag gets a -dirty suffix),
+#      BUILDX_CACHE=gha to use the GitHub Actions build cache (set by .github/workflows/deploy.yml).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -78,10 +79,14 @@ done
 
 for svc in "${services[@]}"; do
   echo "==> Building and pushing $PREFIX$svc:$TAG for linux/amd64"
+  cache=()
+  if [[ "${BUILDX_CACHE:-}" == gha ]]; then
+    cache=(--cache-from "type=gha,scope=$svc" --cache-to "type=gha,mode=max,scope=$svc")
+  fi
   if [[ "$svc" == api ]]; then
-    docker buildx build --platform linux/amd64 --push -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
+    docker buildx build --platform linux/amd64 --push ${cache[@]+"${cache[@]}"} -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
   else
-    docker buildx build --platform linux/amd64 --push -t "$PREFIX$svc:$TAG" "./$svc"
+    docker buildx build --platform linux/amd64 --push ${cache[@]+"${cache[@]}"} -t "$PREFIX$svc:$TAG" "./$svc"
   fi
 done
 

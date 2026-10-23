@@ -20,6 +20,9 @@ import type {
   PersonResponse,
   RecommendationsResponse,
   SearchResponse,
+  SitemapIndexResponse,
+  SitemapMoviesResponse,
+  SitemapPeopleResponse,
   SubscribeResponse,
   TelegramConfirmResponse,
   TelegramLinkResponse,
@@ -38,6 +41,10 @@ import type {
 import type { Transport } from './core';
 
 const id = (value: number | string) => encodeURIComponent(String(value));
+
+// GET /api/events, the viewer's server-sent event stream (apps/api/docs/events.md). EventSource cannot go
+// through a Transport, so components/shell/LiveUpdates opens this URL itself.
+export const EVENTS_PATH = '/api/events';
 
 export function createApi(fetchJson: Transport) {
   return {
@@ -115,6 +122,12 @@ export function createApi(fetchJson: Transport) {
           fetchJson<{ success: true }>(`/api/me/telegram/groups/${id(chatId)}`, { method: 'DELETE' }),
         unlink: () => fetchJson<{ success: true }>('/api/me/telegram', { method: 'DELETE' }),
       },
+    },
+    // ids for /sitemaps/*.xml (app/sitemaps); use publicServerApi, these are the same for every visitor
+    sitemap: {
+      index: () => fetchJson<SitemapIndexResponse>('/api/sitemap'),
+      movies: (chunk: number) => fetchJson<SitemapMoviesResponse>(`/api/sitemap/movies/${id(chunk)}`),
+      people: (chunk: number) => fetchJson<SitemapPeopleResponse>(`/api/sitemap/people/${id(chunk)}`),
     },
     auth: {
       logout: () => fetchJson<{ success: true }>('/api/auth/logout', { method: 'POST', signInOn401: false }),

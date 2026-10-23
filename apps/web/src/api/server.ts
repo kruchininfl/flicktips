@@ -25,6 +25,15 @@ const serverTransport: Transport = async (path, options = {}) => {
 
 export const serverApi = createApi(serverTransport);
 
+// For responses that are the same for every visitor (the sitemap): no cookies are forwarded and the JSON is kept in
+// the Next.js data cache for `revalidate` seconds. A failed call is not cached and throws.
+export const publicServerApi = (revalidate: number) =>
+  createApi(async (path, options = {}) => {
+    const url = API_INTERNAL_URL + withQuery(path, options.query);
+    const response = await fetch(url, { ...requestInit(options, {}), next: { revalidate } });
+    return parseResponse(response, path);
+  });
+
 // Awaits an API call and turns its 404 into the Next.js not-found page (status 404), like the legacy SSR did.
 export async function orNotFound<T>(request: Promise<T>): Promise<T> {
   try {

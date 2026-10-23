@@ -25,7 +25,7 @@ const app = buildApp(
       return true;
     },
   },
-  { logger: true },
+  { logger: true, trustProxy: '127.0.0.1' },
 );
 
 const shutdown = async () => {

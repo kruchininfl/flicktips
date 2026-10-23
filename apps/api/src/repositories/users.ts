@@ -338,3 +338,34 @@ export async function getLoginServices(db: Db, uid: number): Promise<Record<Logi
     .limit(1);
   return { vkontakte: !!row && row.vkontakte !== null, yandex: !!row && row.yandex !== null };
 }
+
+export interface ProfileStats {
+  // votes per kind; the keys are VOTE_VALUES names
+  votes: { super: number; like: number; neutral: number; dislike: number };
+  // mutual follows
+  friends: number;
+}
+
+// The numbers in a profile header (new in v2): votes per kind and how many friends.
+export async function getProfileStats(db: Db, uid: number): Promise<ProfileStats> {
+  const back = alias(userFriends, 'back');
+  const [voteRows, [friends]] = await Promise.all([
+    pdoRows(
+      db,
+      sql`SELECT movie_vote.vote AS vote, COUNT(*) AS num FROM movie_vote WHERE movie_vote.user_id = ${uid} GROUP BY movie_vote.vote`,
+    ),
+    db
+      .select({ num: sql<number>`COUNT(*)` })
+      .from(userFriends)
+      .innerJoin(back, and(eq(back.user1, userFriends.user2), eq(back.user2, uid), eq(back.subscribed, 1)))
+      .innerJoin(user, eq(user.id, userFriends.user2))
+      .where(and(eq(userFriends.user1, uid), eq(userFriends.subscribed, 1))),
+  ]);
+  const votes = { super: 0, like: 0, neutral: 0, dislike: 0 };
+  const names = ['dislike', 'neutral', 'like', 'super'] as const;
+  for (const row of voteRows) {
+    const name = names[Number(row.vote)];
+    if (name) votes[name] = Number(row.num);
+  }
+  return { votes, friends: phpCast(friends?.num, 'int') };
+}

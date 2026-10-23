@@ -71,6 +71,8 @@ TMDB is gone; everything it provided now comes from Кинопоиск or from c
 - **Digital releases**: ordered by first torrent date, then `movie.id DESC` (PHP: `tmdb_id DESC`). The
   movies are looked up by `movie.id` instead of `tmdb_id`. The debug key `results.sth` (the SQL text) is no
   longer returned. `pages` uses `DIGITAL_LIST_SIZE` (24, same value as the `HOME_LIST_SIZE` the PHP used).
+- `GET /api/users/:id/votes` takes a new optional `vote=super|like|neutral|dislike`: only the votes of
+  that kind (`total` and `pages` count those too).
 - `GET /api/users/me/votes` without a viewer: `401 {success: false, msg: 'Access denied'}` (PHP: 200 with
   the same body).
 - Malformed ids (`/api/movies/abc`) answer `404 {success: false, msg: 'Not found'}`; malformed `page` /

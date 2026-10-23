@@ -18,6 +18,7 @@ import type {
   MergeAccountResponse,
   PagedResponse,
   PersonResponse,
+  ProfileStatsResponse,
   PushKeyResponse,
   PushStatusResponse,
   PushSubscriptionJson,
@@ -71,8 +72,11 @@ export function createApi(fetchJson: Transport) {
     users: {
       get: (userId: number | string) => fetchJson<UserResponse>(`/api/users/${id(userId)}`),
       // `me` for the signed-in viewer
-      votes: (userId: number | string | 'me', { page = 1, size }: { page?: number; size?: number } = {}) =>
-        fetchJson<UserVotesResponse>(`/api/users/${id(userId)}/votes`, { query: { page, size } }),
+      votes: (
+        userId: number | string | 'me',
+        { page = 1, size, vote }: { page?: number; size?: number; vote?: VoteName } = {},
+      ) => fetchJson<UserVotesResponse>(`/api/users/${id(userId)}/votes`, { query: { page, size, vote } }),
+      stats: (userId: number | string) => fetchJson<ProfileStatsResponse>(`/api/users/${id(userId)}/stats`),
       search: (q: string) => fetchJson<UsersSearchResponse>('/api/users/search', { query: { q }, signInOn401: false }),
     },
     invites: {

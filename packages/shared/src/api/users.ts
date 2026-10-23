@@ -1,4 +1,4 @@
-import type { Paged } from './common.js';
+import type { Paged, VoteName } from './common.js';
 import type { BookmarkMovie, FriendsVoteMovie } from './movies.js';
 
 export type LoginService = 'vkontakte' | 'yandex';
@@ -34,6 +34,20 @@ export interface ProfileUser extends PublicUser {
 export interface UserResponse {
   success: true;
   user: ProfileUser;
+}
+
+// GET /api/users/:id/stats (new in v2): the numbers in a profile header.
+export interface ProfileStats {
+  votes: Record<VoteName, number>;
+  // mutual follows
+  friends: number;
+  // only on the viewer's own profile
+  bookmarks?: number;
+}
+
+export interface ProfileStatsResponse {
+  success: true;
+  stats: ProfileStats;
 }
 
 // GET /api/me/friends, GET /api/users/search

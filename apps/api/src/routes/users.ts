@@ -92,6 +92,17 @@ export const userRoutes =
       return { success: true, user };
     });
 
+    // New in v2: the numbers in a profile header. `bookmarks` only on the viewer's own profile.
+    app.get<{ Params: { id: string } }>('/users/:id/stats', async (request, reply) => {
+      const user = /^\d+$/.test(request.params.id) ? await users.findPublicUser(db, Number(request.params.id)) : null;
+      if (!user) return reply.status(404).send({ success: false, err: 'User not found' });
+      const stats = await users.getProfileStats(db, user.id);
+      if (request.viewer?.id === user.id) {
+        return { success: true, stats: { ...stats, bookmarks: await countBookmarks(db, user.id) } };
+      }
+      return { success: true, stats };
+    });
+
     // UserController::getInvite — GET /api/invite/{code}
     app.get<{ Params: { code: string } }>('/invites/:code', async (request, reply) => {
       const inviter = await users.findByInviteCode(db, request.params.code);

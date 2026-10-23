@@ -66,6 +66,33 @@ describe.skipIf(!hasTestDb)('user routes', () => {
     });
   });
 
+  describe('GET /api/users/:id/stats', () => {
+    it('counts votes per kind and mutual follows, bookmarks only for the owner', async () => {
+      const owner = await signIn(ctx, { username: 'Владелец' });
+      const mutual = await signIn(ctx, { username: 'Друг' });
+      const oneWay = await signIn(ctx, { username: 'Подписчик' });
+      await follow(ctx, owner.id, mutual.id);
+      await follow(ctx, mutual.id, owner.id);
+      await follow(ctx, oneWay.id, owner.id);
+      const [a, b, c] = [await addMovie(ctx), await addMovie(ctx), await addMovie(ctx)];
+      for (const [movieId, vote] of [
+        [a, 'super'],
+        [b, 'super'],
+        [c, 'dislike'],
+      ] as const) {
+        await inject(ctx, 'POST', '/api/me/votes', owner.headers, { id: movieId, vote });
+      }
+      await inject(ctx, 'POST', '/api/me/bookmarks/toggle', owner.headers, { movieId: a });
+
+      const votes = { super: 2, like: 0, neutral: 0, dislike: 1 };
+      const own = await inject(ctx, 'GET', `/api/users/${owner.id}/stats`, owner.headers);
+      expect(own.json()).toEqual({ success: true, stats: { votes, friends: 1, bookmarks: 1 } });
+      const other = await inject(ctx, 'GET', `/api/users/${owner.id}/stats`, oneWay.headers);
+      expect(other.json()).toEqual({ success: true, stats: { votes, friends: 1 } });
+      expect((await inject(ctx, 'GET', '/api/users/999999/stats')).statusCode).toBe(404);
+    });
+  });
+
   describe('POST /api/me/votes', () => {
     it('toggles the vote, moves the counters and queues vote_event rows for the bot', async () => {
       const voter = await signIn(ctx);

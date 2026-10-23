@@ -77,6 +77,9 @@ wrong'}` but no longer includes the `error` object.
 - **Invite codes.** A user whose `invite_code` is `''` (not `NULL`) made PHP recurse forever; the empty
   string now counts as missing and gets replaced. An empty `code` in `accept` / `GET /invites/:code` is
   "not found" (PHP matched users whose code was `''`).
+- **Profile numbers (new).** `GET /api/users/:id/stats` answers `{success, stats: {votes: {super, like,
+neutral, dislike}, friends, bookmarks?}}` for the profile header: votes per kind, mutual follows, and the
+  bookmark count only on the viewer's own profile.
 - **Profile id.** `GET /api/users/:id` answers 404 for a non-numeric id (MySQL cast `'12abc'` to 12).
 - **Search** keeps `q`, PHP `trim` (ASCII whitespace only) and the 2–64 character window counted in code
   points (`mb_strlen` / `mb_substr`).

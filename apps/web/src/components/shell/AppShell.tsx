@@ -23,7 +23,7 @@ import { MobileHeader, TopBar } from './TopBar';
 // Pages already redrawn for the new design. The rest keep the legacy markup and styles inside a dark panel
 // until they are ported (stage 2 of the redesign); drop this when the list covers every page. `legacy` keeps the
 // redesign's base styles off the old markup (styles/globals.css).
-const REDESIGNED = ['/', '/layout', '/movie/*'];
+const REDESIGNED = ['/', '/layout', '/movie/*', '/user/*'];
 
 const isRedesigned = (pathname: string) =>
   REDESIGNED.some((page) => (page.endsWith('*') ? pathname.startsWith(page.slice(0, -1)) : pathname === page));

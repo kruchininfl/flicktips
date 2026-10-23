@@ -328,16 +328,29 @@ export async function getFilmVotes(db: Db, id: number, viewerId: number | null) 
 }
 
 // IndexController::getVotes total + MovieRepository::findByUserId: a user's votes, newest first.
-export async function countUserVotes(db: Db, userId: number) {
-  const [row] = await selectRows(db, sql`SELECT COUNT(*) AS num FROM movie_vote WHERE user_id = ${userId}`);
+// `vote`: only the votes of this value (null: all)
+const voteFilter = (vote: number | null) => (vote === null ? sql`` : sql` AND movie_vote.vote = ${vote}`);
+
+export async function countUserVotes(db: Db, userId: number, vote: number | null = null) {
+  const [row] = await selectRows(
+    db,
+    sql`SELECT COUNT(*) AS num FROM movie_vote WHERE user_id = ${userId}${voteFilter(vote)}`,
+  );
   return phpCast(row?.num, 'int') as number;
 }
 
-export async function findByUserId(db: Db, viewerId: number | null, userId: number, limit: number, offset: number) {
+export async function findByUserId(
+  db: Db,
+  viewerId: number | null,
+  userId: number,
+  limit: number,
+  offset: number,
+  vote: number | null = null,
+) {
   const page = await selectRows(
     db,
     sql`SELECT movie_vote.movie_id FROM movie_vote JOIN movie ON movie.id = movie_vote.movie_id
-      WHERE movie_vote.user_id = ${userId}
+      WHERE movie_vote.user_id = ${userId}${voteFilter(vote)}
       ORDER BY movie_vote.timestamp DESC, movie_vote.id DESC LIMIT ${limit} OFFSET ${offset}`,
   );
   const ids = page.map((r) => Number(r.movie_id));
@@ -347,7 +360,7 @@ export async function findByUserId(db: Db, viewerId: number | null, userId: numb
     skipSuspended: true,
     friendVotesAs: 'friend_votes',
     extraColumns: sql`UNIX_TIMESTAMP(movie_vote.timestamp) AS timestamp, movie_vote.vote AS vote,`,
-    from: sql`movie_vote JOIN movie ON movie.id = movie_vote.movie_id AND movie_vote.user_id = ${userId}`,
+    from: sql`movie_vote JOIN movie ON movie.id = movie_vote.movie_id AND movie_vote.user_id = ${userId}${voteFilter(vote)}`,
     order: sql`movie_vote.timestamp DESC, movie_vote.id DESC`,
   });
   // `vote` is cast to int; `timestamp` stays a string as in the PHP (it had no cast for it)

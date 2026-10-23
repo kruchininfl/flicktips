@@ -150,3 +150,26 @@ export function timeAgo(ms: number, now = Date.now()): string {
 
   return diff >= 0 ? `${text} назад` : `через ${text}`;
 }
+
+const MONTHS_NOMINATIVE = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+];
+
+// The month heading of a profile's votes: «октябрь 2026» (the page uppercases it).
+export function formatMonthYear(timestamp: number | string): string {
+  const ms = unixToMs(timestamp);
+  if (!ms) return '';
+  const p = parts(ms);
+  return `${MONTHS_NOMINATIVE[p.month - 1]} ${p.year}`;
+}

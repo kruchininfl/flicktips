@@ -5,6 +5,7 @@ import {
   formatDuration,
   formatHoursMinutes,
   formatLongDate,
+  formatMonthYear,
   formatShortDate,
   formatVoteTime,
   timeAgo,
@@ -50,6 +51,15 @@ describe('formatHoursMinutes', () => {
     expect(formatHoursMinutes(166)).toBe('2 ч 46 мин');
     expect(formatHoursMinutes(46)).toBe('46 мин');
     expect(formatHoursMinutes(120)).toBe('2 ч');
+  });
+});
+
+describe('formatMonthYear', () => {
+  it('names the month in Moscow time', () => {
+    expect(formatMonthYear(seconds(Date.UTC(2026, 9, 23, 6, 5)))).toBe('октябрь 2026');
+    // 1 May 01:00 MSK is still 30 April in UTC
+    expect(formatMonthYear(String(seconds(Date.UTC(2026, 3, 30, 22, 0))))).toBe('май 2026');
+    expect(formatMonthYear(0)).toBe('');
   });
 });
 

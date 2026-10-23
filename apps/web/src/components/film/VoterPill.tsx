@@ -7,15 +7,15 @@ import { VOTE_NAMES } from '@/lib/movies';
 
 export const firstName = (name: string | null | undefined) => (name ?? '').split(' ')[0] ?? '';
 
-// Figma «Кто и когда»: the latest voter on a poster, their vote and when.
-export function VoterPill({ vote }: { vote: MovieVote }) {
+// Figma «Кто и когда»: the latest voter on a poster, their vote and when. `you`: the viewer, named «Вы».
+export function VoterPill({ vote, you = false }: { vote: MovieVote; you?: boolean }) {
   const kind = VOTE_NAMES[vote.value];
   return (
     <div className="flex min-w-0 items-center gap-1.5 rounded-2xl bg-black/55 py-[3px] pr-2.5 pl-2 backdrop-blur-[6px] sm:pl-[3px]">
       <UserAvatar src={vote.user_avatar} name={vote.user_name} size={24} className="border-0 max-sm:hidden" />
       <div className="flex min-w-0 flex-col">
         <span className="flex items-center gap-1 text-xs leading-[15px] font-medium text-white">
-          <span className="min-w-0 truncate">{firstName(vote.user_name)}</span>
+          <span className="min-w-0 truncate">{you ? 'Вы' : firstName(vote.user_name)}</span>
           {kind && (
             <span className="shrink-0">
               <VoteGlyph kind={kind} size={12} />

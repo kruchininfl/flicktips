@@ -10,6 +10,8 @@ import {
 
 import type { ViewerProfile } from '@flicktips/shared';
 
+import { plural } from '@/lib/plural';
+
 export interface NavItem {
   href: string;
   label: string;
@@ -55,13 +57,5 @@ export function isActive(pathname: string, href: string): boolean {
 
 // «248 оценок»
 export function votesLabel(count: number): string {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  const word =
-    mod10 === 1 && mod100 !== 11
-      ? 'оценка'
-      : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
-        ? 'оценки'
-        : 'оценок';
-  return `${count} ${word}`;
+  return `${count} ${plural(count, ['оценка', 'оценки', 'оценок'])}`;
 }

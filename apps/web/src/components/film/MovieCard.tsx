@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import type { MovieBase } from '@flicktips/shared';
+import type { MovieBase, MovieVote } from '@flicktips/shared';
 
 import { getPosterUrl } from '@/lib/movies';
 import { cn } from '@/lib/utils';
@@ -13,11 +13,22 @@ import { Ratings } from './Ratings';
 import { latestVotes, MoreVoters, VoterPill } from './VoterPill';
 
 // Figma «Карточка фильма»: the poster with the latest voter, the bookmark, the ratings and the four votes, then
-// the title and «год · жанры». Works in Server and Client Components.
-export function MovieCard({ movie, className }: { movie: MovieBase; className?: string }) {
+// the title and «год · жанры». Works in Server and Client Components. `votes` replaces the movie's own list
+// for the pill (a profile shows its owner first); the voter with `youId` is named «Вы».
+export function MovieCard({
+  movie,
+  votes: ownVotes,
+  youId,
+  className,
+}: {
+  movie: MovieBase;
+  votes?: MovieVote[];
+  youId?: number;
+  className?: string;
+}) {
   const href = '/movie/' + movie.id;
   const poster = getPosterUrl(movie);
-  const votes = latestVotes(movie.votes);
+  const votes = ownVotes ?? latestVotes(movie.votes);
   const title = movie.title ?? movie.original_title ?? '';
 
   return (
@@ -31,7 +42,7 @@ export function MovieCard({ movie, className }: { movie: MovieBase; className?: 
         <Link href={href} aria-label={title} tabIndex={-1} className="absolute inset-0" />
 
         <div className="pointer-events-none relative flex items-center gap-1.5 *:pointer-events-auto">
-          {votes[0] && <VoterPill vote={votes[0]} />}
+          {votes[0] && <VoterPill vote={votes[0]} you={youId !== undefined && votes[0].user_id === youId} />}
           <MoreVoters count={votes.length - 1} />
           <BookmarkButton id={movie.id} inBookmarks={movie.inBookmarks} className="ml-auto" />
         </div>

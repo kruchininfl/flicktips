@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { useViewer } from '@/viewer/ViewerProvider';
 
 import { canUseTelegram } from './access';
+import { PublishFilter } from './PublishFilter';
 
 function Card({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
@@ -211,81 +212,89 @@ export function TelegramPage({ code }: { code: string }) {
       )}
 
       {state && (
-        <div className="flex max-w-[740px] flex-col gap-6">
-          <Card title="Как подключить" note="Три шага, займёт минуту">
-            <ol className="flex flex-col gap-6">
-              <Step number={1} done={linked} title="Привяжите Telegram">
-                {linked ? (
-                  <p className="type-caption text-muted-foreground">
-                    Привязан{state.status.username ? ` @${state.status.username}` : ''} ·{' '}
-                    <button type="button" className="underline hover:text-foreground" onClick={unlink}>
-                      Отвязать
-                    </button>
-                  </p>
-                ) : (
-                  <>
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,740px)_340px]">
+          <div className="flex min-w-0 flex-col gap-6">
+            <Card title="Как подключить" note="Три шага, займёт минуту">
+              <ol className="flex flex-col gap-6">
+                <Step number={1} done={linked} title="Привяжите Telegram">
+                  {linked ? (
                     <p className="type-caption text-muted-foreground">
-                      @{state.status.botUsername} спросит подтверждение в личных сообщениях
+                      Привязан{state.status.username ? ` @${state.status.username}` : ''} ·{' '}
+                      <button type="button" className="underline hover:text-foreground" onClick={unlink}>
+                        Отвязать
+                      </button>
                     </p>
-                    <Button variant="brand" size="s" className="mt-2" asChild>
-                      <a href={state.links.startUrl} target="_blank" rel="noopener noreferrer">
-                        <IconBrandTelegram />
-                        Открыть в Telegram
-                      </a>
-                    </Button>
-                  </>
-                )}
-              </Step>
-              <Step number={2} done={active > 0} title="Добавьте бота в группу">
-                <p className="type-caption text-muted-foreground">
-                  @{state.status.botUsername} должен быть участником группового чата. Если бот уже в группе, нажмите там
-                  «Участвовать»
-                </p>
-                <Button variant={active ? 'outline' : 'brand'} size="s" className="mt-2" asChild>
-                  <a href={state.links.groupUrl} target="_blank" rel="noopener noreferrer">
-                    <IconUsersPlus />
-                    {active ? 'Добавить в ещё одну группу' : 'Добавить бота в группу'}
-                  </a>
-                </Button>
-              </Step>
-              <Step number={3} done={linked && active > 0} title="Готово">
-                <p className="type-caption text-muted-foreground">
-                  Новые оценки будут появляться в группе автоматически
-                </p>
-              </Step>
-            </ol>
-          </Card>
-
-          {groups.length > 0 && (
-            <Card title="Подключённые группы">
-              <ul className="flex flex-col gap-3">
-                {groups.map((group) => (
-                  <li key={group.chat_id} className="flex items-center gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-tint text-brand-text">
-                      <IconUsers className="size-5" />
-                    </span>
-                    <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                      <span className="truncate font-medium">{group.title || 'Группа без названия'}</span>
-                      {group.active ? (
-                        <Badge status="positive">Активна</Badge>
-                      ) : (
-                        <Badge status="warning">Бот удалён из группы</Badge>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="s"
-                      disabled={leaving === group.chat_id}
-                      onClick={() => leave(group.chat_id)}
-                    >
-                      <IconUnlink />
-                      Отключить
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+                  ) : (
+                    <>
+                      <p className="type-caption text-muted-foreground">
+                        @{state.status.botUsername} спросит подтверждение в личных сообщениях
+                      </p>
+                      <Button variant="brand" size="s" className="mt-2" asChild>
+                        <a href={state.links.startUrl} target="_blank" rel="noopener noreferrer">
+                          <IconBrandTelegram />
+                          Открыть в Telegram
+                        </a>
+                      </Button>
+                    </>
+                  )}
+                </Step>
+                <Step number={2} done={active > 0} title="Добавьте бота в группу">
+                  <p className="type-caption text-muted-foreground">
+                    @{state.status.botUsername} должен быть участником группового чата. Если бот уже в группе, нажмите
+                    там «Участвовать»
+                  </p>
+                  <Button variant={active ? 'outline' : 'brand'} size="s" className="mt-2" asChild>
+                    <a href={state.links.groupUrl} target="_blank" rel="noopener noreferrer">
+                      <IconUsersPlus />
+                      {active ? 'Добавить в ещё одну группу' : 'Добавить бота в группу'}
+                    </a>
+                  </Button>
+                </Step>
+                <Step number={3} done={linked && active > 0} title="Готово">
+                  <p className="type-caption text-muted-foreground">
+                    Новые оценки будут появляться в группе автоматически
+                  </p>
+                </Step>
+              </ol>
             </Card>
-          )}
+
+            {groups.length > 0 && (
+              <Card title="Подключённые группы">
+                <ul className="flex flex-col gap-3">
+                  {groups.map((group) => (
+                    <li key={group.chat_id} className="flex items-center gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-tint text-brand-text">
+                        <IconUsers className="size-5" />
+                      </span>
+                      <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+                        <span className="truncate font-medium">{group.title || 'Группа без названия'}</span>
+                        {group.active ? (
+                          <Badge status="positive">Активна</Badge>
+                        ) : (
+                          <Badge status="warning">Бот удалён из группы</Badge>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="s"
+                        disabled={leaving === group.chat_id}
+                        onClick={() => leave(group.chat_id)}
+                      >
+                        <IconUnlink />
+                        Отключить
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+          </div>
+
+          <Card title="Что публиковать" note="Какие оценки бот отправит в группу">
+            <div className="-mt-1">
+              <PublishFilter publish={state.status.publish} />
+            </div>
+          </Card>
         </div>
       )}
     </div>

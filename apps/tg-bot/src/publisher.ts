@@ -2,7 +2,7 @@ import type { Api } from 'grammy';
 import { GrammyError, InlineKeyboard } from 'grammy';
 import { exec, select, selectOne } from './db.js';
 import type { Movie, User } from './texts.js';
-import { changedText, movieUrl, posterUrl, postText } from './texts.js';
+import { changedText, movieUrl, posterUrl, postText, publishesVote } from './texts.js';
 import * as store from './store.js';
 
 // A rating is published once it has not changed for this long, so quick re-clicks make one post.
@@ -248,6 +248,11 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
 
     // a removed rating leaves its posts as they are
     if (!current || !user || !movie) {
+      return 'done';
+    }
+
+    // a vote the user does not publish («Что публиковать») is like a removed one: old posts stay as they are
+    if (!publishesVote(user, Number(current.vote))) {
       return 'done';
     }
 

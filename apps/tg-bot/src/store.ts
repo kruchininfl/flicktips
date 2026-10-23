@@ -3,7 +3,7 @@ import { exec, select, selectOne } from './db.js';
 import type { User } from './texts.js';
 
 const LINK_CODE_TTL = 15 * 60;
-const USER_FIELDS = 'id, username, gender, tg_user_id';
+const USER_FIELDS = 'id, username, gender, tg_user_id, tg_publish_votes';
 
 export interface TgUser {
   id: number;

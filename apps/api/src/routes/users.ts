@@ -13,6 +13,7 @@ import {
   USERS_RECOMMENDATIONS_SIZE,
   USERS_SEARCH_SIZE,
 } from '../lib/limits.js';
+import { notFoundMsg } from '../lib/query-params.js';
 import { countBookmarks, listBookmarks, toggleBookmark } from '../repositories/bookmarks.js';
 import { declineRequest, getCircle } from '../repositories/circle.js';
 import * as users from '../repositories/users.js';
@@ -85,6 +86,13 @@ export const userRoutes =
       };
     });
 
+    // v2: /u/<nickname> — the profile id behind a nickname
+    app.get<{ Params: { nickname: string } }>('/users/by-nickname/:nickname', async (request) => {
+      const id = await users.findIdByNickname(db, request.params.nickname.slice(0, 32));
+      if (!id) throw notFoundMsg();
+      return { success: true, id };
+    });
+
     // UserController::getUser — GET /api/user/{uid}
     app.get<{ Params: { id: string } }>('/users/:id', async (request, reply) => {
       const user = /^\d+$/.test(request.params.id) ? await users.findPublicUser(db, Number(request.params.id)) : null;
@@ -117,9 +125,33 @@ export const userRoutes =
     // UserController::updateUser — PUT /api/user/ {data: {hide_viewed}}
     app.patch('/me', async (request) => {
       const viewer = requireViewer(request);
-      const { data } = parse(z.object({ data: z.object({ hide_viewed: flag.nullish() }).nullish() }), request.body);
+      const { data } = parse(
+        z.object({
+          data: z
+            .object({
+              hide_viewed: flag.nullish(),
+              // v2 settings: «Имя» and «Ник» ('' or null clears the nickname)
+              username: z.string().trim().min(1).max(64).optional(),
+              nickname: z.string().trim().toLowerCase().max(32).nullish(),
+              // «Сменить фото»: the photo of a linked account, or none (the initials)
+              avatar: z.enum(['vkontakte', 'yandex', 'none']).optional(),
+            })
+            .nullish(),
+        }),
+        request.body,
+      );
       if (data?.hide_viewed !== undefined && data.hide_viewed !== null) {
         await users.setHideViewed(db, viewer.id, data.hide_viewed ? 1 : 0);
+      }
+      if (data && (data.username !== undefined || data.nickname !== undefined)) {
+        const nickname = data.nickname === undefined ? undefined : data.nickname || null;
+        if (nickname && !users.isNicknameAllowed(nickname)) throw new HttpError(400, 'nickname not allowed');
+        if (!(await users.updateProfile(db, viewer.id, { username: data.username, nickname }))) {
+          throw new HttpError(409, 'nickname taken');
+        }
+      }
+      if (data?.avatar && !(await users.chooseAvatar(db, viewer.id, data.avatar))) {
+        throw new HttpError(400, 'no photo in that account');
       }
       return { success: true, data: await users.getViewerProfile(db, viewer.id) };
     });
@@ -269,6 +301,10 @@ export const userRoutes =
     // UserController::getAccounts — GET /api/user/accounts/
     app.get('/me/accounts', async (request) => {
       const viewer = requireViewer(request);
-      return { success: true, services: await users.getLoginServices(db, viewer.id) };
+      const [services, avatars] = await Promise.all([
+        users.getLoginServices(db, viewer.id),
+        users.getServiceAvatars(db, viewer.id),
+      ]);
+      return { success: true, services, avatars };
     });
   };

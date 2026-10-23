@@ -37,7 +37,7 @@ export default async function UserPage({ params }: PageProps<'/user/[id]'>) {
           <ShareDialog
             title="Поделиться профилем"
             description="По ссылке откроется ваш профиль с оценками и статистикой."
-            link={`${SITE_URL}/user/${user.id}`}
+            link={viewer.nickname ? `${SITE_URL}/u/${viewer.nickname}` : `${SITE_URL}/user/${user.id}`}
             text="Мои оценки фильмов на FlickTips"
           >
             <Button variant="outline">

@@ -1,4 +1,0 @@
-// The cascade layer order of the site, lowest first (see globals.css). Every sheet that puts rules in a layer
-// starts with `@use 'layers';`: whichever stylesheet the browser gets first fixes the order for the page.
-@layer properties, theme, legacy, base, components, utilities;
-@layer legacy.parts, legacy.sheets;

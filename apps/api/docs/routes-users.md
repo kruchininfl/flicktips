@@ -89,6 +89,16 @@ wrong'}` but no longer includes the `error` object.
 - **Profile numbers (new).** `GET /api/users/:id/stats` answers `{success, stats: {votes: {super, like,
 neutral, dislike}, friends, bookmarks?}}` for the profile header: votes per kind, mutual follows, and the
   bookmark count only on the viewer's own profile.
+- **Settings (new, migration 004).** `PATCH /api/me {data}` also takes `username` (1–64 characters after trim),
+  `nickname` (3–32 of `a-z 0-9 - _`, starting with a letter, stored lower-case; `''` or null clears it; 400 when
+  malformed or reserved, 409 when taken) and `avatar: 'vkontakte' | 'yandex' | 'none'` (the photo of a linked
+  account, 400 when that account has none, or no photo). `GET /api/me` / `PATCH /api/me` return `nickname`.
+  `GET /api/users/by-nickname/:nickname` answers `{success, id}` (case-insensitive) or 404, for `/u/<nickname>`.
+  `GET /api/me/accounts` adds `avatars: {vkontakte, yandex}`: each linked account's photo, stored on every
+  sign-in and link (`user.<service>_avatar`) and cleared on unlink.
+- **Account deletion (new).** `DELETE /api/me {confirm: 'delete'}` deletes the user, their votes (taken off the
+  movie counters), bookmarks, follows both ways, Telegram rows, push subscriptions and sessions, and clears the
+  session cookie; 400 without the confirmation.
 - **Profile id.** `GET /api/users/:id` answers 404 for a non-numeric id (MySQL cast `'12abc'` to 12).
 - **Search** keeps `q`, PHP `trim` (ASCII whitespace only) and the 2–64 character window counted in code
   points (`mb_strlen` / `mb_substr`).

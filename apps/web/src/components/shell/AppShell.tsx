@@ -20,11 +20,6 @@ import { PendingActions } from './PendingActions';
 import { CollapsedSidebar, Sidebar } from './Sidebar';
 import { MobileHeader, TopBar } from './TopBar';
 
-// Pages not redrawn for the new design yet (stage 4 of the redesign): they keep the legacy markup and styles inside
-// a dark panel; drop this with the last of them. `legacy` keeps the redesign's base styles off the old markup
-// (styles/globals.css). Every other page, the 404 included, is in the new design.
-const LEGACY = ['/profile/accounts'];
-
 // Full-screen pages without the sidebar and the header (Figma «Вход», «Инвайт»)
 const BARE = ['/signin', '/invite/*'];
 
@@ -32,16 +27,6 @@ const matches = (pages: string[], pathname: string) => {
   const path = pathname.replace(/(.)\/+$/, '$1');
   return pages.some((page) => (page.endsWith('*') ? path.startsWith(page.slice(0, -1)) : path === page));
 };
-
-function PageContent({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  if (!matches(LEGACY, pathname)) return <>{children}</>;
-  return (
-    <div className="legacy legacy-content">
-      <div className="container">{children}</div>
-    </div>
-  );
-}
 
 export function AppShell({ children, initialCollapsed }: { children: ReactNode; initialCollapsed: boolean }) {
   const pathname = usePathname();
@@ -68,9 +53,7 @@ export function AppShell({ children, initialCollapsed }: { children: ReactNode; 
         <SignInModal />
       </Suspense>
       <SearchDialog />
-      <div className="legacy contents">
-        <PendingActions />
-      </div>
+      <PendingActions />
       <LiveUpdates />
       <Metrika />
     </>
@@ -104,9 +87,7 @@ export function AppShell({ children, initialCollapsed }: { children: ReactNode; 
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar onToggleSidebar={toggleSidebar} />
           <MobileHeader onOpenMenu={() => setMenuOpen(true)} />
-          <main className="flex-1 px-4 pt-4 pb-6 sm:px-6 sm:pt-6 sm:pb-8 lg:px-10 lg:pt-0 lg:pb-10">
-            <PageContent>{children}</PageContent>
-          </main>
+          <main className="flex-1 px-4 pt-4 pb-6 sm:px-6 sm:pt-6 sm:pb-8 lg:px-10 lg:pt-0 lg:pb-10">{children}</main>
         </div>
 
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>

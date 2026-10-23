@@ -18,10 +18,12 @@ import type {
   LoginService,
   MeResponse,
   MergeAccountResponse,
+  NicknameResponse,
   PagedResponse,
   PeopleSearchResponse,
   PersonResponse,
   ProfileStatsResponse,
+  ProfileUpdate,
   PushKeyResponse,
   PushStatusResponse,
   PushSubscriptionJson,
@@ -33,6 +35,7 @@ import type {
   SubscribeResponse,
   TelegramConfirmResponse,
   TelegramLinkResponse,
+  TelegramPublishResponse,
   TelegramResponse,
   ToggleBookmarkResponse,
   ToggleVoteResponse,
@@ -81,6 +84,7 @@ export function createApi(fetchJson: Transport) {
         userId: number | string | 'me',
         { page = 1, size, vote }: { page?: number; size?: number; vote?: VoteName } = {},
       ) => fetchJson<UserVotesResponse>(`/api/users/${id(userId)}/votes`, { query: { page, size, vote } }),
+      byNickname: (nickname: string) => fetchJson<NicknameResponse>(`/api/users/by-nickname/${id(nickname)}`),
       stats: (userId: number | string) => fetchJson<ProfileStatsResponse>(`/api/users/${id(userId)}/stats`),
       search: (q: string) => fetchJson<UsersSearchResponse>('/api/users/search', { query: { q }, signInOn401: false }),
     },
@@ -90,8 +94,10 @@ export function createApi(fetchJson: Transport) {
     me: {
       // 401 for anonymous viewers; use getViewer() (viewer/server.ts) on the server
       get: () => fetchJson<MeResponse>('/api/me', { signInOn401: false }),
-      update: (data: { hide_viewed?: boolean | 0 | 1 }) =>
-        fetchJson<MeResponse>('/api/me', { method: 'PATCH', body: { data } }),
+      update: (data: ProfileUpdate) => fetchJson<MeResponse>('/api/me', { method: 'PATCH', body: { data } }),
+      // settings «Удалить аккаунт»: signs out too
+      delete: () =>
+        fetchJson<{ success: true }>('/api/me', { method: 'DELETE', body: { confirm: 'delete' }, signInOn401: false }),
       friends: ({ page = 1, size, type = 'following' }: { page?: number; size?: number; type?: FriendsType } = {}) =>
         fetchJson<PagedResponse<ListedUser>>('/api/me/friends', { query: { page, size, type } }),
       friendsVotes: (page = 1) =>
@@ -143,6 +149,9 @@ export function createApi(fetchJson: Transport) {
         leaveGroup: (chatId: string) =>
           fetchJson<{ success: true }>(`/api/me/telegram/groups/${id(chatId)}`, { method: 'DELETE' }),
         unlink: () => fetchJson<{ success: true }>('/api/me/telegram', { method: 'DELETE' }),
+        // «Что публиковать»
+        setPublish: (publish: VoteName[]) =>
+          fetchJson<TelegramPublishResponse>('/api/me/telegram', { method: 'PATCH', body: { publish } }),
       },
       // Web Push subscriptions of this browser (apps/api/docs/push.md)
       push: {

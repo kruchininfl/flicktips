@@ -17,6 +17,15 @@ Bodies, params and response JSON are unchanged: `{success, linked, username, bot
 `{success:false, msg:'authorization required'}`, an unknown/expired confirm code is 404
 `{success:false, err:'Code not found or expired'}`. Group items are `{chat_id: string, title, active: boolean}`.
 
+## «Что публиковать» (new, migration 004)
+
+- `GET /api/me/telegram` also answers `publish`: the votes the bot posts, from `dislike`, `neutral`, `like`, `super`
+  (all of them unless changed).
+- `PATCH /api/me/telegram` with `{publish: [...]}` changes them and answers `{success, publish}`; anything but a list
+  of those names is 400.
+- Stored in `user.tg_publish_votes`, bit `1 << movie_vote.vote`. The bot (`apps/tg-bot/src/publisher.ts`) skips a vote
+  whose bit is off, like a removed vote: its earlier posts stay as they are.
+
 ## Chat ids
 
 `tg_chat.chat_id` is `bigint`. Responses carry it as a string (as PHP did). Queries pass the id from the

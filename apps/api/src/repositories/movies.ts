@@ -522,7 +522,7 @@ async function insertKpFilmOnce(db: Db, item: KpFilmListItem): Promise<number> {
 }
 
 // mysql2 error, possibly wrapped by Drizzle (DrizzleQueryError.cause)
-function isDuplicateKey(err: unknown): boolean {
+export function isDuplicateKey(err: unknown): boolean {
   for (let e: unknown = err; e && typeof e === 'object'; e = (e as { cause?: unknown }).cause) {
     if ((e as { code?: unknown }).code === 'ER_DUP_ENTRY') return true;
   }

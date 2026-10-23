@@ -12,10 +12,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // legacy URLs: /profile/* with a trailing slash, the rest without (proxy.ts)
   skipTrailingSlashRedirect: true,
-  sassOptions: {
-    // `@use 'base' as *;` from any file (src/styles/_base.scss)
-    loadPaths: [new URL('./src/styles', import.meta.url).pathname],
-  },
   // The service worker is a prerendered route, which Next.js would send with `s-maxage=31536000`: a proxy cache
   // could then keep an old worker for a year. Browsers check it for updates on every navigation anyway.
   async headers() {

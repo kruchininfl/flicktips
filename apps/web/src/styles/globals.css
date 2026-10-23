@@ -5,14 +5,9 @@
   The theme follows the system unless the visitor picked one: <html data-theme="light|dark"> (cookie `theme`,
   src/lib/theme.ts).
 
-  Layers, lowest first (also in styles/_layers.scss). `legacy` holds the old sheets (styles/legacy.scss and the
-  legacy components' own) and sits under `base`, so the redesign's base styles win on the new UI. The base styles
-  skip legacy markup (`.legacy` and everything in it: the dark panel of the pages not redrawn yet, the old search,
-  modals and tooltips), where the old reset still rules.
-  Delete `legacy` with the last legacy page and switch to the stock `@import 'tailwindcss'`.
+  Tailwind's own layers, with its preflight replaced by the trimmed one below.
 */
-@layer properties, theme, legacy, base, components, utilities;
-@layer legacy.parts, legacy.sheets;
+@layer properties, theme, base, components, utilities;
 
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
@@ -268,13 +263,12 @@
 }
 
 /*
-  Tailwind's preflight, trimmed, for everything outside legacy markup. `:where()` keeps it at zero specificity like
-  the stock one.
+  Tailwind's preflight, trimmed. `:where()` keeps it at zero specificity like the stock one.
 */
 @layer base {
-  :where(:not(.legacy, .legacy *)),
-  :where(:not(.legacy, .legacy *))::before,
-  :where(:not(.legacy, .legacy *))::after,
+  :where(*),
+  :where(*)::before,
+  :where(*)::after,
   ::backdrop {
     box-sizing: border-box;
     margin: 0;
@@ -282,41 +276,41 @@
     border: 0 solid var(--border-default);
   }
 
-  :where(:not(.legacy, .legacy *)):is(h1, h2, h3, h4, h5, h6) {
+  :where(*):is(h1, h2, h3, h4, h5, h6) {
     font-size: inherit;
     font-weight: inherit;
   }
 
-  :where(:not(.legacy, .legacy *)):is(a) {
+  :where(*):is(a) {
     color: inherit;
     text-decoration: inherit;
   }
 
-  :where(:not(.legacy, .legacy *)):is(b, strong) {
+  :where(*):is(b, strong) {
     font-weight: 600;
   }
 
-  :where(:not(.legacy, .legacy *)):is(hr) {
+  :where(*):is(hr) {
     height: 0;
     color: inherit;
     border-top-width: 1px;
   }
 
-  :where(:not(.legacy, .legacy *)):is(ol, ul, menu) {
+  :where(*):is(ol, ul, menu) {
     list-style: none;
   }
 
-  :where(:not(.legacy, .legacy *)):is(img, svg, video, canvas, iframe) {
+  :where(*):is(img, svg, video, canvas, iframe) {
     display: block;
     vertical-align: middle;
   }
 
-  :where(:not(.legacy, .legacy *)):is(img, video) {
+  :where(*):is(img, video) {
     max-width: 100%;
     height: auto;
   }
 
-  :where(:not(.legacy, .legacy *)):is(button, input, select, textarea) {
+  :where(*):is(button, input, select, textarea) {
     font: inherit;
     letter-spacing: inherit;
     color: inherit;
@@ -327,21 +321,21 @@
     appearance: none;
   }
 
-  :where(:not(.legacy, .legacy *)):is(button, [role='button'], label) {
+  :where(*):is(button, [role='button'], label) {
     cursor: pointer;
   }
 
-  :where(:not(.legacy, .legacy *)):is(kbd, code) {
+  :where(*):is(kbd, code) {
     font-family: var(--font-mono);
     font-size: 1em;
   }
 
-  :where(:not(.legacy, .legacy *))::placeholder {
+  :where(*)::placeholder {
     opacity: 1;
     color: var(--text-faint);
   }
 
-  :where(:not(.legacy, .legacy *)):focus-visible {
+  :where(*):focus-visible {
     outline: 2px solid var(--accent-line);
     outline-offset: 2px;
   }
@@ -350,7 +344,6 @@
     display: none !important;
   }
 
-  /* app.scss (legacy) styles body for the old dark design; the new shell takes over the page */
   html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;

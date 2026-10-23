@@ -1,9 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
-import { botUrl, changedText, escapeHtml, movieUrl, posterUrl, postText, userName, welcomeText } from './texts.js';
+import {
+  botUrl,
+  changedText,
+  escapeHtml,
+  movieUrl,
+  posterUrl,
+  postText,
+  publishesVote,
+  userName,
+  welcomeText,
+} from './texts.js';
 import type { Movie, User } from './texts.js';
 
-const user: User = { id: 7, username: 'Ann <b>', gender: 'female', tg_user_id: '100' };
+const user: User = { id: 7, username: 'Ann <b>', gender: 'female', tg_user_id: '100', tg_publish_votes: 15 };
 const movie: Movie = {
   id: 42,
   title: 'Alien & Co',
@@ -15,6 +25,13 @@ const movie: Movie = {
 };
 
 describe('texts', () => {
+  it('publishes only the votes chosen in the settings', () => {
+    expect([0, 1, 2, 3].map((vote) => publishesVote(user, vote))).toEqual([true, true, true, true]);
+    // like and super; MySQL may hand the tinyint over as a string
+    const picky = { ...user, tg_publish_votes: '12' as unknown as number };
+    expect([0, 1, 2, 3].map((vote) => publishesVote(picky, vote))).toEqual([false, false, true, true]);
+  });
+
   it('escapes HTML', () => {
     expect(escapeHtml('<a href="x">&</a>')).toBe('&lt;a href="x"&gt;&amp;&lt;/a&gt;');
     expect(userName({ ...user, username: null })).toBe('Пользователь FlickTips');

@@ -20,6 +20,22 @@ export interface ViewerProfile extends PublicUser {
   votes_count: number;
   // followers the user has not answered (the count next to «Друзья»)
   friend_requests: number;
+  // the short profile address /u/<nickname>, set in the settings
+  nickname: string | null;
+}
+
+// PATCH /api/me `data`: the settings' fields
+export interface ProfileUpdate {
+  hide_viewed?: boolean | 0 | 1;
+  username?: string;
+  nickname?: string | null;
+  avatar?: 'vkontakte' | 'yandex' | 'none';
+}
+
+// GET /api/users/by-nickname/:nickname
+export interface NicknameResponse {
+  success: true;
+  id: number;
 }
 
 export interface MeResponse {
@@ -160,6 +176,8 @@ export type LoginServices = Record<LoginService, boolean>;
 export interface AccountsResponse {
   success: true;
   services: LoginServices;
+  // the photo of each linked account, for «Сменить фото»
+  avatars: Record<LoginService, string | null>;
 }
 
 // What merging another account would move over (getMergeSummary).

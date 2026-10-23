@@ -4,7 +4,10 @@
 
 @include meta.load-css('pages/last-graded-page');
 @include meta.load-css('pages/layout-page');
-// TODO: Profile.scss, ProfileAccounts.scss, ProfileTablets.scss, UserSearch.scss (batches C, D)
+// Profile.scss (ends with ProfileTablets), UserSearch.scss, ProfileAccounts.scss
+@include meta.load-css('pages/profile');
+@include meta.load-css('pages/user-search');
+@include meta.load-css('pages/profile-accounts');
 @include meta.load-css('pages/movie-page');
 @include meta.load-css('pages/person-page');
 @include meta.load-css('pages/invite-page');

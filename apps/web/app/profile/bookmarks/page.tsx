@@ -1,12 +1,21 @@
 import type { Metadata } from 'next';
 
-import { PortTodo } from '@/components/PortTodo';
+import { serverApi } from '@/api/server';
+import { BookmarksList } from '@/components/profile/BookmarksList';
+import { ProfileLayout } from '@/components/profile/ProfileLayout';
 import { requireViewer } from '@/viewer/server';
 
 export const metadata: Metadata = { robots: { index: false } };
 
-// /profile/bookmarks/ — ProfileBookmarksPage (+ ProfileLayout).
+// /profile/bookmarks/ — web/src/components/ProfilePage/ProfileBookmarksPage
 export default async function ProfileBookmarksPage() {
-  await requireViewer('/profile/bookmarks/');
-  return <PortTodo legacy="ProfilePage/ProfileBookmarksPage" />;
+  const viewer = await requireViewer('/profile/bookmarks/');
+  const { results } = await serverApi.me.bookmarks();
+
+  return (
+    <div className="profile">
+      <ProfileLayout user={viewer} />
+      <BookmarksList initial={results} />
+    </div>
+  );
 }

@@ -35,7 +35,7 @@ export function navGroups(viewer: ViewerProfile | null): NavGroup[] {
       items: [
         { href: '/profile/bookmarks/', label: 'Закладки', icon: IconBookmark },
         { href: `/user/${viewer.id}`, label: 'Мои оценки', icon: IconStar },
-        { href: '/profile/friends/', label: 'Друзья', icon: IconUsers },
+        { href: '/profile/friends/', label: 'Друзья', icon: IconUsers, count: viewer.friend_requests || undefined },
       ],
     });
   }

@@ -18,6 +18,8 @@ export interface ViewerProfile extends PublicUser {
   hide_viewed: boolean;
   // all the user's votes («248 оценок» in the sidebar)
   votes_count: number;
+  // followers the user has not answered (the count next to «Друзья»)
+  friend_requests: number;
 }
 
 export interface MeResponse {
@@ -48,6 +50,32 @@ export interface ProfileStats {
 export interface ProfileStatsResponse {
   success: true;
   stats: ProfileStats;
+}
+
+// GET /api/me/circle (new in v2): one person on the friends page.
+export interface CircleUser extends PublicUser {
+  votes_count: number;
+  last_vote: { movie_id: number; title: string | null; vote: number } | null;
+  // 0–100, null with fewer than 3 common movies
+  match: number | null;
+  // people both follow
+  common_friends: number;
+}
+
+export interface CircleResponse {
+  success: true;
+  // people who follow each other
+  friends: CircleUser[];
+  // followers the viewer has not answered
+  requests: CircleUser[];
+  // follows not returned yet
+  outgoing: CircleUser[];
+}
+
+// POST /api/me/requests/decline
+export interface DeclineRequestResponse {
+  success: true;
+  userId: number;
 }
 
 // GET /api/me/friends, GET /api/users/search

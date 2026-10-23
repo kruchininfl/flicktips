@@ -14,6 +14,7 @@ import {
   USERS_SEARCH_SIZE,
 } from '../lib/limits.js';
 import { countBookmarks, listBookmarks, toggleBookmark } from '../repositories/bookmarks.js';
+import { declineRequest, getCircle } from '../repositories/circle.js';
 import * as users from '../repositories/users.js';
 import { countFriendsVotes, listFriendsVotes, queueVoteEvent, toggleVote, VOTE_VALUES } from '../repositories/votes.js';
 
@@ -131,6 +132,22 @@ export const userRoutes =
       const total = await users.countFriends(db, viewer.id, type);
       const entities = total ? await users.listFriends(db, viewer.id, type, size, offset) : [];
       return pageResult(total, page, size, entities);
+    });
+
+    // New in v2: the friends page — friends, requests and follows not returned yet (repositories/circle.ts).
+    app.get('/me/circle', async (request) => {
+      const viewer = requireViewer(request);
+      return { success: true, ...(await getCircle(db, viewer.id)) };
+    });
+
+    // New in v2: «Отклонить» on a friend request.
+    app.post('/me/requests/decline', async (request) => {
+      const viewer = requireViewer(request);
+      const { userId } = parse(z.object({ userId: id }), request.body);
+      if (userId === viewer.id) throw new HttpError(400, 'cannot decline yourself');
+      if (!(await users.findPublicUser(db, userId))) throw new HttpError(404, 'user not found');
+      await declineRequest(db, viewer.id, userId);
+      return { success: true, userId };
     });
 
     // UserController::getFriendsVotes — GET /api/user/friends_votes/?page&size

@@ -66,6 +66,57 @@ describe.skipIf(!hasTestDb)('user routes', () => {
     });
   });
 
+  describe('GET /api/me/circle', () => {
+    it('splits friends, requests and outgoing follows, with match and the latest vote', async () => {
+      const me = await signIn(ctx, { username: 'Я' });
+      const friend = await signIn(ctx, { username: 'Друг' });
+      const fan = await signIn(ctx, { username: 'Поклонник' });
+      const crush = await signIn(ctx, { username: 'Кумир' });
+      const declined = await signIn(ctx, { username: 'Отклонён' });
+      await follow(ctx, me.id, friend.id);
+      await follow(ctx, friend.id, me.id);
+      await follow(ctx, fan.id, me.id);
+      await follow(ctx, fan.id, friend.id);
+      await follow(ctx, me.id, crush.id);
+      await follow(ctx, declined.id, me.id);
+
+      const movies = [await addMovie(ctx), await addMovie(ctx), await addMovie(ctx, { title: 'Последний' })];
+      const vote = (who: { headers: Headers }, movieId: number, value: string) =>
+        inject(ctx, 'POST', '/api/me/votes', who.headers, { id: movieId, vote: value });
+      for (const movieId of movies) await vote(me, movieId, 'super');
+      await vote(friend, movies[0]!, 'super');
+      await vote(friend, movies[1]!, 'like');
+      await vote(friend, movies[2]!, 'dislike');
+
+      const decline = await inject(ctx, 'POST', '/api/me/requests/decline', me.headers, { userId: declined.id });
+      expect(decline.json()).toEqual({ success: true, userId: declined.id });
+
+      const res = (await inject(ctx, 'GET', '/api/me/circle', me.headers)).json();
+      expect(res.friends).toEqual([
+        {
+          id: friend.id,
+          username: 'Друг',
+          avatar: null,
+          gender: null,
+          registration_date: null,
+          votes_count: 3,
+          last_vote: { movie_id: movies[2], title: 'Последний', vote: 0 },
+          // differences 0, 1, 3: 1 - (4/3)/3
+          match: 56,
+          common_friends: 0,
+        },
+      ]);
+      expect(res.requests.map((u: { id: number; common_friends: number }) => [u.id, u.common_friends])).toEqual([
+        [fan.id, 1],
+      ]);
+      expect(res.outgoing.map((u: { id: number }) => u.id)).toEqual([crush.id]);
+
+      const profile = await inject(ctx, 'GET', '/api/me', me.headers);
+      expect(profile.json().data.friend_requests).toBe(1);
+      expect((await inject(ctx, 'GET', '/api/me/circle')).statusCode).toBe(401);
+    });
+  });
+
   describe('GET /api/users/:id/stats', () => {
     it('counts votes per kind and mutual follows, bookmarks only for the owner', async () => {
       const owner = await signIn(ctx, { username: 'Владелец' });
@@ -522,6 +573,7 @@ describe.skipIf(!hasTestDb)('user routes', () => {
           new_notifications: 0,
           hide_viewed: true,
           votes_count: 0,
+          friend_requests: 0,
         },
       });
       const off = await inject(ctx, 'PATCH', '/api/me', me.headers, { data: { hide_viewed: 0 } });

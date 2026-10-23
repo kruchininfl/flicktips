@@ -4,6 +4,8 @@ import type {
   AcceptInviteResponse,
   AccountsResponse,
   BookmarksResponse,
+  CircleResponse,
+  DeclineRequestResponse,
   DigitalResponse,
   FeedResponse,
   FilmResponse,
@@ -91,6 +93,9 @@ export function createApi(fetchJson: Transport) {
         fetchJson<PagedResponse<ListedUser>>('/api/me/friends', { query: { page, size, type } }),
       friendsVotes: (page = 1) =>
         fetchJson<FriendsVotesResponse>('/api/me/friends/votes', { query: { page }, signInOn401: false }),
+      circle: () => fetchJson<CircleResponse>('/api/me/circle'),
+      declineRequest: (userId: number) =>
+        fetchJson<DeclineRequestResponse>('/api/me/requests/decline', { method: 'POST', body: { userId } }),
       bookmarks: ({
         page = 1,
         size,

@@ -36,6 +36,7 @@ export interface ViewerProfile extends PublicUser {
   new_notifications: number;
   hide_viewed: boolean;
   votes_count: number;
+  friend_requests: number;
 }
 
 export interface ListedUser extends PublicUser {
@@ -54,7 +55,8 @@ export async function findPublicUser(db: Db, id: number): Promise<PublicUser | n
 
 /**
  * getByCredentials without the token check: the profile plus `new_notifications` (votes of the people the
- * user follows newer than last_seen_notifications), `hide_viewed` and `votes_count` (new in v2, for the sidebar).
+ * user follows newer than last_seen_notifications), `hide_viewed`, and for the sidebar (new in v2) `votes_count`
+ * and `friend_requests`.
  */
 export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfile | null> {
   const [row] = await db
@@ -69,6 +71,13 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
       )`,
       hide_viewed: user.hideViewed,
       votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${id})`,
+      // followers without a row back (repositories/circle.ts)
+      friend_requests: sql<string>`(
+        SELECT COUNT(*) FROM user_friends theirs
+        INNER JOIN user requester ON requester.id = theirs.user_1
+        LEFT JOIN user_friends mine ON mine.user_1 = ${id} AND mine.user_2 = theirs.user_1
+        WHERE theirs.user_2 = ${id} AND theirs.subscribed = 1 AND mine.user_1 IS NULL AND theirs.user_1 <> ${id}
+      )`,
     })
     .from(user)
     .where(eq(user.id, id))
@@ -79,6 +88,7 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
     new_notifications: phpCast(row.new_notifications, 'int'),
     hide_viewed: !!row.hide_viewed,
     votes_count: phpCast(row.votes_count, 'int'),
+    friend_requests: phpCast(row.friend_requests, 'int'),
   };
 }
 

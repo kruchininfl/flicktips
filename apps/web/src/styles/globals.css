@@ -1,0 +1,372 @@
+/*
+  The v2 redesign on Tailwind v4 + shadcn/ui. The tokens are the Figma collections «Цвет» (modes Светлая / Тёмная)
+  and «Размеры»; keep the raw names in step with the Figma variables (bg/page -> --bg-page).
+
+  The theme follows the system unless the visitor picked one: <html data-theme="light|dark"> (cookie `theme`,
+  src/lib/theme.ts).
+
+  Layers, lowest first (also in styles/_layers.scss). `legacy` holds the old sheets (styles/legacy.scss and the
+  legacy components' own) and sits under `base`, so the redesign's base styles win on the new UI. The base styles
+  skip legacy markup (`.legacy` and everything in it: the dark panel of the pages not redrawn yet, the old search,
+  modals and tooltips), where the old reset still rules.
+  Delete `legacy` with the last legacy page and switch to the stock `@import 'tailwindcss'`.
+*/
+@layer properties, theme, legacy, base, components, utilities;
+@layer legacy.parts, legacy.sheets;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+
+@source '../../app';
+@source '..';
+
+/* `dark:` follows the same switch as the tokens */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme='dark'] *) {
+    @slot;
+  }
+}
+
+:root {
+  --bg-page: #fbfaf9;
+  --bg-card: #ffffff;
+  --bg-muted: #f3f1f1;
+  --bg-input: #e8e4e380;
+  --bg-overlay: #1c1a1570;
+  --text-primary: #0c0a09;
+  --text-secondary: #615955;
+  --text-faint: #aba09c;
+  --border-default: #e8e4e3;
+  --border-strong: #d6d0ce;
+  --border-ring: #0c0a090f;
+  --button-primary-bg: #0c0a09;
+  --button-primary-text: #fbfaf9;
+  --accent-fill: #ffb446;
+  --accent-on-fill: #0c0a09;
+  --accent-text: #a35f00;
+  --accent-tint: #fff4e3;
+  --accent-line: #ffd59a;
+  --vote-super: #ffb446;
+  --vote-like: #ed6767;
+  --vote-neutral: #818181;
+  --vote-dislike: #1d5fd8;
+  --status-positive: #1c8742;
+  --status-warning: #965e00;
+  --status-destructive: #e7000b;
+  --status-info: #2a63a8;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-page: #0c0a09;
+    --bg-card: #1d1816;
+    --bg-muted: #2b2422;
+    --bg-input: #ffffff14;
+    --bg-overlay: #00000099;
+    --text-primary: #fbfaf9;
+    --text-secondary: #aba09c;
+    --text-faint: #7c6d67;
+    --border-default: #ffffff1a;
+    --border-strong: #ffffff2e;
+    --border-ring: #ffffff14;
+    --button-primary-bg: #ecebea;
+    --button-primary-text: #0c0a09;
+    --accent-text: #ffb446;
+    --accent-tint: #ffb4461f;
+    --accent-line: #ffb44659;
+    --vote-like: #f07d7d;
+    --vote-neutral: #9a9a9a;
+    --vote-dislike: #5b8def;
+    --status-positive: #42c070;
+    --status-warning: #e6ac3d;
+    --status-destructive: #ff6467;
+    --status-info: #9cbcf5;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg-page: #0c0a09;
+  --bg-card: #1d1816;
+  --bg-muted: #2b2422;
+  --bg-input: #ffffff14;
+  --bg-overlay: #00000099;
+  --text-primary: #fbfaf9;
+  --text-secondary: #aba09c;
+  --text-faint: #7c6d67;
+  --border-default: #ffffff1a;
+  --border-strong: #ffffff2e;
+  --border-ring: #ffffff14;
+  --button-primary-bg: #ecebea;
+  --button-primary-text: #0c0a09;
+  --accent-text: #ffb446;
+  --accent-tint: #ffb4461f;
+  --accent-line: #ffb44659;
+  --vote-like: #f07d7d;
+  --vote-neutral: #9a9a9a;
+  --vote-dislike: #5b8def;
+  --status-positive: #42c070;
+  --status-warning: #e6ac3d;
+  --status-destructive: #ff6467;
+  --status-info: #9cbcf5;
+  color-scheme: dark;
+}
+
+/*
+  Utility names. The Figma orange («accent») is `brand` here: shadcn's `accent` is the hover background of menus
+  and ghost buttons, which in this design is `muted`. Tints and lines of the votes and statuses are the Figma
+  «…/tint» (14% alpha) and «…/line» (45% alpha) colours.
+*/
+@theme inline {
+  --color-page: var(--bg-page);
+  --color-card: var(--bg-card);
+  --color-muted: var(--bg-muted);
+  --color-input: var(--bg-input);
+  --color-overlay: var(--bg-overlay);
+  --color-foreground: var(--text-primary);
+  --color-muted-foreground: var(--text-secondary);
+  --color-faint: var(--text-faint);
+  --color-border: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--border-ring);
+  --color-primary: var(--button-primary-bg);
+  --color-primary-foreground: var(--button-primary-text);
+
+  --color-brand: var(--accent-fill);
+  --color-brand-foreground: var(--accent-on-fill);
+  --color-brand-text: var(--accent-text);
+  --color-brand-tint: var(--accent-tint);
+  --color-brand-line: var(--accent-line);
+
+  --color-vote-super: var(--vote-super);
+  --color-vote-like: var(--vote-like);
+  --color-vote-neutral: var(--vote-neutral);
+  --color-vote-dislike: var(--vote-dislike);
+  --color-vote-super-tint: color-mix(in srgb, var(--vote-super) 14%, transparent);
+  --color-vote-like-tint: color-mix(in srgb, var(--vote-like) 14%, transparent);
+  --color-vote-neutral-tint: color-mix(in srgb, var(--vote-neutral) 14%, transparent);
+  --color-vote-dislike-tint: color-mix(in srgb, var(--vote-dislike) 14%, transparent);
+  --color-vote-super-line: color-mix(in srgb, var(--vote-super) 45%, transparent);
+  --color-vote-like-line: color-mix(in srgb, var(--vote-like) 45%, transparent);
+  --color-vote-neutral-line: color-mix(in srgb, var(--vote-neutral) 45%, transparent);
+  --color-vote-dislike-line: color-mix(in srgb, var(--vote-dislike) 45%, transparent);
+
+  --color-positive: var(--status-positive);
+  --color-warning: var(--status-warning);
+  --color-destructive: var(--status-destructive);
+  --color-info: var(--status-info);
+  --color-positive-line: color-mix(in srgb, var(--status-positive) 45%, transparent);
+  --color-warning-line: color-mix(in srgb, var(--status-warning) 45%, transparent);
+  --color-destructive-line: color-mix(in srgb, var(--status-destructive) 45%, transparent);
+  --color-muted-foreground-line: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+
+  /* shadcn names */
+  --color-background: var(--bg-page);
+  --color-popover: var(--bg-card);
+  --color-popover-foreground: var(--text-primary);
+  --color-card-foreground: var(--text-primary);
+  --color-secondary: var(--bg-muted);
+  --color-secondary-foreground: var(--text-primary);
+  --color-accent: var(--bg-muted);
+  --color-accent-foreground: var(--text-primary);
+}
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Geologica', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* «Размеры»: radius/sm, md, card, pill */
+  --radius-sm: 7px;
+  --radius-md: 11px;
+  --radius-card: 19px;
+
+  --shadow-card: 0 4px 6px -1px #0000000f, 0 2px 4px -2px #0000000f;
+  --shadow-popover: 0 16px 40px -16px #1c1a142e, 0 2px 6px 0 #0000000f;
+
+  /* «Десктоп 1440» from 1024px, «Планшет 768», «Мобайл 390» below 600px */
+  --breakpoint-sm: 600px;
+  --breakpoint-lg: 1024px;
+}
+
+/*
+  The Figma text styles («Заголовок/…», «Текст/…»). `type-`, not `text-`: tailwind-merge would take
+  `text-h1` for a colour and drop it next to `text-foreground`.
+*/
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 39px;
+  letter-spacing: -0.025em;
+}
+@utility type-h1-mobile {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.025em;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.015em;
+}
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+@utility type-metric {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+@utility type-logo {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+@utility type-large {
+  font-size: 16px;
+  line-height: 25px;
+}
+@utility type-body {
+  font-size: 14px;
+  line-height: 20px;
+}
+@utility type-caption {
+  font-size: 12px;
+  line-height: 16px;
+}
+@utility type-label {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@utility type-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/*
+  Tailwind's preflight, trimmed, for everything outside legacy markup. `:where()` keeps it at zero specificity like
+  the stock one.
+*/
+@layer base {
+  :where(:not(.legacy, .legacy *)),
+  :where(:not(.legacy, .legacy *))::before,
+  :where(:not(.legacy, .legacy *))::after,
+  ::backdrop {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid var(--border-default);
+  }
+
+  :where(:not(.legacy, .legacy *)):is(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(b, strong) {
+    font-weight: 600;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(hr) {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(ol, ul, menu) {
+    list-style: none;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(img, svg, video, canvas, iframe) {
+    display: block;
+    vertical-align: middle;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(img, video) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(button, input, select, textarea) {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    line-height: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+    appearance: none;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(button, [role='button'], label) {
+    cursor: pointer;
+  }
+
+  :where(:not(.legacy, .legacy *)):is(kbd, code) {
+    font-family: var(--font-mono);
+    font-size: 1em;
+  }
+
+  :where(:not(.legacy, .legacy *))::placeholder {
+    opacity: 1;
+    color: var(--text-faint);
+  }
+
+  :where(:not(.legacy, .legacy *)):focus-visible {
+    outline: 2px solid var(--accent-line);
+    outline-offset: 2px;
+  }
+
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+
+  /* app.scss (legacy) styles body for the old dark design; the new shell takes over the page */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--accent-line);
+  }
+}

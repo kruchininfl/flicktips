@@ -16,7 +16,7 @@ const MIN_QUERY_LENGTH = 2;
 
 // Movie search in the header (web/src/partitions/HeaderSearch): opened from the header and the phone tab bar.
 export function HeaderSearch() {
-  const { searchOpen, openSearch, closeSearch } = useUi();
+  const { searchOpen, closeSearch } = useUi();
   const input = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const request = useRef<AbortController>(undefined);
@@ -88,13 +88,10 @@ export function HeaderSearch() {
     return null;
   };
 
+  // the legacy search panel until the new «Поиск (Ctrl K)» replaces it (stage 3); opened from the top bar
   return (
-    <div className="header__right-item">
+    <div className={'legacy-search' + (searchOpen ? ' m-opened' : '')}>
       <div className="header-search">
-        <div onClick={openSearch} className="header-search__toggle">
-          <Icon name="loupe" />
-          <span className="header-search__toggle-text">Поиск</span>
-        </div>
         <div className={'header-search__container' + (searchOpen ? ' m-opened' : '')}>
           <div className="header-search__head">
             <input

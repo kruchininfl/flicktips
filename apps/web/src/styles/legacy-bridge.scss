@@ -1,0 +1,39 @@
+@use 'base' as *;
+
+// Temporary: the pages that are not redrawn yet keep their dark «Кинозал» look inside a panel of the new shell
+// (components/shell/AppShell, LEGACY). Delete with the last legacy page.
+.legacy-content {
+  min-height: calc(100vh - 96px);
+  border-radius: var(--radius-card);
+  background: $color-bg;
+  color: $color-text;
+  font-family: $font-main;
+  overflow: hidden;
+
+  .container {
+    min-height: 0;
+    padding-top: 8px;
+    padding-bottom: 24px;
+  }
+}
+
+// the old header search, now a panel that slides down over the top of the page
+.legacy-search {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 55;
+  height: 60px;
+  color: $color-text;
+  font-family: $font-main;
+
+  .header-search {
+    height: 100%;
+  }
+
+  // closed, the panel sits above the viewport and must not catch clicks on the header
+  &:not(.m-opened) {
+    pointer-events: none;
+  }
+}

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 
-import { SignInPanel } from '@/components/auth/SignInPanel';
+import { AuthBackdrop } from '@/components/auth/AuthBackdrop';
+import { SignInCard } from '@/components/auth/SignInCard';
+import { Logo } from '@/components/brand/Logo';
 import { pageMetadata } from '@/lib/metadata';
 import { getViewer } from '@/viewer/server';
 import { safeNext } from '@/viewer/urls';
@@ -9,12 +11,22 @@ export const metadata = pageMetadata({ title: 'Вход — FlickTips', path: '/
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-// /signin?next=/path&error=code — web/src/components/SignInPage. The API sends failed sign-ins here
-// (apps/api/docs/auth.md); requireViewer() sends guests here from the /profile/* pages.
+// /signin?next=/path&error=code — Figma «Вход». The API sends failed sign-ins here (apps/api/docs/auth.md);
+// requireViewer() sends guests here from the /profile/* pages.
 export default async function SignInPage({ searchParams }: PageProps<'/signin'>) {
   const query = await searchParams;
   const next = safeNext(first(query.next));
   if (await getViewer()) redirect(next);
 
-  return <SignInPanel next={next} error={first(query.error) ?? null} />;
+  return (
+    <AuthBackdrop>
+      <SignInCard
+        next={next}
+        top={<Logo />}
+        title="Вход в FlickTips"
+        text="Оценивайте фильмы и смотрите, что понравилось друзьям"
+        error={first(query.error) ?? null}
+      />
+    </AuthBackdrop>
+  );
 }

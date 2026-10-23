@@ -4,6 +4,8 @@ import type {
   AcceptInviteResponse,
   AccountsResponse,
   BookmarksResponse,
+  CircleResponse,
+  DeclineRequestResponse,
   DigitalResponse,
   FeedResponse,
   FilmResponse,
@@ -18,6 +20,7 @@ import type {
   MergeAccountResponse,
   PagedResponse,
   PersonResponse,
+  ProfileStatsResponse,
   PushKeyResponse,
   PushStatusResponse,
   PushSubscriptionJson,
@@ -71,8 +74,11 @@ export function createApi(fetchJson: Transport) {
     users: {
       get: (userId: number | string) => fetchJson<UserResponse>(`/api/users/${id(userId)}`),
       // `me` for the signed-in viewer
-      votes: (userId: number | string | 'me', { page = 1, size }: { page?: number; size?: number } = {}) =>
-        fetchJson<UserVotesResponse>(`/api/users/${id(userId)}/votes`, { query: { page, size } }),
+      votes: (
+        userId: number | string | 'me',
+        { page = 1, size, vote }: { page?: number; size?: number; vote?: VoteName } = {},
+      ) => fetchJson<UserVotesResponse>(`/api/users/${id(userId)}/votes`, { query: { page, size, vote } }),
+      stats: (userId: number | string) => fetchJson<ProfileStatsResponse>(`/api/users/${id(userId)}/stats`),
       search: (q: string) => fetchJson<UsersSearchResponse>('/api/users/search', { query: { q }, signInOn401: false }),
     },
     invites: {
@@ -87,8 +93,18 @@ export function createApi(fetchJson: Transport) {
         fetchJson<PagedResponse<ListedUser>>('/api/me/friends', { query: { page, size, type } }),
       friendsVotes: (page = 1) =>
         fetchJson<FriendsVotesResponse>('/api/me/friends/votes', { query: { page }, signInOn401: false }),
-      bookmarks: ({ page = 1, size }: { page?: number; size?: number } = {}) =>
-        fetchJson<BookmarksResponse>('/api/me/bookmarks', { query: { page, size } }),
+      circle: () => fetchJson<CircleResponse>('/api/me/circle'),
+      declineRequest: (userId: number) =>
+        fetchJson<DeclineRequestResponse>('/api/me/requests/decline', { method: 'POST', body: { userId } }),
+      bookmarks: ({
+        page = 1,
+        size,
+        type,
+        liked,
+      }: { page?: number; size?: number; type?: 'movie' | 'tv'; liked?: boolean } = {}) =>
+        fetchJson<BookmarksResponse>('/api/me/bookmarks', {
+          query: { page, size, type, liked: liked ? 1 : undefined },
+        }),
       // sets the vote, or removes it when the same vote is sent again
       vote: (movieId: number, vote: VoteName) =>
         fetchJson<ToggleVoteResponse>('/api/me/votes', { method: 'POST', body: { id: movieId, vote } }),

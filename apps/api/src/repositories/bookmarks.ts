@@ -1,6 +1,6 @@
 // Bookmarks of the signed-in user: UserController::toggleBookmark and UserRepository::getBookmarks.
 import { schema, type Db } from '@flicktips/db';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, sql, type SQL } from 'drizzle-orm';
 
 import { groupRows, phpCast, type Row } from '../lib/group-rows.js';
 import { pdoRows } from '../lib/pdo-rows.js';
@@ -22,11 +22,34 @@ export async function toggleBookmark(db: Db, uid: number, movieId: number): Prom
   return true;
 }
 
-export async function countBookmarks(db: Db, uid: number): Promise<number> {
-  const [row] = await db
-    .select({ num: sql<number>`COUNT(${bookmark.id})` })
-    .from(bookmark)
-    .where(eq(bookmark.userId, uid));
+// New in v2: «Фильмы / Сериалы» and «Друзьям понравилось» (someone the user follows voted like or super).
+export interface BookmarkFilter {
+  type?: 'movie' | 'tv';
+  liked?: boolean;
+}
+
+// conditions on a `bookmark` row, ANDed after `bookmark.user_id = uid`
+function filterSql(uid: number, { type, liked }: BookmarkFilter): SQL {
+  const parts: SQL[] = [];
+  if (type) {
+    parts.push(sql` AND bookmark.movie_id IN (SELECT movie.id FROM movie WHERE movie.type = ${type})`);
+  }
+  if (liked) {
+    parts.push(sql` AND EXISTS (
+      SELECT 1 FROM movie_vote AS liked_vote
+      WHERE liked_vote.movie_id = bookmark.movie_id AND liked_vote.vote >= 2 AND liked_vote.user_id IN (
+        SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ${uid} AND user_friends.subscribed = 1
+      )
+    )`);
+  }
+  return sql.join(parts, sql``);
+}
+
+export async function countBookmarks(db: Db, uid: number, filter: BookmarkFilter = {}): Promise<number> {
+  const [row] = await pdoRows(
+    db,
+    sql`SELECT COUNT(bookmark.id) AS num FROM bookmark WHERE bookmark.user_id = ${uid}${filterSql(uid, filter)}`,
+  );
   return phpCast(row?.num, 'int');
 }
 
@@ -83,7 +106,13 @@ const bookmarkFields = {
  * A page of bookmarked movies, newest bookmark first: every movie column (as PHP's `movie.*`), the viewer's
  * vote flags, `genres` and `friend_votes` (votes of the people the user follows, newest first).
  */
-export async function listBookmarks(db: Db, uid: number, limit: number, offset: number): Promise<Row[]> {
+export async function listBookmarks(
+  db: Db,
+  uid: number,
+  limit: number,
+  offset: number,
+  filter: BookmarkFilter = {},
+): Promise<Row[]> {
   const rows = await pdoRows(
     db,
     sql`SELECT
@@ -102,7 +131,7 @@ export async function listBookmarks(db: Db, uid: number, limit: number, offset: 
       genre.name AS genre_name
     FROM (
       SELECT bookmark.id AS bookmark_id, bookmark.movie_id, bookmark.timestamp AS bookmark_timestamp
-      FROM bookmark WHERE bookmark.user_id = ${uid}
+      FROM bookmark WHERE bookmark.user_id = ${uid}${filterSql(uid, filter)}
       ORDER BY bookmark.timestamp DESC, bookmark.id DESC LIMIT ${limit} OFFSET ${offset}
     ) bookmarks
     INNER JOIN movie ON movie.id = bookmarks.movie_id

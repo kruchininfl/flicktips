@@ -721,6 +721,14 @@ describe.skipIf(!hasTestDb)('IndexController routes', () => {
       expect(page2).toEqual({ success: true, results: { total: 2, page: 2, pages: 2, entities: [anonSerial] } });
     });
 
+    it('filters by the kind of vote', async () => {
+      const liked = (await get(`/api/users/${s.friend.id}/votes?vote=like`)).json();
+      expect(liked.results).toMatchObject({ total: 1, pages: 1, entities: [{ id: s.movies.serial, vote: 2 }] });
+      const none = (await get(`/api/users/${s.friend.id}/votes?vote=dislike`)).json();
+      expect(none.results).toEqual({ total: 0, page: 1, pages: 0, entities: [] });
+      expect((await get(`/api/users/${s.friend.id}/votes?vote=meh`)).statusCode).toBe(400);
+    });
+
     it('`me` is the viewer; 401 without one, 404 for unknown users', async () => {
       const mine = (await get('/api/users/me/votes', s.viewer.headers)).json();
       expect(mine.results.total).toBe(1);

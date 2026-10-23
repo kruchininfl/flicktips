@@ -15,9 +15,15 @@ import {
   getFilmsOrderedByVotes,
   userExists,
 } from '../repositories/movies.js';
+import { VOTE_VALUES, type VoteName } from '../repositories/votes.js';
 
 const pageQuery = z.object({ page: optionalPositiveInt(10_000) });
-const votesQuery = z.object({ page: optionalPositiveInt(100_000), size: optionalPositiveInt(500) });
+const votesQuery = z.object({
+  page: optionalPositiveInt(100_000),
+  size: optionalPositiveInt(500),
+  // new in v2: only the votes of one kind
+  vote: z.enum(Object.keys(VOTE_VALUES) as [VoteName]).optional(),
+});
 
 export const feedRoutes =
   (deps: AppDeps): FastifyPluginAsync =>
@@ -50,15 +56,18 @@ export const feedRoutes =
         userId = parseId(request.params.id);
         if (!(await userExists(db, userId))) throw notFoundMsg();
       }
-      const { page = 1, size = VOTES_LIST_SIZE } = parseQuery(votesQuery, request.query);
-      const total = await countUserVotes(db, userId);
+      const { page = 1, size = VOTES_LIST_SIZE, vote: voteName } = parseQuery(votesQuery, request.query);
+      const vote = voteName === undefined ? null : VOTE_VALUES[voteName];
+      const total = await countUserVotes(db, userId, vote);
       return {
         success: true,
         results: {
           total,
           page,
           pages: Math.ceil(total / size),
-          entities: total ? await findByUserId(db, request.viewer?.id ?? null, userId, size, (page - 1) * size) : [],
+          entities: total
+            ? await findByUserId(db, request.viewer?.id ?? null, userId, size, (page - 1) * size, vote)
+            : [],
         },
       };
     });

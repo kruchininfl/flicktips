@@ -1,4 +1,4 @@
-import type { Paged } from './common.js';
+import type { Paged, VoteName } from './common.js';
 import type { BookmarkMovie, FriendsVoteMovie } from './movies.js';
 
 export type LoginService = 'vkontakte' | 'yandex';
@@ -16,6 +16,10 @@ export interface PublicUser {
 export interface ViewerProfile extends PublicUser {
   new_notifications: number;
   hide_viewed: boolean;
+  // all the user's votes («248 оценок» in the sidebar)
+  votes_count: number;
+  // followers the user has not answered (the count next to «Друзья»)
+  friend_requests: number;
 }
 
 export interface MeResponse {
@@ -32,6 +36,46 @@ export interface ProfileUser extends PublicUser {
 export interface UserResponse {
   success: true;
   user: ProfileUser;
+}
+
+// GET /api/users/:id/stats (new in v2): the numbers in a profile header.
+export interface ProfileStats {
+  votes: Record<VoteName, number>;
+  // mutual follows
+  friends: number;
+  // only on the viewer's own profile
+  bookmarks?: number;
+}
+
+export interface ProfileStatsResponse {
+  success: true;
+  stats: ProfileStats;
+}
+
+// GET /api/me/circle (new in v2): one person on the friends page.
+export interface CircleUser extends PublicUser {
+  votes_count: number;
+  last_vote: { movie_id: number; title: string | null; vote: number } | null;
+  // 0–100, null with fewer than 3 common movies
+  match: number | null;
+  // people both follow
+  common_friends: number;
+}
+
+export interface CircleResponse {
+  success: true;
+  // people who follow each other
+  friends: CircleUser[];
+  // followers the viewer has not answered
+  requests: CircleUser[];
+  // follows not returned yet
+  outgoing: CircleUser[];
+}
+
+// POST /api/me/requests/decline
+export interface DeclineRequestResponse {
+  success: true;
+  userId: number;
 }
 
 // GET /api/me/friends, GET /api/users/search

@@ -73,6 +73,23 @@ export function formatVoteTime(timestamp: number, now = Date.now()): string {
   return t.year === today.year ? `${date} в ${time}` : `${date} ${t.year} в ${time}`;
 }
 
+const MONTHS_CARD = ['янв', 'февр', 'мар', 'апр', 'мая', 'июня', 'июля', 'авг', 'сент', 'окт', 'нояб', 'дек'];
+
+// The redesign's vote time on cards: "сегодня, 21:40", "вчера, 18:05", "18 окт, 22:31", "3 мая 2025";
+// `short` (phones) drops «сегодня»
+export function formatCardTime(timestamp: number, now = Date.now(), short = false): string {
+  if (!timestamp) return '';
+  const t = parts(timestamp * 1000);
+  const today = parts(now);
+  const time = `${pad(t.hour)}:${pad(t.minute)}`;
+
+  if (sameDay(t, today)) return short ? time : `сегодня, ${time}`;
+  if (sameDay(t, parts(now - 24 * 3600 * 1000))) return `вчера, ${time}`;
+
+  const date = `${t.day} ${MONTHS_CARD[t.month - 1]}`;
+  return t.year === today.year ? `${date}, ${time}` : `${date} ${t.year}`;
+}
+
 // 'DD.MM.YY'
 export function formatShortDate(ms: number): string {
   const t = parts(ms);
@@ -89,6 +106,15 @@ export function formatLongDate(ms: number): string {
 export function formatDuration(minutes: number): string {
   const total = Math.max(0, Math.round(minutes));
   return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+}
+
+// «2 ч 46 мин», «46 мин»
+export function formatHoursMinutes(minutes: number): string {
+  const total = Math.max(0, Math.round(minutes));
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (!hours) return `${rest} мин`;
+  return rest ? `${hours} ч ${rest} мин` : `${hours} ч`;
 }
 
 function plural(forms: [string, string, string], n: number): string {
@@ -123,4 +149,27 @@ export function timeAgo(ms: number, now = Date.now()): string {
   else text = `${years} ${plural(['год', 'года', 'лет'], years)}`;
 
   return diff >= 0 ? `${text} назад` : `через ${text}`;
+}
+
+const MONTHS_NOMINATIVE = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+];
+
+// The month heading of a profile's votes: «октябрь 2026» (the page uppercases it).
+export function formatMonthYear(timestamp: number | string): string {
+  const ms = unixToMs(timestamp);
+  if (!ms) return '';
+  const p = parts(ms);
+  return `${MONTHS_NOMINATIVE[p.month - 1]} ${p.year}`;
 }

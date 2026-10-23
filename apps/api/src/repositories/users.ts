@@ -35,6 +35,8 @@ export interface PublicUser {
 export interface ViewerProfile extends PublicUser {
   new_notifications: number;
   hide_viewed: boolean;
+  votes_count: number;
+  friend_requests: number;
 }
 
 export interface ListedUser extends PublicUser {
@@ -53,25 +55,41 @@ export async function findPublicUser(db: Db, id: number): Promise<PublicUser | n
 
 /**
  * getByCredentials without the token check: the profile plus `new_notifications` (votes of the people the
- * user follows newer than last_seen_notifications) and `hide_viewed`.
+ * user follows newer than last_seen_notifications), `hide_viewed`, and for the sidebar (new in v2) `votes_count`
+ * and `friend_requests`.
  */
 export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfile | null> {
   const [row] = await db
     .select({
       ...publicUserFields,
+      // drizzle renders ${user.id} as a bare `id`, which inside these subqueries means movie_vote.id: bind the id
       new_notifications: sql<string>`(
         SELECT COUNT(*) FROM movie_vote
         WHERE movie_vote.user_id IN (
-          SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ${user.id} AND user_friends.subscribed = 1
+          SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ${id} AND user_friends.subscribed = 1
         ) AND movie_vote.timestamp > ${user.lastSeenNotifications}
       )`,
       hide_viewed: user.hideViewed,
+      votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${id})`,
+      // followers without a row back (repositories/circle.ts)
+      friend_requests: sql<string>`(
+        SELECT COUNT(*) FROM user_friends theirs
+        INNER JOIN user requester ON requester.id = theirs.user_1
+        LEFT JOIN user_friends mine ON mine.user_1 = ${id} AND mine.user_2 = theirs.user_1
+        WHERE theirs.user_2 = ${id} AND theirs.subscribed = 1 AND mine.user_1 IS NULL AND theirs.user_1 <> ${id}
+      )`,
     })
     .from(user)
     .where(eq(user.id, id))
     .limit(1);
   if (!row) return null;
-  return { ...row, new_notifications: phpCast(row.new_notifications, 'int'), hide_viewed: !!row.hide_viewed };
+  return {
+    ...row,
+    new_notifications: phpCast(row.new_notifications, 'int'),
+    hide_viewed: !!row.hide_viewed,
+    votes_count: phpCast(row.votes_count, 'int'),
+    friend_requests: phpCast(row.friend_requests, 'int'),
+  };
 }
 
 export async function setHideViewed(db: Db, id: number, hideViewed: 0 | 1): Promise<void> {
@@ -329,4 +347,35 @@ export async function getLoginServices(db: Db, uid: number): Promise<Record<Logi
     .where(eq(user.id, uid))
     .limit(1);
   return { vkontakte: !!row && row.vkontakte !== null, yandex: !!row && row.yandex !== null };
+}
+
+export interface ProfileStats {
+  // votes per kind; the keys are VOTE_VALUES names
+  votes: { super: number; like: number; neutral: number; dislike: number };
+  // mutual follows
+  friends: number;
+}
+
+// The numbers in a profile header (new in v2): votes per kind and how many friends.
+export async function getProfileStats(db: Db, uid: number): Promise<ProfileStats> {
+  const back = alias(userFriends, 'back');
+  const [voteRows, [friends]] = await Promise.all([
+    pdoRows(
+      db,
+      sql`SELECT movie_vote.vote AS vote, COUNT(*) AS num FROM movie_vote WHERE movie_vote.user_id = ${uid} GROUP BY movie_vote.vote`,
+    ),
+    db
+      .select({ num: sql<number>`COUNT(*)` })
+      .from(userFriends)
+      .innerJoin(back, and(eq(back.user1, userFriends.user2), eq(back.user2, uid), eq(back.subscribed, 1)))
+      .innerJoin(user, eq(user.id, userFriends.user2))
+      .where(and(eq(userFriends.user1, uid), eq(userFriends.subscribed, 1))),
+  ]);
+  const votes = { super: 0, like: 0, neutral: 0, dislike: 0 };
+  const names = ['dislike', 'neutral', 'like', 'super'] as const;
+  for (const row of voteRows) {
+    const name = names[Number(row.vote)];
+    if (name) votes[name] = Number(row.num);
+  }
+  return { votes, friends: phpCast(friends?.num, 'int') };
 }

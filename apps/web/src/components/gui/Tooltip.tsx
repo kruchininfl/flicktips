@@ -54,7 +54,7 @@ export function Tooltip({ title, children, distance = 10, delay = 0, hideDelay =
       {placement
         ? createPortal(
             <div
-              className="tippy-popper"
+              className="tippy-popper legacy"
               role="tooltip"
               style={{ top: placement.top + distance - 10, left: placement.left }}
               data-placement="bottom"

@@ -14,6 +14,7 @@ import {
   USERS_SEARCH_SIZE,
 } from '../lib/limits.js';
 import { countBookmarks, listBookmarks, toggleBookmark } from '../repositories/bookmarks.js';
+import { declineRequest, getCircle } from '../repositories/circle.js';
 import * as users from '../repositories/users.js';
 import { countFriendsVotes, listFriendsVotes, queueVoteEvent, toggleVote, VOTE_VALUES } from '../repositories/votes.js';
 
@@ -43,6 +44,9 @@ const pagingQuery = z.object({ page: pageNumber, size: pageNumber.pipe(z.number(
 
 // 1/0, "1"/"0" or a boolean, as the legacy pages send flags
 const flag = z.union([z.boolean(), z.literal(0), z.literal(1), z.literal('0'), z.literal('1')]).transform((v) => !!+v);
+
+// new in v2: the bookmark filters
+const bookmarksQuery = z.object({ type: z.enum(['movie', 'tv']).optional(), liked: flag.optional() });
 
 function paging(query: unknown, defaultSize: number) {
   const { page = 1, size = defaultSize } = parse(pagingQuery, query);
@@ -92,6 +96,17 @@ export const userRoutes =
       return { success: true, user };
     });
 
+    // New in v2: the numbers in a profile header. `bookmarks` only on the viewer's own profile.
+    app.get<{ Params: { id: string } }>('/users/:id/stats', async (request, reply) => {
+      const user = /^\d+$/.test(request.params.id) ? await users.findPublicUser(db, Number(request.params.id)) : null;
+      if (!user) return reply.status(404).send({ success: false, err: 'User not found' });
+      const stats = await users.getProfileStats(db, user.id);
+      if (request.viewer?.id === user.id) {
+        return { success: true, stats: { ...stats, bookmarks: await countBookmarks(db, user.id) } };
+      }
+      return { success: true, stats };
+    });
+
     // UserController::getInvite — GET /api/invite/{code}
     app.get<{ Params: { code: string } }>('/invites/:code', async (request, reply) => {
       const inviter = await users.findByInviteCode(db, request.params.code);
@@ -119,6 +134,22 @@ export const userRoutes =
       return pageResult(total, page, size, entities);
     });
 
+    // New in v2: the friends page — friends, requests and follows not returned yet (repositories/circle.ts).
+    app.get('/me/circle', async (request) => {
+      const viewer = requireViewer(request);
+      return { success: true, ...(await getCircle(db, viewer.id)) };
+    });
+
+    // New in v2: «Отклонить» on a friend request.
+    app.post('/me/requests/decline', async (request) => {
+      const viewer = requireViewer(request);
+      const { userId } = parse(z.object({ userId: id }), request.body);
+      if (userId === viewer.id) throw new HttpError(400, 'cannot decline yourself');
+      if (!(await users.findPublicUser(db, userId))) throw new HttpError(404, 'user not found');
+      await declineRequest(db, viewer.id, userId);
+      return { success: true, userId };
+    });
+
     // UserController::getFriendsVotes — GET /api/user/friends_votes/?page&size
     app.get('/me/friends/votes', async (request) => {
       const viewer = requireViewer(request);
@@ -131,12 +162,13 @@ export const userRoutes =
       return pageResult(total, page, size, entities);
     });
 
-    // UserController::getBookmarks — GET /api/user/bookmarks/?page&size
+    // UserController::getBookmarks — GET /api/user/bookmarks/?page&size (+ type, liked)
     app.get('/me/bookmarks', async (request) => {
       const viewer = requireViewer(request);
       const { page, size, offset } = paging(request.query, BOOKMARKS_LIST_SIZE);
-      const total = await countBookmarks(db, viewer.id);
-      const entities = total ? await listBookmarks(db, viewer.id, size, offset) : [];
+      const filter = parse(bookmarksQuery, request.query);
+      const total = await countBookmarks(db, viewer.id, filter);
+      const entities = total ? await listBookmarks(db, viewer.id, size, offset, filter) : [];
       return pageResult(total, page, size, entities);
     });
 

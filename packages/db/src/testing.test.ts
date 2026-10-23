@@ -11,7 +11,8 @@ describe('PENDING', () => {
   });
 });
 
-describe.skipIf(!testDbServer())('createTestDatabase', () => {
+// builds the whole schema on the CI MySQL while the API and bot suites do the same in parallel: past the 5s default
+describe.skipIf(!testDbServer())('createTestDatabase', { timeout: 30_000 }, () => {
   it('creates the legacy schema with the v2 migrations applied', async () => {
     const t = await createTestDatabase();
     try {

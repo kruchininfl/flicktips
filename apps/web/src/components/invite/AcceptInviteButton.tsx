@@ -1,16 +1,18 @@
 'use client';
 
+import { IconUsers } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { api } from '@/api/browser';
-import { Button } from '@/components/gui/Button';
+import { Button } from '@/components/ui/button';
 
+// a signed-in visitor on someone's invite: follow each other, then their profile
 export function AcceptInviteButton({ code }: { code: string }) {
   const router = useRouter();
   const [accepting, setAccepting] = useState(false);
 
-  const handleAccept = () => {
+  const accept = () => {
     if (accepting) return;
     setAccepting(true);
     api.me
@@ -20,7 +22,8 @@ export function AcceptInviteButton({ code }: { code: string }) {
   };
 
   return (
-    <Button color="green" loading={accepting} onClick={handleAccept} className="p-invite__btn">
+    <Button variant="brand" className="w-full" disabled={accepting} onClick={accept}>
+      <IconUsers />
       Стать друзьями
     </Button>
   );

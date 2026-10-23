@@ -145,6 +145,8 @@ describe.skipIf(!hasTestDb)('auth routes', () => {
         registration_date: created!.registrationDate,
         new_notifications: 0,
         hide_viewed: false,
+        votes_count: 0,
+        friend_requests: 0,
       },
     });
   });

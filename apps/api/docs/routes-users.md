@@ -77,6 +77,18 @@ wrong'}` but no longer includes the `error` object.
 - **Invite codes.** A user whose `invite_code` is `''` (not `NULL`) made PHP recurse forever; the empty
   string now counts as missing and gets replaced. An empty `code` in `accept` / `GET /invites/:code` is
   "not found" (PHP matched users whose code was `''`).
+- **Friends page (new).** `GET /api/me/circle` answers `{success, friends, requests, outgoing}`: people who
+  follow each other, followers the viewer has no row for (a request), and follows not returned yet. Every
+  entry is a public user plus `votes_count`, `last_vote` (`{movie_id, title, vote}` or null), `match` (0–100:
+  how close the votes on common movies are, null below 3 common movies) and `common_friends` (people both
+  follow). Friends come closest match first. `POST /api/me/requests/decline {userId}` stores a row with
+  `subscribed = 0`, so the request goes away; accepting is `POST /api/me/subscriptions`. `GET /api/me` and
+  `PATCH /api/me` add `friend_requests`, the count in the sidebar.
+- **Bookmark filters (new).** `GET /api/me/bookmarks` takes `type=movie|tv` and `liked=1` (someone the
+  viewer follows voted like or super); `total` and `pages` count the filtered list.
+- **Profile numbers (new).** `GET /api/users/:id/stats` answers `{success, stats: {votes: {super, like,
+neutral, dislike}, friends, bookmarks?}}` for the profile header: votes per kind, mutual follows, and the
+  bookmark count only on the viewer's own profile.
 - **Profile id.** `GET /api/users/:id` answers 404 for a non-numeric id (MySQL cast `'12abc'` to 12).
 - **Search** keeps `q`, PHP `trim` (ASCII whitespace only) and the 2–64 character window counted in code
   points (`mb_strlen` / `mb_substr`).

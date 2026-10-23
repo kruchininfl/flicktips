@@ -1,111 +1,124 @@
 'use client';
 
-// The legacy App component: fixed header (logo, "hide viewed" switch, search, sign-in / profile menu), the
-// "join" banner for guests, the page, the footer and the phone tab bar.
-import Link from 'next/link';
-import { Suspense, type ReactNode } from 'react';
+// The v2 shell (Figma «Десктоп 1440» / «Планшет 768» / «Мобайл 390»): the sidebar (full or collapsed) with the
+// top bar on desktops, the header with the slide-out menu below 1024px.
+import { usePathname } from 'next/navigation';
+import { Suspense, useState, type ReactNode } from 'react';
 
-import { SignInButton } from '@/components/auth/SignInButton';
 import { SignInModal } from '@/components/auth/SignInModal';
-import { Button } from '@/components/gui/Button';
-import { Toggler } from '@/components/gui/Toggler';
-import { Tooltip } from '@/components/gui/Tooltip';
-import { useViewer, useViewerActions } from '@/viewer/ViewerProvider';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { setCookie } from '@/lib/cookies';
+import { cn } from '@/lib/utils';
+import { SIDEBAR_COOKIE } from '@/lib/theme';
 
-import { HeaderProfile } from './HeaderProfile';
 import { HeaderSearch } from './HeaderSearch';
 import { LiveUpdates } from './LiveUpdates';
 import { LoadingBar } from './LoadingBar';
 import { Metrika } from './Metrika';
 import { PendingActions } from './PendingActions';
-import { TabBar } from './TabBar';
-import { useUi } from './UiProvider';
+import { CollapsedSidebar, Sidebar } from './Sidebar';
+import { MobileHeader, TopBar } from './TopBar';
 
-function ViewedFilter() {
-  const viewer = useViewer();
-  const { updateProfile } = useViewerActions();
-  if (!viewer) return null;
+// Pages not redrawn for the new design yet (stage 4 of the redesign): they keep the legacy markup and styles inside
+// a dark panel; drop this with the last of them. `legacy` keeps the redesign's base styles off the old markup
+// (styles/globals.css). Every other page, the 404 included, is in the new design.
+const LEGACY = ['/profile/accounts'];
 
+// Full-screen pages without the sidebar and the header (Figma «Вход», «Инвайт»)
+const BARE = ['/signin', '/invite/*'];
+
+const matches = (pages: string[], pathname: string) => {
+  const path = pathname.replace(/(.)\/+$/, '$1');
+  return pages.some((page) => (page.endsWith('*') ? path.startsWith(page.slice(0, -1)) : path === page));
+};
+
+function PageContent({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (!matches(LEGACY, pathname)) return <>{children}</>;
   return (
-    <Tooltip
-      title={viewer.hide_viewed ? 'Показать просмотренные' : 'Скрыть просмотренные'}
-      distance={20}
-      delay={300}
-      hideDelay={100}
-    >
-      <Toggler checked={viewer.hide_viewed} onChange={() => void updateProfile({ hide_viewed: !viewer.hide_viewed })} />
-    </Tooltip>
-  );
-}
-
-function JoinBanner() {
-  const viewer = useViewer();
-  const { openSignIn } = useUi();
-  if (viewer) return null;
-
-  return (
-    <div className="about-ttip">
-      <div className="about-ttip__inn">
-        <div className="about-ttip__body">
-          <div className="about-ttip__title">Любишь хорошее кино?</div>
-          <div className="about-ttip__text">Оценивай фильмы и смотри, что понравилось друзьям.</div>
-        </div>
-        <Button onClick={openSignIn} className="about-ttip__btn" size="big" color="blue">
-          Присоединиться
-        </Button>
-      </div>
+    <div className="legacy legacy-content">
+      <div className="container">{children}</div>
     </div>
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
-  return (
-    <div className="layout">
-      <div className="header">
-        <Suspense fallback={<div />}>
-          <LoadingBar className="header__loader" />
-        </Suspense>
-        <div className="wrapper header__inn">
-          <Link href="/" className="header__logo logo">
-            Flick<em>Tips</em>
-          </Link>
+export function AppShell({ children, initialCollapsed }: { children: ReactNode; initialCollapsed: boolean }) {
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState(pathname);
 
-          <div className="header__right">
-            <ViewedFilter />
-            <HeaderSearch />
-            <SignInButton />
-            <HeaderProfile />
-          </div>
-        </div>
-      </div>
+  // a link in the menu navigates: close it
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMenuOpen(false);
+  }
 
-      <div className="container">
-        <JoinBanner />
-        {children}
-      </div>
+  const toggleSidebar = () => {
+    setCollapsed((value) => {
+      setCookie(SIDEBAR_COOKIE, value ? 'full' : 'collapsed', 365);
+      return !value;
+    });
+  };
 
-      <div className="footer">
-        <div className="wrapper">
-          <a href="mailto:support@flicktips.ru" className="footer__link">
-            Контакты
-          </a>
-          <Link href="/about" className="footer__link">
-            О Проекте
-          </Link>
-          <Link href="/" className="footer__logo logo">
-            Flick<em>Tips</em>
-          </Link>
-        </div>
-      </div>
-
-      <TabBar />
-
+  const extras = (
+    <>
       <Suspense fallback={null}>
         <SignInModal />
       </Suspense>
-      <PendingActions />
+      <div className="legacy contents">
+        <HeaderSearch />
+        <PendingActions />
+      </div>
       <LiveUpdates />
       <Metrika />
-    </div>
+    </>
+  );
+
+  if (matches(BARE, pathname)) {
+    return (
+      <TooltipProvider>
+        <main>{children}</main>
+        {extras}
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="flex min-h-dvh">
+        <Suspense fallback={null}>
+          <LoadingBar className="fixed inset-x-0 top-0 z-60" />
+        </Suspense>
+
+        <aside
+          className={cn(
+            'sticky top-0 z-20 hidden h-dvh shrink-0 border-r border-border lg:block',
+            collapsed ? 'w-16' : 'w-64',
+          )}
+        >
+          {collapsed ? <CollapsedSidebar /> : <Sidebar />}
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar onToggleSidebar={toggleSidebar} />
+          <MobileHeader onOpenMenu={() => setMenuOpen(true)} />
+          <main className="flex-1 px-4 pt-4 pb-6 sm:px-6 sm:pt-6 sm:pb-8 lg:px-10 lg:pt-0 lg:pb-10">
+            <PageContent>{children}</PageContent>
+          </main>
+        </div>
+
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+          <SheetContent side="left" closeLabel="Закрыть меню" className="shadow-popover">
+            <SheetTitle className="sr-only">Меню</SheetTitle>
+            <SheetDescription className="sr-only">Разделы FlickTips</SheetDescription>
+            <Sidebar />
+          </SheetContent>
+        </Sheet>
+
+        {extras}
+      </div>
+    </TooltipProvider>
   );
 }

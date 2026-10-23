@@ -4,6 +4,7 @@
 #   tools/v2-test-setup.sh env      # /var/www/flicktips-v2/test/.env (secrets copied on the server, never printed)
 #   tools/v2-test-setup.sh vapid    # Web Push key pair: kept in ./.vapid-keys.json, written to the test .env
 #   tools/v2-test-setup.sh check    # names of the test .env, values only for non-secrets
+#   tools/v2-test-setup.sh shrink   # flicktips_test cut down to the 10 oldest users and the movies they voted for
 #   tools/v2-test-setup.sh backup   # mysqldump of flicktips_test streamed to ~/flicktips_test-<date>.sql.gz
 #   tools/v2-test-setup.sh migrate  # migrations 001 and 002 on flicktips_test (needs a backup from today)
 # Every step is idempotent. Production (`flicktips`) is never touched.
@@ -73,6 +74,12 @@ ls -l .env
 EOF
 }
 
+step_shrink() {
+  ssh "$SERVER" "df -h / | tail -1; mysql $DB -e \"SELECT COUNT(*) AS users FROM \\\`user\\\`; SELECT COUNT(*) AS movies FROM movie;\""
+  ssh "$SERVER" "mysql --table $DB" < tools/v2-shrink-test-db.sql
+  ssh "$SERVER" "df -h / | tail -1"
+}
+
 step_backup() {
   ssh "$SERVER" "mysqldump --single-transaction --quick $DB | gzip" > "$BACKUP"
   gunzip -t "$BACKUP"
@@ -89,6 +96,6 @@ step_migrate() {
 }
 
 case "${1:-}" in
-  env | vapid | check | backup | migrate) "step_$1" ;;
-  *) sed -n '2,9p' "$0" >&2; exit 2 ;;
+  env | vapid | check | shrink | backup | migrate) "step_$1" ;;
+  *) sed -n '2,10p' "$0" >&2; exit 2 ;;
 esac

@@ -11,7 +11,7 @@ const { movie, movieVote, tgChat, tgChatMember, voteEvent } = schema;
 // movie_vote.vote values
 export const VOTE_VALUES = { super: 3, like: 2, neutral: 1, dislike: 0 } as const;
 export type VoteName = keyof typeof VOTE_VALUES;
-type VoteValue = (typeof VOTE_VALUES)[VoteName];
+export type VoteValue = (typeof VOTE_VALUES)[VoteName];
 
 // movie counter column per vote value
 const COUNTERS = ['dislikes', 'neutral', 'likes', 'super'] as const;

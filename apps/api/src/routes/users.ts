@@ -67,7 +67,7 @@ function phpTrim(s: string): string {
 export const userRoutes =
   (deps: ResolvedDeps): FastifyPluginAsync =>
   async (app) => {
-    const { db, events } = deps;
+    const { db, events, push } = deps;
 
     // UserController::searchUsers — GET /api/users/search/?q=
     app.get('/users/search', async (request) => {
@@ -171,6 +171,10 @@ export const userRoutes =
         movie: { id: movieId, super: superCount, likes, neutral, dislikes },
         flags,
       });
+      // followers get a Web Push (docs/push.md); in the background, it never fails or delays the vote
+      if (outcome.vote !== null) {
+        void push.notify({ type: 'friend-vote', userId: viewer.id, movieId, vote: outcome.vote });
+      }
       return { success: true, data: outcome.result };
     });
 

@@ -25,6 +25,11 @@ const envSchema = z.object({
   // Optional: key for signing the OAuth state cookie and account-link proofs. Derived from the OAuth secrets
   // when empty, as the PHP AccountLinkProof did, so no new secret is needed.
   AUTH_SECRET: z.string().default(''),
+  // Web Push VAPID keys (`npx web-push generate-vapid-keys`, docs/push.md) and the contact the push services
+  // see (mailto: or https:). Push notifications are off unless all three are set.
+  WEB_PUSH_PUBLIC_KEY: z.string().default(''),
+  WEB_PUSH_PRIVATE_KEY: z.string().default(''),
+  WEB_PUSH_SUBJECT: z.string().default(''),
 });
 
 export type Config = ReturnType<typeof loadConfig>;
@@ -50,6 +55,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
       createHash('sha256')
         .update(`flicktips-auth|${parsed.VKONTAKTE_API_SECRET}|${parsed.YANDEX_CLIENT_SECRET}`)
         .digest('hex'),
+    webPush:
+      parsed.WEB_PUSH_PUBLIC_KEY && parsed.WEB_PUSH_PRIVATE_KEY && parsed.WEB_PUSH_SUBJECT
+        ? {
+            publicKey: parsed.WEB_PUSH_PUBLIC_KEY,
+            privateKey: parsed.WEB_PUSH_PRIVATE_KEY,
+            subject: parsed.WEB_PUSH_SUBJECT,
+          }
+        : null,
+    webPushPublicKey: parsed.WEB_PUSH_PUBLIC_KEY || null,
     oauth: {
       vkontakte: { clientId: parsed.VKONTAKTE_API_KEY, secret: parsed.VKONTAKTE_API_SECRET },
       yandex: { clientId: parsed.YANDEX_CLIENT_ID, secret: parsed.YANDEX_CLIENT_SECRET },

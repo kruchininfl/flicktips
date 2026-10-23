@@ -18,6 +18,9 @@ import type {
   MergeAccountResponse,
   PagedResponse,
   PersonResponse,
+  PushKeyResponse,
+  PushStatusResponse,
+  PushSubscriptionJson,
   RecommendationsResponse,
   SearchResponse,
   SitemapIndexResponse,
@@ -122,6 +125,23 @@ export function createApi(fetchJson: Transport) {
           fetchJson<{ success: true }>(`/api/me/telegram/groups/${id(chatId)}`, { method: 'DELETE' }),
         unlink: () => fetchJson<{ success: true }>('/api/me/telegram', { method: 'DELETE' }),
       },
+      // Web Push subscriptions of this browser (apps/api/docs/push.md)
+      push: {
+        status: (endpoint: string) =>
+          fetchJson<PushStatusResponse>('/api/me/push', { query: { endpoint }, signInOn401: false }),
+        subscribe: (subscription: PushSubscriptionJson) =>
+          fetchJson<PushStatusResponse>('/api/me/push/subscriptions', { method: 'POST', body: { subscription } }),
+        unsubscribe: (endpoint: string) =>
+          fetchJson<PushStatusResponse>('/api/me/push/subscriptions', {
+            method: 'DELETE',
+            body: { endpoint },
+            signInOn401: false,
+          }),
+      },
+    },
+    push: {
+      // the VAPID public key; null when the server sends no push notifications
+      key: () => fetchJson<PushKeyResponse>('/api/push/key', { signInOn401: false }),
     },
     // ids for /sitemaps/*.xml (app/sitemaps); use publicServerApi, these are the same for every visitor
     sitemap: {

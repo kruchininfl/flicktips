@@ -1,0 +1,11 @@
+{
+  "extends": "@flicktips/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2023", "webworker"],
+    "types": [],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true
+  },
+  "include": ["./*.ts", "../lib/pwa.ts"]
+}

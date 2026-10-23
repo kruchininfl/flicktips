@@ -20,5 +20,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // pages only: not the API (proxied in dev), Next.js internals or static files
-  matcher: ['/((?!api/|auth/|_next/|public/|poster/|favicon\\.ico).*)'],
+  matcher: ['/((?!api/|auth/|_next/|public/|poster/|serwist/|favicon\\.ico|manifest\\.webmanifest|offline\\.html).*)'],
 };

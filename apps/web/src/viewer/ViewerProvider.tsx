@@ -8,6 +8,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import type { ViewerProfile } from '@flicktips/shared';
 
 import { api } from '@/api/browser';
+import { forgetBrowserPush } from '@/components/pwa/push-client';
 
 interface ViewerContextValue {
   viewer: ViewerProfile | null;
@@ -49,6 +50,8 @@ export function ViewerProvider({
     try {
       await api.auth.logout();
     } finally {
+      // this browser's push subscription belonged to the session that just ended
+      void forgetBrowserPush();
       setViewer(null);
       router.refresh();
     }

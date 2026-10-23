@@ -149,6 +149,29 @@ updates at once. Server-sent vote updates (the legacy socket `vote-changed`) fee
 Relative times (`timeAgo`, `formatVoteTime`) depend on "now": render them in a client component with
 `suppressHydrationWarning` on the element, as `MovieVotes` and `MoviePreview` do.
 
+## PWA (replaces the Cordova app)
+
+- `app/manifest.ts` -> `/manifest.webmanifest` (name, colors, `display: standalone`, `start_url`/`scope` `/`). Icons
+  are the legacy `public/public/android-chrome-*.png`; `maskable-{192,512}.png` are the same logo scaled to 70 % on
+  the tile color `#333b41` (made once with sharp). The legacy `public/public/site.webmanifest` is no longer linked.
+- Service worker: Serwist with Turbopack (`@serwist/turbopack`, its documented setup since `@serwist/next` needs
+  webpack). `src/sw/sw.ts` is bundled by esbuild inside the static route `app/serwist/[path]/route.ts`, so
+  `next build` prerenders `/serwist/sw.js` and the standalone server just serves it (`Service-Worker-Allowed: /`,
+  `Cache-Control: no-cache`). `src/components/pwa/PwaProvider` registers it (not in `next dev`). The worker has its
+  own tsconfig (`src/sw/tsconfig.json`, WebWorker lib; `pnpm typecheck` runs both).
+- Caching rules (see the header of `src/sw/sw.ts`): precache `/_next/static`, `/offline.html` and a few images;
+  page navigations network-first, but a page is stored only if its response is explicitly public, and every page
+  renders per viewer with `private, no-store`, so no page (and no `/api` answer) is ever cached or shown to another
+  user; offline -> `public/offline.html` (static, viewer-independent). `/api/*` (including the `/api/events` SSE
+  stream) and `/auth/*` are never cached; `/auth` navigations reuse the navigation-preload response, so the OAuth
+  start is requested exactly once (one state cookie). Same-origin images (`/poster/kp/*`, `/public/*`):
+  stale-while-revalidate.
+- Web Push: the toggle «Уведомления» on `/profile/accounts/` (`pwa/PushToggle`, existing `accounts__*` classes and
+  `Toggler`) appears only where push works (service worker + Push API + Notification; iOS Safari only in an app
+  added to the home screen) and when the API has VAPID keys. API side and setup: `apps/api/docs/push.md`.
+- nginx (when the site moves to v2): `/serwist/*`, `/manifest.webmanifest` and `/offline.html` must go to Next.js,
+  and nothing may cache `/serwist/sw.js`.
+
 ## Checklist for a page
 
 1. Read the legacy page, its partitions, its `asyncConnect` calls and its Helmet tags.

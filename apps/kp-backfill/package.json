@@ -1,0 +1,30 @@
+{
+  "name": "@flicktips/kp-backfill",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CLI that matches movies without kp_id to Kinopoisk by title and year (dry run by default)",
+  "type": "module",
+  "bin": {
+    "kp-backfill": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@flicktips/db": "workspace:*",
+    "@flicktips/kinopoisk": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "mysql2": "3.24.6"
+  },
+  "devDependencies": {
+    "@flicktips/config": "workspace:*",
+    "@types/node": "22.20.5",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}

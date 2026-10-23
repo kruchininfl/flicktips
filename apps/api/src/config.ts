@@ -10,6 +10,8 @@ const envSchema = z.object({
   DB_USER: z.string().default(''),
   DB_PASSWORD: z.string().default(''),
   DB_NAME: z.string().optional(),
+  KP_API_KEY: z.string().default(''),
+  TELEGRAM_BOT_USERNAME: z.string().default('FlickTipsBot'),
 });
 
 export type Config = ReturnType<typeof loadConfig>;
@@ -27,5 +29,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
       password: parsed.DB_PASSWORD,
       database: parsed.DB_NAME ?? (parsed.APP_ENV === 'dev' ? 'flicktips_test' : 'flicktips'),
     },
+    kpApiKey: parsed.KP_API_KEY,
+    telegramBotUsername: parsed.TELEGRAM_BOT_USERNAME,
   };
 }

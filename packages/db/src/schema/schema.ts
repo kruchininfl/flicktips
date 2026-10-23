@@ -157,7 +157,7 @@ export const movie = mysqlTable(
   'movie',
   {
     id: int().autoincrement().notNull(),
-    tmdbId: varchar('tmdb_id', { length: 50 }).notNull(),
+    tmdbId: varchar('tmdb_id', { length: 50 }), // nullable since migrations/001
     type: varchar({ length: 50 }),
     title: longtext(),
     originalTitle: longtext('original_title'),
@@ -176,11 +176,11 @@ export const movie = mysqlTable(
     kpOverview: longtext('kp_overview'),
     kpDuration: int('kp_duration'),
     // you can use { mode: 'date' }, if you want to have Date as type for this column
-    kpReleaseDate: date('kp_release_date', { mode: 'string' }).default('0000-00-00'),
+    kpReleaseDate: date('kp_release_date', { mode: 'string' }).$defaultFn(() => sql`NULL`), // DB default '0000-00-00' fails under strict sql_mode
     // you can use { mode: 'date' }, if you want to have Date as type for this column
-    kpReleaseDateDvd: date('kp_release_date_dvd', { mode: 'string' }).default('0000-00-00'),
+    kpReleaseDateDvd: date('kp_release_date_dvd', { mode: 'string' }).$defaultFn(() => sql`NULL`), // DB default '0000-00-00' fails under strict sql_mode
     // you can use { mode: 'date' }, if you want to have Date as type for this column
-    kpReleaseDateRus: date('kp_release_date_rus', { mode: 'string' }).default('0000-00-00'),
+    kpReleaseDateRus: date('kp_release_date_rus', { mode: 'string' }).$defaultFn(() => sql`NULL`), // DB default '0000-00-00' fails under strict sql_mode
     kpRatingValue: float('kp_rating_value'),
     kpRatingCount: int('kp_rating_count'),
     imdbId: varchar('imdb_id', { length: 50 }),

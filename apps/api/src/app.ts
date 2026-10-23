@@ -1,18 +1,39 @@
-import type { HealthResponse } from '@flicktips/shared';
-import Fastify, { type FastifyServerOptions } from 'fastify';
+import cookie from '@fastify/cookie';
+import Fastify, { type FastifyError, type FastifyServerOptions } from 'fastify';
 
-export interface AppDeps {
-  // Returns true when the database answers; injected so tests run without MySQL.
-  pingDb: () => Promise<boolean>;
+import { legacyTokenResolver, type ViewerResolver } from './auth/viewer.js';
+import type { AppDeps } from './deps.js';
+import { HttpError } from './lib/errors.js';
+import { healthRoutes } from './routes/health.js';
+
+export interface BuildAppOptions extends FastifyServerOptions {
+  resolveViewer?: ViewerResolver;
 }
 
-export function buildApp(deps: AppDeps, options: FastifyServerOptions = {}) {
+export function buildApp(deps: AppDeps, { resolveViewer, ...options }: BuildAppOptions = {}) {
   const app = Fastify(options);
+  const viewerOf = resolveViewer ?? legacyTokenResolver(deps);
 
-  app.get('/api/health', async (): Promise<HealthResponse> => {
-    const up = await deps.pingDb().catch(() => false);
-    return { status: 'ok', db: up ? 'up' : 'down' };
+  app.register(cookie);
+
+  app.decorateRequest('viewer', null);
+  app.addHook('onRequest', async (request) => {
+    request.viewer = await viewerOf(request);
   });
+
+  app.setErrorHandler<FastifyError>((error, request, reply) => {
+    if (error instanceof HttpError) {
+      return reply.status(error.statusCode).send(error.body);
+    }
+    if (error.validation) {
+      return reply.status(400).send({ success: false, msg: error.message });
+    }
+    request.log.error(error);
+    return reply.status(500).send({ success: false, msg: 'Internal Server Error' });
+  });
+
+  // Route modules: one file per area under src/routes, each a plugin taking the deps.
+  app.register(healthRoutes(deps), { prefix: '/api' });
 
   return app;
 }

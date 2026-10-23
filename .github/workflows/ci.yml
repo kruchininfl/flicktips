@@ -16,6 +16,21 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      # throwaway databases for the integration tests (packages/db/src/testing.ts)
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ptest" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_PORT: 3306
+      TEST_DB_USER: root
+      TEST_DB_PASSWORD: test
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

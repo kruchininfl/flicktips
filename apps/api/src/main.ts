@@ -1,13 +1,17 @@
 import { createDb } from '@flicktips/db';
+import { KinopoiskClient } from '@flicktips/kinopoisk';
 
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 
 const config = loadConfig();
-const { pool } = createDb(config.db);
+const { db, pool } = createDb(config.db);
 
 const app = buildApp(
   {
+    db,
+    kp: new KinopoiskClient({ apiKey: config.kpApiKey }),
+    config,
     pingDb: async () => {
       await pool.query('SELECT 1');
       return true;

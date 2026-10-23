@@ -93,3 +93,19 @@ only the data differs. The generated Drizzle schema therefore applies to product
 - Dates and timestamps are generated with `mode: 'string'`, `bigint` columns with `mode: 'number'`.
 
 After a re-introspection the manual fixes above have to be applied again.
+
+## v2 changes to the generated schema
+
+- `movie.tmdb_id` is nullable in `schema.ts` to match `migrations/001` (movies found only on Кинопоиск).
+- `kp_release_date*` use `$defaultFn(() => sql\`NULL\`)`: an insert that omits them would otherwise send `DEFAULT`
+(`'0000-00-00'`), which strict `sql_mode` rejects.
+- `v2.ts` holds the tables the v2 migrations add (`session`). Re-apply these edits after a new `drizzle-kit pull`.
+
+## Migrations and tests
+
+`migrations/*.sql` are applied by hand, in name order, first to `flicktips_test`, then to `flicktips`. Tests
+(`src/testing.ts`) build a throwaway database from `test/legacy-schema.sql` (DDL generated from the legacy
+schema) plus every migration, on the MySQL server named by `TEST_DB_HOST`/`TEST_DB_PORT`/`TEST_DB_USER`/
+`TEST_DB_PASSWORD` (CI runs a `mysql:8.4` service). Locally:
+`docker run -d -e MYSQL_ROOT_PASSWORD=test -p 3307:3306 mysql:8.4`, then
+`TEST_DB_HOST=127.0.0.1 TEST_DB_PORT=3307 TEST_DB_PASSWORD=test pnpm test`.

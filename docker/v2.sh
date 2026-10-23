@@ -131,7 +131,8 @@ cmd_prune() {
       keep+=("$tag")
     done
   done
-  docker images --format '{{.Repository}}:{{.Tag}}' | grep "^$PREFIX" | while read -r ref; do
+  # grep exits 1 when there is no flicktips2 image yet (first deploy); pipefail would turn that into a failure
+  docker images --format '{{.Repository}}:{{.Tag}}' | { grep "^$PREFIX" || true; } | while read -r ref; do
     tag="${ref##*:}"
     for t in ${keep[@]+"${keep[@]}"}; do
       [[ "$tag" == "$t" || "$tag" == "test-$t" || "$tag" == "prod-$t" ]] && continue 2

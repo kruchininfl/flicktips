@@ -1,0 +1,60 @@
+@use 'base' as *;
+
+@media screen and (min-width: 768px) {
+  .movie-prev-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+    gap: 28px 18px;
+    padding: 4px 0 24px;
+
+    .movie-prev {
+      // a grid item defaults to min-width: auto, and a wrapping flex column sizes its line to the content,
+      // so either one lets a long nowrap title stretch the card past its column
+      min-width: 0;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 10px;
+      padding: 0;
+      border-bottom: none;
+    }
+    .movie-cover.movie-cover__prev {
+      width: 100%;
+      border-radius: $radius;
+      transition: box-shadow 350ms $ease-out;
+
+      .movie-cover-inn {
+        transition:
+          transform 500ms $ease-out,
+          filter 300ms;
+      }
+    }
+    .movie-prev__friends-votes {
+      left: 8px;
+      bottom: 8px;
+      max-width: calc(100% - 16px);
+    }
+    .movie-prev__content {
+      gap: 3px;
+
+      .movie-title {
+        font-size: 14px;
+      }
+    }
+    .movie-prev__votes {
+      padding-top: 6px;
+    }
+
+    .movie-prev__link:hover {
+      & ~ .movie-cover {
+        box-shadow:
+          $shadow-lg,
+          0 0 0 1px $color-glass-line;
+
+        .movie-cover-inn {
+          transform: scale(1.04);
+          filter: brightness(108%);
+        }
+      }
+    }
+  }
+}

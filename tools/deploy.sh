@@ -85,6 +85,9 @@ for svc in "${services[@]}"; do
   fi
   if [[ "$svc" == api ]]; then
     docker buildx build --platform linux/amd64 --push ${cache[@]+"${cache[@]}"} -t "$PREFIX$svc:$TAG" -f api/Dockerfile .
+  elif [[ "$svc" == tg-bot ]]; then
+    # apps/tg-bot is a pnpm workspace package: built from the repo root
+    docker buildx build --platform linux/amd64 --push ${cache[@]+"${cache[@]}"} -t "$PREFIX$svc:$TAG" -f apps/tg-bot/Dockerfile .
   else
     docker buildx build --platform linux/amd64 --push ${cache[@]+"${cache[@]}"} -t "$PREFIX$svc:$TAG" "./$svc"
   fi

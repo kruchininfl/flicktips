@@ -1,0 +1,126 @@
+@use 'base' as *;
+@use 'movie';
+
+.movie-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin: 0 0 8px;
+  padding: 16px;
+  border-radius: $radius-lg;
+  background: $color-surface;
+  isolation: isolate;
+
+  &:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba($color-bg, 0.92) 0%, rgba($color-bg, 0.6) 55%, rgba($color-bg, 0.2) 100%);
+  }
+}
+.movie-hero__bg {
+  position: absolute;
+  inset: -40px;
+  z-index: -2;
+  background: {
+    size: cover;
+    position: 50% 30%;
+  }
+  filter: blur(28px) saturate(140%);
+  opacity: 0.85;
+}
+.movie-hero__link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  font-size: 0;
+}
+.movie-cover.movie-hero__cover {
+  float: none;
+  flex: none;
+  width: 104px;
+  border-radius: $radius;
+  box-shadow: $shadow-lg;
+}
+.movie-hero__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+
+  .movie-user-votes,
+  .movie-votes {
+    position: relative;
+    z-index: 2;
+  }
+}
+.movie-hero__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-accent;
+}
+.movie-hero__title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.movie-hero__meta {
+  font-size: 13px;
+  color: $color-text-soft;
+}
+.movie-user-votes.movie-hero__voters {
+  gap: 14px;
+  margin-top: 6px;
+}
+.movie-hero__votes {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 6px;
+}
+
+@media screen and (max-width: 767px) {
+  .movie-hero {
+    margin: 8px 10px;
+    align-items: flex-start;
+  }
+  .movie-user-votes.movie-hero__voters {
+    display: none;
+  }
+}
+@media screen and (min-width: 768px) {
+  .movie-user-votes.movie-hero__voters-compact {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .movie-hero {
+    min-height: 280px;
+    gap: 28px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+  .movie-cover.movie-hero__cover {
+    width: 170px;
+  }
+  .movie-hero__title {
+    font-size: 32px;
+  }
+  .movie-hero__label {
+    font-size: 12px;
+  }
+  .movie-hero__body {
+    gap: 8px;
+  }
+}

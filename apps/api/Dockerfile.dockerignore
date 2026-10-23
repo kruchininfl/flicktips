@@ -1,0 +1,12 @@
+# Used by BuildKit for `docker build -f apps/api/Dockerfile .` (repo root context)
+**/node_modules
+**/dist
+**/.turbo
+**/.next
+**/*.tsbuildinfo
+**/kp-backfill-out
+.git
+.env
+.env.*
+!.env.example
+data

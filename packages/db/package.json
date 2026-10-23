@@ -1,0 +1,36 @@
+{
+  "name": "@flicktips/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drizzle schema of the existing FlickTips MySQL database and the connection pool",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "introspect": "drizzle-kit pull",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "mysql2": "3.24.6"
+  },
+  "devDependencies": {
+    "@flicktips/config": "workspace:*",
+    "@types/node": "22.20.5",
+    "drizzle-kit": "0.31.11",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}

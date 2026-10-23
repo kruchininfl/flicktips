@@ -1,0 +1,84 @@
+# v2 deploy (apps/api, apps/web, apps/tg-bot; docker-compose.v2.yml): runs tools/deploy-v2.sh on a GitHub runner.
+# Images are built here for linux/amd64 and pushed to Docker Hub (infamoustill/flicktips2-*); the server only pulls
+# them (docker/v2.sh). Manual only (Actions → Deploy v2 → Run workflow), by the owner's rule: no push or schedule
+# triggers. Runbook: docs/v2-deploy.md. The legacy Deploy workflow (deploy.yml) is separate and unchanged.
+#
+# Secrets: the same as deploy.yml (DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS, DOCKERHUB_TOKEN; optional DEPLOY_HOST), plus
+# optional DEPLOY_V2_PATH (default /var/www/flicktips-v2). The target directory and its .env must exist on the
+# server before the first run.
+name: Deploy v2
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Where to deploy: test (side by side with production, on the test domain) or prod'
+        type: choice
+        options:
+          - test
+          - prod
+        default: test
+      test_site_url:
+        description: 'Public URL of the test target (must match SITE_URL in its .env); ignored for prod'
+        required: false
+        default: 'https://dev.flicktips.ru'
+      rollback:
+        description: 'Roll the target back to V2_PREV_TAG instead of deploying'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-v2-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf 'Host *\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n' > ~/.ssh/config
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/config ~/.ssh/known_hosts
+
+      - uses: docker/setup-buildx-action@v3
+        if: ${{ !inputs.rollback }}
+
+      # Exposes the cache service token to tools/deploy-v2.sh for --cache-to type=gha.
+      - uses: crazy-max/ghaction-github-runtime@v3
+        if: ${{ !inputs.rollback }}
+
+      - uses: docker/login-action@v3
+        if: ${{ !inputs.rollback }}
+        with:
+          username: infamoustill
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy
+        if: ${{ !inputs.rollback }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_V2_PATH: ${{ secrets.DEPLOY_V2_PATH }}
+          V2_TEST_SITE_URL: ${{ inputs.test_site_url }}
+          BUILDX_CACHE: gha
+          TARGET: ${{ inputs.target }}
+        # empty DEPLOY_HOST / DEPLOY_V2_PATH fall back to the defaults in tools/deploy-v2.sh
+        run: tools/deploy-v2.sh "$TARGET"
+
+      - name: Roll back
+        if: ${{ inputs.rollback }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_V2_PATH: ${{ secrets.DEPLOY_V2_PATH }}
+          V2_TEST_SITE_URL: ${{ inputs.test_site_url }}
+          TARGET: ${{ inputs.target }}
+        run: tools/deploy-v2.sh "$TARGET" --rollback

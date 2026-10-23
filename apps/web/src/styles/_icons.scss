@@ -1,0 +1,17 @@
+// The legacy icon font (web/public/icons) is replaced by inline SVG glyphs (components/gui/Icon.tsx). The `.icn`
+// element keeps the box the font gave it, so the legacy rules that size and color icons work unchanged.
+.icn {
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  > svg {
+    display: inline-block;
+    height: 1em;
+    fill: currentColor;
+    // the font's baseline sat 6.25% of the em above the bottom of the glyph
+    vertical-align: -0.0625em;
+  }
+}

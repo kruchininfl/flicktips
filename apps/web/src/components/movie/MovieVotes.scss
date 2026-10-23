@@ -1,0 +1,94 @@
+@use 'base' as *;
+
+.movie-user-votes {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.movie-user-votes__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  text-decoration: none;
+  color: $color-text-soft;
+}
+.userpic.movie-user-votes__item-photo {
+  width: 40px;
+  height: 40px;
+  transition: box-shadow 200ms;
+
+  .movie-user-votes__item:hover & {
+    box-shadow: 0 0 0 2px $color-accent;
+  }
+}
+.movie-user-votes__item-vote {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: $color-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .vote-icn {
+    width: 14px;
+    height: 14px;
+  }
+}
+.movie-user-votes__item-name {
+  font-size: 11px;
+  font-weight: 600;
+  max-width: 56px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.movie-user-votes__more {
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-muted;
+}
+
+// Compact variant over a poster: overlapping userpics, names hidden
+.movie-user-votes.m-compact {
+  @include glass();
+  padding: 3px 8px 3px 3px;
+  border-radius: 999px;
+  gap: 0;
+
+  .movie-user-votes__item {
+    margin-right: -6px;
+
+    &:last-of-type {
+      margin-right: 6px;
+    }
+  }
+  .userpic.movie-user-votes__item-photo {
+    width: 24px;
+    height: 24px;
+    border-width: 1px;
+  }
+  .movie-user-votes__item-vote {
+    width: 15px;
+    height: 15px;
+    right: -4px;
+    bottom: -3px;
+
+    .vote-icn {
+      width: 11px;
+      height: 11px;
+    }
+  }
+  .movie-user-votes__item-name {
+    display: none;
+  }
+  .movie-user-votes__more {
+    font-size: 11px;
+    color: $color-text-soft;
+  }
+}

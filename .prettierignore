@@ -1,0 +1,11 @@
+# Prettier only formats the v2 workspace
+/*
+!/apps
+!/packages
+!/package.json
+!/turbo.json
+!/pnpm-workspace.yaml
+**/dist
+**/.next
+**/next-env.d.ts
+**/kp-backfill-out*

@@ -1,0 +1,13 @@
+// The legacy page stylesheets, global and in the order web/src/routes.js imported the pages (the order the
+// legacy single CSS bundle had them, after App.scss). Ported pages add theirs here, not in page.tsx.
+@use 'sass:meta';
+
+@include meta.load-css('pages/last-graded-page');
+@include meta.load-css('pages/layout-page');
+// Profile.scss (ends with ProfileTablets), UserSearch.scss, ProfileAccounts.scss
+@include meta.load-css('pages/profile');
+@include meta.load-css('pages/user-search');
+@include meta.load-css('pages/profile-accounts');
+@include meta.load-css('pages/movie-page');
+@include meta.load-css('pages/person-page');
+@include meta.load-css('pages/invite-page');

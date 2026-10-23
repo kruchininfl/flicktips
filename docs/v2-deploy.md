@@ -139,6 +139,9 @@ together with the same token; a test target uses its own bot from @BotFather or 
    fine; a subscription made on the test domain only works there anyway).
 5. **OAuth redirect URLs** (see "OAuth" below): add the test domain's to VK ID and Yandex ID.
 
+Steps 3 and 4 for the test target, plus the backup and migrations below, are scripted for the Mac:
+`tools/v2-test-setup.sh env|vapid|check|backup|migrate` (idempotent; secrets stay on the server).
+
 ## Database migrations (manual, backup first)
 
 `packages/db/migrations/001-v2-tmdb-optional-and-sessions.sql` (`movie.tmdb_id` nullable, `session` table) and

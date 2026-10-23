@@ -5,6 +5,6 @@
 // TODO(batch A): LastGradedPage.scss with MovieHero/FriendsVote/SidebarPanel
 @include meta.load-css('pages/layout-page');
 // TODO: Profile.scss, ProfileAccounts.scss, ProfileTablets.scss, UserSearch.scss (batches C, D)
-// TODO: MoviePage.scss, MoviePageTablets.scss (batch B)
-// TODO: PersonPage.scss, PersonPageTablets.scss (batch B)
+@include meta.load-css('pages/movie-page');
+@include meta.load-css('pages/person-page');
 // TODO: InvitePage.scss (batch D)

@@ -35,6 +35,8 @@ interface ModalProps {
   onRequestClose?: () => void;
   // react-modal's default; only works with onRequestClose
   shouldCloseOnOverlayClick?: boolean;
+  // appended to the content's class like in react-modal; the default inline styles are dropped then
+  className?: string;
   contentLabel?: string;
   children?: ReactNode;
 }
@@ -46,6 +48,7 @@ export function Modal({
   isOpen,
   onRequestClose,
   shouldCloseOnOverlayClick = true,
+  className,
   contentLabel,
   children,
 }: ModalProps) {
@@ -89,8 +92,12 @@ export function Modal({
         onClick={onOverlayClick}
       >
         <div
-          className={'ReactModal__Content' + (afterOpen ? ' ReactModal__Content--after-open' : '')}
-          style={CONTENT_STYLE}
+          className={
+            'ReactModal__Content' +
+            (afterOpen ? ' ReactModal__Content--after-open' : '') +
+            (className ? ' ' + className : '')
+          }
+          style={className ? undefined : CONTENT_STYLE}
           tabIndex={-1}
           role="dialog"
           aria-modal="true"

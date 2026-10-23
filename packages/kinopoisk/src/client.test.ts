@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { KinopoiskClient, KinopoiskError } from './client.js';
-import { bestMatch, titleSimilarity } from './match.js';
+import { bestMatch, normalizeTitle, titleNumbers, titleSimilarity } from './match.js';
 import type { KpFilmListItem } from './types.js';
 
 const json = (body: unknown, status = 200) =>
@@ -68,9 +68,43 @@ describe('bestMatch', () => {
     expect(bestMatch({ titles: ['Друзья'], kind: 'tv' }, items)?.kinopoiskId).toBe(5);
   });
 
+  it('prefers the closest year among equally similar titles', () => {
+    const items = [
+      item({ kinopoiskId: 10, nameRu: 'Брат', year: 1999 }),
+      item({ kinopoiskId: 11, nameRu: 'Брат', year: 1997 }),
+      item({ kinopoiskId: 12, nameRu: 'Брат', year: 1998 }),
+    ];
+    expect(bestMatch({ titles: ['Брат'], year: 1997 }, items)).toEqual({ kinopoiskId: 11, similarity: 1 });
+    // without a year the search order decides
+    expect(bestMatch({ titles: ['Брат'] }, items)?.kinopoiskId).toBe(10);
+  });
+
+  it('does not take a sequel for the film', () => {
+    const items = [item({ kinopoiskId: 13, nameRu: 'Матрица 4', year: 2021 })];
+    expect(bestMatch({ titles: ['Матрица'], year: 2021 }, items)).toBeNull();
+  });
+
   it('scores similar titles between 0 and 1', () => {
     expect(titleSimilarity('Ёлки', 'Елки')).toBe(1);
     expect(titleSimilarity('Матрица', 'Матрица: Перезагрузка')).toBeGreaterThan(0.4);
     expect(titleSimilarity('Матрица', 'Аватар')).toBeLessThan(0.3);
+  });
+
+  it('ignores punctuation, ellipses, quotes and dashes', () => {
+    expect(titleSimilarity('Прощай, любимая', 'Прощай, любимая...')).toBe(1);
+    expect(titleSimilarity('Прощай, любимая', 'Прощай, любимая…')).toBe(1);
+    expect(titleSimilarity('«Ирония судьбы»', '"Ирония судьбы"')).toBe(1);
+    expect(titleSimilarity('Spider-Man: No Way Home', 'Spider Man — No Way Home')).toBe(1);
+    expect(titleSimilarity("Ocean's Eleven", 'Ocean’s Eleven')).toBe(1);
+    expect(normalizeTitle('  Ёжик  в тумане!? ')).toBe('ежик в тумане');
+  });
+
+  it('keeps titles with different numbers apart', () => {
+    expect(titleSimilarity('Матрица', 'Матрица 4')).toBeLessThan(0.8);
+    expect(titleSimilarity('Брат 2', 'Брат 3')).toBeLessThan(0.8);
+    expect(titleSimilarity('Rocky II', 'Rocky 2')).toBe(1);
+    expect(titleNumbers('Терминатор 2: Судный день 1991')).toBe('2,1991');
+    // not a numeral: "constructor" is not looked up on Object.prototype
+    expect(normalizeTitle('constructor')).toBe('constructor');
   });
 });

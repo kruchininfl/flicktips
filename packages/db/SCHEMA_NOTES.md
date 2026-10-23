@@ -106,6 +106,7 @@ After a re-introspection the manual fixes above have to be applied again.
 `migrations/*.sql` are applied by hand, in name order, first to `flicktips_test`, then to `flicktips`. Tests
 (`src/testing.ts`) build a throwaway database from `test/legacy-schema.sql` (DDL generated from the legacy
 schema) plus every migration, on the MySQL server named by `TEST_DB_HOST`/`TEST_DB_PORT`/`TEST_DB_USER`/
-`TEST_DB_PASSWORD` (CI runs a `mysql:8.4` service). Locally:
+`TEST_DB_PASSWORD` (CI runs a `mysql:8.4` service). A migration containing the line `-- status: pending` is
+written but not applied in production yet, and the test databases skip it; delete that line when it is applied. Locally:
 `docker run -d -e MYSQL_ROOT_PASSWORD=test -p 3307:3306 mysql:8.4`, then
 `TEST_DB_HOST=127.0.0.1 TEST_DB_PORT=3307 TEST_DB_PASSWORD=test pnpm test`.

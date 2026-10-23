@@ -28,6 +28,9 @@ export function testDbServer() {
   };
 }
 
+// A migration with this line is skipped (remove it once the migration is applied in production)
+export const PENDING = /^-- status: pending\b/m;
+
 async function sqlStatements(file: string): Promise<string[]> {
   const text = await readFile(file, 'utf8');
   return text
@@ -58,6 +61,8 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     }
     const migrations = (await readdir(`${packageRoot}/migrations`)).filter((f) => f.endsWith('.sql')).sort();
     for (const file of migrations) {
+      // written but not applied in production yet: test databases stay like production
+      if (PENDING.test(await readFile(`${packageRoot}/migrations/${file}`, 'utf8'))) continue;
       for (const statement of await sqlStatements(`${packageRoot}/migrations/${file}`)) {
         await admin.query(statement);
       }

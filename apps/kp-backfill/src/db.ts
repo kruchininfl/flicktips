@@ -1,9 +1,10 @@
-// The SQL this tool runs. Reads go through Drizzle; the only write is applyKpId().
+// The SQL of match, apply-report and duplicates. Reads go through Drizzle; the only write here is applyKpId()
+// (dedupe-apply has its own, in dedupe.ts).
 import { schema, type Db } from '@flicktips/db';
 import { and, asc, count, gt, inArray, isNotNull, isNull, lte, type SQL } from 'drizzle-orm';
 import type { Pool, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
-import type { MovieRow } from './classify.js';
+import { movieYear, yearOf, type MovieRow } from './classify.js';
 
 const { movie } = schema;
 
@@ -120,8 +121,11 @@ export interface DuplicateMovie {
   type: string | null;
   title: string | null;
   originalTitle: string | null;
-  year: string | null;
+  year: number | null;
+  // what kp-parser stored from the Кинопоиск film (the same film for every movie of a group, unless it changed)
   kpTitle: string | null;
+  kpOriginalTitle: string | null;
+  kpYear: number | null;
   suspend: number;
   votes: number;
   bookmarks: number;
@@ -137,15 +141,15 @@ export interface DuplicateGroup {
   // since movie_vote and bookmark are unique per (movie, user)
   sharedVoters: number;
   sharedBookmarkers: number;
-  suggestKeep: number;
 }
 
 const DUP_KP_IDS = 'SELECT kp_id FROM movie WHERE kp_id IS NOT NULL GROUP BY kp_id HAVING COUNT(*) > 1';
 
 export async function findDuplicates(pool: Pool): Promise<DuplicateGroup[]> {
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT m.kp_id, m.id, m.tmdb_id, m.type, m.title, m.original_title,
-       LEFT(COALESCE(NULLIF(m.release_date, ''), m.first_air_date), 4) AS year, m.kp_title, m.suspend,
+    `SELECT m.kp_id, m.id, m.tmdb_id, m.type, m.title, m.original_title, m.release_date, m.first_air_date,
+       m.kp_title, m.kp_original_title, CAST(m.kp_start_year AS CHAR) AS kp_start_year,
+       CAST(m.kp_release_date AS CHAR) AS kp_release_date, m.suspend,
        m.likes + m.super + m.neutral + m.dislikes AS counters,
        (SELECT COUNT(*) FROM movie_vote v WHERE v.movie_id = m.id) AS votes,
        (SELECT COUNT(*) FROM bookmark b WHERE b.movie_id = m.id) AS bookmarks,
@@ -177,19 +181,21 @@ export async function findDuplicates(pool: Pool): Promise<DuplicateGroup[]> {
         movies: [],
         sharedVoters: sharedVotes.get(kpId) ?? 0,
         sharedBookmarkers: sharedBookmarks.get(kpId) ?? 0,
-        suggestKeep: 0,
       };
       groups.set(kpId, g);
     }
+    const type = r.type ?? null;
     g.movies.push({
       kpId,
       id: Number(r.id),
       tmdbId: r.tmdb_id ?? null,
-      type: r.type ?? null,
+      type,
       title: r.title ?? null,
       originalTitle: r.original_title ?? null,
-      year: r.year ?? null,
+      year: movieYear(type, r.release_date ?? null, r.first_air_date ?? null),
       kpTitle: r.kp_title ?? null,
+      kpOriginalTitle: r.kp_original_title ?? null,
+      kpYear: yearOf(r.kp_start_year ?? null) ?? yearOf(r.kp_release_date ?? null),
       suspend: Number(r.suspend),
       votes: Number(r.votes),
       bookmarks: Number(r.bookmarks),
@@ -197,16 +203,5 @@ export async function findDuplicates(pool: Pool): Promise<DuplicateGroup[]> {
       counters: Number(r.counters),
     });
   }
-  for (const g of groups.values()) g.suggestKeep = suggestKeep(g.movies);
   return [...groups.values()];
-}
-
-// Only a hint for the human deciding the merge: the most used movie, then one that is not suspended and has a
-// TMDb id, then the oldest.
-export function suggestKeep(movies: DuplicateMovie[]): number {
-  const score = (m: DuplicateMovie) => m.votes + m.bookmarks + m.tgPosts;
-  const sorted = [...movies].sort(
-    (a, b) => score(b) - score(a) || a.suspend - b.suspend || Number(!!b.tmdbId) - Number(!!a.tmdbId) || a.id - b.id,
-  );
-  return sorted[0]?.id ?? 0;
 }

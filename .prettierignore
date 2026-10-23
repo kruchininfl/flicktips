@@ -8,4 +8,4 @@
 **/dist
 **/.next
 **/next-env.d.ts
-**/kp-backfill-out
+**/kp-backfill-out*

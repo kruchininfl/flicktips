@@ -7,4 +7,4 @@
 // TODO: Profile.scss, ProfileAccounts.scss, ProfileTablets.scss, UserSearch.scss (batches C, D)
 // TODO: MoviePage.scss, MoviePageTablets.scss (batch B)
 // TODO: PersonPage.scss, PersonPageTablets.scss (batch B)
-// TODO: InvitePage.scss (batch D)
+@include meta.load-css('pages/invite-page');

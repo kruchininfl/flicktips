@@ -64,6 +64,37 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(sass@1.106.1)(tsx@4.23.15))
 
+  apps/kp-backfill:
+    dependencies:
+      '@flicktips/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@flicktips/kinopoisk':
+        specifier: workspace:*
+        version: link:../../packages/kinopoisk
+      drizzle-orm:
+        specifier: 0.45.4
+        version: 0.45.4(mysql2@3.24.6(@types/node@22.20.5))
+      mysql2:
+        specifier: 3.24.6
+        version: 3.24.6(@types/node@22.20.5)
+    devDependencies:
+      '@flicktips/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 5.0.5
+        version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(sass@1.106.1)(tsx@4.23.15))
+
   apps/web:
     dependencies:
       '@flicktips/shared':

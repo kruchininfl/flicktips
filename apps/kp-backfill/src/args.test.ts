@@ -9,22 +9,30 @@ describe('parseCli', () => {
     const cli = parseCli([]);
     expect(cli.command).toBe('match');
     if (cli.command === 'help') throw new Error('unreachable');
-    expect(cli.match).toMatchObject({ apply: false, includeErrored: false, batchSize: 100, concurrency: 2 });
+    // every movie with kp_id NULL has kp_error='not_found' in production, so they are included by default
+    expect(cli.match).toMatchObject({ apply: false, includeErrored: true, batchSize: 100, concurrency: 2 });
     expect(cli.rps).toBe(4);
   });
 
   it('reads the options', () => {
-    const cli = parseCli(['match', '--apply', '--include-errored', '--ids', '3,1', '--limit', '10', '--rps', '2.5']);
+    const cli = parseCli(['match', '--apply', '--skip-errored', '--ids', '3,1', '--limit', '10', '--rps', '2.5']);
     if (cli.command === 'help') throw new Error('unreachable');
-    expect(cli.match).toMatchObject({ apply: true, includeErrored: true, ids: [3, 1], limit: 10 });
+    expect(cli.match).toMatchObject({ apply: true, includeErrored: false, ids: [3, 1], limit: 10 });
     expect(cli.rps).toBe(2.5);
+    const legacy = parseCli(['match', '--include-errored']);
+    expect(legacy.command !== 'help' && legacy.match.includeErrored).toBe(true);
     expect(parseCli(['duplicates', '--out-dir', '/tmp/x']).command).toBe('duplicates');
+    expect(parseCli(['dedupe-plan', '--fetch-kp'])).toMatchObject({ command: 'dedupe-plan', fetchKp: true });
+    expect(parseCli(['dedupe-apply', 'plan.jsonl'])).toMatchObject({ command: 'dedupe-apply', file: 'plan.jsonl' });
   });
 
   it('rejects bad input', () => {
     expect(() => parseCli(['nope'])).toThrow(ConfigError);
     expect(() => parseCli(['--batch-size', '0'])).toThrow(ConfigError);
     expect(() => parseCli(['--unknown'])).toThrow(ConfigError);
+    expect(() => parseCli(['dedupe-apply'])).toThrow(/plan .jsonl/);
+    expect(() => parseCli(['match', '--skip-errored', '--include-errored'])).toThrow(ConfigError);
+    expect(() => parseCli(['match', '--fetch-kp'])).toThrow(/fetch-kp/);
   });
 });
 

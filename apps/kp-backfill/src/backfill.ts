@@ -176,7 +176,8 @@ export async function runMatch(opts: MatchOptions, deps: MatchDeps): Promise<Mat
       ) {
         throw new Error(
           `${checkpointPath} belongs to another run (${saved.host}/${saved.database}, includeErrored=${saved.includeErrored}); ` +
-            'use another --out-dir or --restart',
+            'use another --out-dir or --restart (a checkpoint with includeErrored=false was made before kp_error rows ' +
+            'became the default: --skip-errored resumes it)',
         );
       }
       cursor = saved.cursor;

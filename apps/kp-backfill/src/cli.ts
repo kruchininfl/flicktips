@@ -6,6 +6,7 @@ import { KinopoiskClient } from '@flicktips/kinopoisk';
 import { runApplyReport } from './apply-report.js';
 import { parseCli, USAGE } from './args.js';
 import { runMatch } from './backfill.js';
+import { runDedupeApply, runDedupePlan } from './dedupe.js';
 import { runDuplicates } from './duplicates.js';
 import { ConfigError, dbConfigFromEnv, describeDb, kpApiKeyFromEnv } from './env.js';
 import { rateLimiter } from './rate-limit.js';
@@ -18,14 +19,38 @@ async function main(argv: string[]): Promise<number> {
   }
   const log = (line: string) => console.error(`[${new Date().toISOString().slice(11, 19)}] ${line}`);
   const dbConfig = dbConfigFromEnv();
-  const apiKey = cli.command === 'match' ? kpApiKeyFromEnv() : '';
+  const apiKey = cli.command === 'match' || cli.fetchKp ? kpApiKeyFromEnv() : '';
   log(`database ${describeDb(dbConfig)}`);
   const { db, pool } = createDb(dbConfig);
   try {
+    // duplicates / dedupe-plan --fetch-kp
+    const fetch = cli.fetchKp
+      ? {
+          client: new KinopoiskClient({ apiKey, concurrency: 1 }),
+          maxRequests: cli.match.maxRequests,
+          beforeRequest: rateLimiter(cli.rps),
+        }
+      : undefined;
     if (cli.command === 'duplicates') {
-      const s = await runDuplicates({ outDir: cli.outDir, log }, { pool });
+      const s = await runDuplicates({ outDir: cli.outDir, database: dbConfig.database, fetch, log }, { pool });
       log(`report: ${s.reportCsv}, ${s.reportJsonl}`);
       return 0;
+    }
+    if (cli.command === 'dedupe-plan') {
+      log('dedupe-plan: read-only, no database writes');
+      const s = await runDedupePlan({ outDir: cli.outDir, database: dbConfig.database, fetch, log }, { pool });
+      log(`plan: ${s.planCsv}, ${s.planJsonl}`);
+      return 0;
+    }
+    if (cli.command === 'dedupe-apply') {
+      log('APPLY: kp_id will be cleared on the auto_safe and approved groups of the plan');
+      const s = await runDedupeApply(
+        { file: cli.file as string, outDir: cli.outDir, database: dbConfig.database, log },
+        { pool },
+      );
+      log(`totals: ${JSON.stringify(s.totals)}; ${s.cleared} kp_ids cleared`);
+      log(`report: ${s.reportCsv}, ${s.reportJsonl}`);
+      return s.totals.error ? 1 : 0;
     }
     if (cli.command === 'apply-report') {
       log('APPLY: kp_id will be written for the confident matches of the report');

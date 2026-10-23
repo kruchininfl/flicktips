@@ -65,18 +65,23 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   runnerUpMargin: 0.05,
 };
 
-const TV_TYPES = ['TV_SERIES', 'MINI_SERIES', 'TV_SHOW'];
+export const TV_TYPES = ['TV_SERIES', 'MINI_SERIES', 'TV_SHOW'];
 
-function cleanTitle(title: string | null): string | null {
+export function cleanTitle(title: string | null): string | null {
   // TMDb-era titles sometimes carry the kp-parser hint " (сериал)", which Кинопоиск search does not match
   const t = title?.replace(/\s*\(сериал\)\s*$/i, '').trim();
   return t ? t : null;
 }
 
-function yearOf(date: string | null): number | null {
+export function yearOf(date: string | null): number | null {
   const m = /^(\d{4})/.exec(date ?? '');
   const year = m ? Number(m[1]) : NaN;
   return year >= 1870 && year <= 2100 ? year : null;
+}
+
+// A series is dated by its first air date, a film by its release date; either falls back to the other.
+export function movieYear(type: string | null, releaseDate: string | null, firstAirDate: string | null): number | null {
+  return type === 'tv' ? (yearOf(firstAirDate) ?? yearOf(releaseDate)) : (yearOf(releaseDate) ?? yearOf(firstAirDate));
 }
 
 // The search query for a movie row: original title first (as kp-parser did), then the Russian title.
@@ -86,11 +91,7 @@ export function movieQuery(m: MovieRow): MovieQuery {
   for (const t of [cleanTitle(m.originalTitle), cleanTitle(m.title)]) {
     if (t && !titles.some((x) => x.toLowerCase() === t.toLowerCase())) titles.push(t);
   }
-  const year =
-    kind === 'tv'
-      ? (yearOf(m.firstAirDate) ?? yearOf(m.releaseDate))
-      : (yearOf(m.releaseDate) ?? yearOf(m.firstAirDate));
-  return { titles, year, kind, imdbId: m.imdbId?.trim() || null };
+  return { titles, year: movieYear(m.type, m.releaseDate, m.firstAirDate), kind, imdbId: m.imdbId?.trim() || null };
 }
 
 function kindOk(kind: MovieQuery['kind'], type: string): boolean {
@@ -127,8 +128,16 @@ function scoreCandidate(query: MovieQuery, item: KpFilmListItem): Candidate {
   };
 }
 
-// "Матрица" and "Матрица 4" are 0.92 similar: titles whose numbers differ are sequels, not spelling variants
-const numbers = (s: string) => (s.match(/\d+/g) ?? []).map(Number).join(',');
+// The movie and the Кинопоиск title are the same and so is the year, but one is a film and the other a series
+// (TMDb and Кинопоиск disagree about mini-series and TV films). Never confident: a human decides.
+function isKindMismatch(kind: MovieQuery['kind'], c: Candidate): boolean {
+  if (c.similarity < 1 || c.yearDiff !== 0) return false;
+  if (kind === 'movie') return c.type === 'MINI_SERIES' || c.type === 'TV_SERIES';
+  if (kind === 'tv') return c.type === 'FILM';
+  return false;
+}
+
+export const KIND_MISMATCH = 'kind_mismatch';
 
 const fmt = (c: Candidate) => `${c.kinopoiskId} "${c.name}" (${c.year ?? '?'}, ${c.type})`;
 
@@ -162,6 +171,15 @@ export function classify(
   }
 
   const match = bestMatch(query, items, thresholds.minSimilarity);
+  const kindMismatch = scored.find((c) => isKindMismatch(query.kind, c));
+  if (kindMismatch && !candidates.includes(kindMismatch)) candidates.push(kindMismatch);
+  if (!match && kindMismatch) {
+    return result('ambiguous', kindMismatch, [
+      KIND_MISMATCH,
+      `same title and year but ${fmt(kindMismatch)} is not a ${query.kind === 'tv' ? 'series' : 'film'} ` +
+        `(movie type ${query.kind})`,
+    ]);
+  }
   if (!match) {
     const reasons = [`${items.length} results, none with title similarity >= ${thresholds.minSimilarity}`];
     const top = scored[0];
@@ -175,12 +193,8 @@ export function classify(
     return result('not_found', null, reasons);
   }
 
-  // bestMatch keeps the first of equally similar candidates; among those, take the one closest in year
-  const picked = scored.find((c) => c.kinopoiskId === match.kinopoiskId) as Candidate;
-  const yearRank = (c: Candidate) => c.yearDiff ?? 3;
-  const best = scored
-    .filter((c) => c.eligible && c.similarity === picked.similarity)
-    .reduce((a, c) => (yearRank(c) < yearRank(a) ? c : a), picked);
+  // bestMatch prefers the closest year among equally similar candidates
+  const best = scored.find((c) => c.kinopoiskId === match.kinopoiskId) as Candidate;
   const reasons = [`best: ${fmt(best)} similarity ${best.similarity}`];
   const blockers: string[] = [];
 
@@ -195,9 +209,6 @@ export function classify(
     else if (best.yearDiff === 1 && best.similarity < thresholds.exactSimilarity) {
       blockers.push(`year differs by 1 and similarity ${best.similarity} < ${thresholds.exactSimilarity}`);
     }
-  }
-  if (numbers(best.matchedTitle) !== numbers(best.name)) {
-    blockers.push(`numbers in the titles differ: "${best.matchedTitle}" vs "${best.name}"`);
   }
   if (best.similarity < thresholds.confidentSimilarity) {
     blockers.push(`similarity ${best.similarity} < ${thresholds.confidentSimilarity}`);
@@ -214,6 +225,9 @@ export function classify(
   );
   if (rivals.length)
     blockers.push(`${rivals.length} other close candidate(s): ${rivals.slice(0, 3).map(fmt).join('; ')}`);
+  // an exact title of the other kind in the same year, while the picked one of the right kind is not confident
+  if (blockers.length && kindMismatch)
+    blockers.push(`${KIND_MISMATCH}: also ${fmt(kindMismatch)}, same title and year`);
 
   return result(blockers.length ? 'ambiguous' : 'confident', best, [...reasons, ...blockers]);
 }

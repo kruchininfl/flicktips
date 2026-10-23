@@ -63,7 +63,7 @@ describe('classify', () => {
 
   it('accepts a year off by one only for an (almost) exact title', () => {
     expect(classify({ ...q, year: 1999 }, [truman]).status).toBe('confident');
-    const near = kpItem({ kinopoiskId: 9, nameRu: 'Шоу Трумана!', year: 1997 });
+    const near = kpItem({ kinopoiskId: 9, nameRu: 'Шоу Трумана и', year: 1997 });
     const c = classify({ ...q, titles: ['Шоу Трумана'] }, [near]);
     expect(c.similarity).toBeGreaterThanOrEqual(0.8);
     expect(c.similarity).toBeLessThan(0.97);
@@ -91,11 +91,58 @@ describe('classify', () => {
     expect(c.reasons.join('\n')).toMatch(/similarity .* < 0.9/);
   });
 
-  it('is ambiguous when the titles differ by a number (sequels)', () => {
+  it('does not take a sequel for the film (titles that differ by a number)', () => {
     const c = classify({ ...q, titles: ['Матрица'] }, [kpItem({ kinopoiskId: 5, nameRu: 'Матрица 4', year: 1998 })]);
-    expect(c.similarity).toBeGreaterThanOrEqual(0.9);
-    expect(c.status).toBe('ambiguous');
-    expect(c.reasons.join('\n')).toContain('numbers in the titles differ');
+    expect(c.status).toBe('not_found');
+    expect(c.candidates[0]?.similarity).toBeLessThan(0.8);
+  });
+
+  it('ignores punctuation and ellipses in titles', () => {
+    const c = classify({ ...q, titles: ['Прощай, любимая'] }, [
+      kpItem({ kinopoiskId: 11, nameRu: 'Прощай, любимая...', year: 1998 }),
+    ]);
+    expect(c).toMatchObject({ status: 'confident', kpId: 11, similarity: 1 });
+  });
+
+  it('prefers the namesake closest in year', () => {
+    const brat = (kinopoiskId: number, year: number) => kpItem({ kinopoiskId, nameRu: 'Брат', year });
+    const c = classify({ ...q, titles: ['Брат'], year: 1997 }, [brat(1, 1998), brat(41520, 1997), brat(3, 1999)]);
+    expect(c.kpId).toBe(41520);
+  });
+
+  describe('kind_mismatch', () => {
+    const mini = kpItem({
+      kinopoiskId: 60,
+      nameRu: 'Чернобыль',
+      nameOriginal: 'Chernobyl',
+      year: 2019,
+      type: 'MINI_SERIES',
+    });
+    const movieQ = { titles: ['Chernobyl', 'Чернобыль'], year: 2019, kind: 'movie' as const, imdbId: null };
+
+    it('a film that Кинопоиск has as a mini-series of the same title and year is ambiguous, not confident', () => {
+      const c = classify(movieQ, [mini]);
+      expect(c).toMatchObject({ status: 'ambiguous', kpId: 60, reasons: ['kind_mismatch', expect.any(String)] });
+      expect(c.candidates.map((x) => x.kinopoiskId)).toContain(60);
+      expect(classify(movieQ, [{ ...mini, type: 'TV_SERIES' }]).reasons[0]).toBe('kind_mismatch');
+    });
+
+    it('a series that Кинопоиск has as a film', () => {
+      const film = { ...mini, type: 'FILM' as const };
+      expect(classify({ ...movieQ, kind: 'tv' }, [film])).toMatchObject({ status: 'ambiguous', kpId: 60 });
+    });
+
+    it('needs the exact title and the same year', () => {
+      expect(classify({ ...movieQ, year: 2020 }, [mini]).status).toBe('not_found');
+      expect(classify({ ...movieQ, titles: ['Chernobyl Diaries'] }, [mini]).status).toBe('not_found');
+      // TV_SHOW is not a film/series confusion
+      expect(classify(movieQ, [{ ...mini, type: 'TV_SHOW' }]).status).toBe('not_found');
+    });
+
+    it('a film of the right kind and the same name still wins', () => {
+      const film = { ...mini, kinopoiskId: 61, type: 'FILM' as const };
+      expect(classify(movieQ, [mini, film])).toMatchObject({ status: 'confident', kpId: 61 });
+    });
   });
 
   it('is ambiguous when two films of the same name and year exist', () => {
@@ -112,7 +159,8 @@ describe('classify', () => {
   });
 
   it('respects the movie kind and reports what was filtered out', () => {
-    const series = kpItem({ kinopoiskId: 6, nameRu: 'Друзья', nameOriginal: 'Friends', year: 1994, type: 'TV_SERIES' });
+    const series = kpItem({ kinopoiskId: 6, nameRu: 'Друзья', nameOriginal: 'Friends', year: 1995, type: 'TV_SERIES' });
+    // (the same year would be a kind_mismatch, below)
     const movieQ = { titles: ['Friends'], year: 1994, kind: 'movie' as const, imdbId: null };
     const c = classify(movieQ, [series]);
     expect(c.status).toBe('not_found');

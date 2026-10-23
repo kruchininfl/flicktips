@@ -67,7 +67,8 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
         ) AND movie_vote.timestamp > ${user.lastSeenNotifications}
       )`,
       hide_viewed: user.hideViewed,
-      votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${user.id})`,
+      // the bound id, not ${user.id}: unqualified `id` inside the subquery would be movie_vote.id
+      votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${id})`,
     })
     .from(user)
     .where(eq(user.id, id))

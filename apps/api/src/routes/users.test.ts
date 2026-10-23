@@ -378,6 +378,7 @@ describe.skipIf(!hasTestDb)('user routes', () => {
 
       const profile = await inject(ctx, 'PATCH', '/api/me', me.headers, {});
       expect(profile.json().data.new_notifications).toBe(1);
+      expect(profile.json().data.votes_count).toBe(1);
 
       const res = await inject(ctx, 'GET', '/api/me/friends/votes?size=1', me.headers);
       const body = res.json();

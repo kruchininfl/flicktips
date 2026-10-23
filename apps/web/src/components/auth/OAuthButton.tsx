@@ -1,29 +1,29 @@
 'use client';
 
+import { IconBrandVk, IconBrandYandex, IconLoader2 } from '@tabler/icons-react';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import type { LoginService } from '@flicktips/shared';
 
-import { Button } from '@/components/gui/Button';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { signInUrl } from '@/viewer/urls';
 
-const CLASS_ALIASES: Record<LoginService, 'vk' | 'ya'> = { vkontakte: 'vk', yandex: 'ya' };
+const ICONS = { vkontakte: IconBrandVk, yandex: IconBrandYandex };
 
 interface OAuthButtonProps {
   provider: LoginService;
   // where the API sends the browser back after signing in
   next: string;
-  // link the account to the signed-in user instead of signing in (profile accounts page)
-  link?: boolean;
-  disabled?: boolean;
   className?: string;
   children: ReactNode;
 }
 
 // A sign-in button: a plain link to /auth/<provider>?next=… (the OAuth flow needs a full-page navigation).
-export function OAuthButton({ provider, next, link = false, disabled = false, className, children }: OAuthButtonProps) {
+// Яндекс is the primary button of the Figma «Вход», VK the outlined one.
+export function OAuthButton({ provider, next, className, children }: OAuthButtonProps) {
   const [loading, setLoading] = useState(false);
-  const alias = CLASS_ALIASES[provider];
+  const ProviderIcon = loading ? IconLoader2 : ICONS[provider];
 
   // coming back with the browser's Back button restores the page from the bfcache with the spinner on
   useEffect(() => {
@@ -33,15 +33,11 @@ export function OAuthButton({ provider, next, link = false, disabled = false, cl
   }, []);
 
   return (
-    <Button
-      href={disabled ? undefined : signInUrl(provider, next, link)}
-      loading={loading}
-      disabled={disabled}
-      onClick={() => setLoading(true)}
-      className={`p-signin__btn p-signin__btn_${alias}${className ? ' ' + className : ''}`}
-      icn={`soc_${alias}`}
-    >
-      {children}
+    <Button variant={provider === 'yandex' ? 'primary' : 'outline'} className={cn('w-full', className)} asChild>
+      <a href={signInUrl(provider, next)} onClick={() => setLoading(true)} aria-busy={loading}>
+        <ProviderIcon className={cn(loading && 'animate-spin')} />
+        {children}
+      </a>
     </Button>
   );
 }

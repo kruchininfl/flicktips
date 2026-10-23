@@ -4,7 +4,7 @@ import { IconBrandTelegram, IconBrandVk, IconBrandWhatsapp, IconCheck, IconCopy 
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { openVkShare } from '@/components/invite/VkShareButton';
+import { openVkShare } from './vk';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 

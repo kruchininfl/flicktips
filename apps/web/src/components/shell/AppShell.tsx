@@ -23,16 +23,28 @@ import { MobileHeader, TopBar } from './TopBar';
 // Pages already redrawn for the new design. The rest keep the legacy markup and styles inside a dark panel
 // until they are ported (stage 2 of the redesign); drop this when the list covers every page. `legacy` keeps the
 // redesign's base styles off the old markup (styles/globals.css).
-const REDESIGNED = ['/', '/layout', '/movie/*', '/user/*', '/profile/bookmarks', '/profile/friends', '/telegram'];
+const REDESIGNED = [
+  '/',
+  '/layout',
+  '/movie/*',
+  '/user/*',
+  '/profile/bookmarks',
+  '/profile/friends',
+  '/telegram',
+  '/about',
+];
 
-const isRedesigned = (pathname: string) => {
+// Full-screen pages without the sidebar and the header (Figma «Вход», «Инвайт»)
+const BARE = ['/signin', '/invite/*'];
+
+const matches = (pages: string[], pathname: string) => {
   const path = pathname.replace(/(.)\/+$/, '$1');
-  return REDESIGNED.some((page) => (page.endsWith('*') ? path.startsWith(page.slice(0, -1)) : path === page));
+  return pages.some((page) => (page.endsWith('*') ? path.startsWith(page.slice(0, -1)) : path === page));
 };
 
 function PageContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  if (isRedesigned(pathname)) return <>{children}</>;
+  if (matches(REDESIGNED, pathname)) return <>{children}</>;
   return (
     <div className="legacy legacy-content">
       <div className="container">{children}</div>
@@ -58,6 +70,29 @@ export function AppShell({ children, initialCollapsed }: { children: ReactNode; 
       return !value;
     });
   };
+
+  const extras = (
+    <>
+      <Suspense fallback={null}>
+        <SignInModal />
+      </Suspense>
+      <div className="legacy contents">
+        <HeaderSearch />
+        <PendingActions />
+      </div>
+      <LiveUpdates />
+      <Metrika />
+    </>
+  );
+
+  if (matches(BARE, pathname)) {
+    return (
+      <TooltipProvider>
+        <main>{children}</main>
+        {extras}
+      </TooltipProvider>
+    );
+  }
 
   return (
     <TooltipProvider>
@@ -91,15 +126,7 @@ export function AppShell({ children, initialCollapsed }: { children: ReactNode; 
           </SheetContent>
         </Sheet>
 
-        <div className="legacy contents">
-          <HeaderSearch />
-          <Suspense fallback={null}>
-            <SignInModal />
-          </Suspense>
-          <PendingActions />
-        </div>
-        <LiveUpdates />
-        <Metrika />
+        {extras}
       </div>
     </TooltipProvider>
   );

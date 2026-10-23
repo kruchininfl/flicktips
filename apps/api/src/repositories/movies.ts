@@ -485,9 +485,35 @@ export async function upsertKpFilms(db: Db, items: KpFilmListItem[]): Promise<nu
 
   for (const item of items) {
     if (existing.has(item.kinopoiskId)) continue;
-    existing.set(item.kinopoiskId, await insertKpFilm(db, item));
+    existing.set(item.kinopoiskId, await insertKpFilmOnce(db, item));
   }
   return kpIds.map((id) => existing.get(id)!);
+}
+
+// A concurrent search may insert the same film first; with the UNIQUE key on kp_id (migration 003) the
+// loser gets ER_DUP_ENTRY and takes the winner's row.
+async function insertKpFilmOnce(db: Db, item: KpFilmListItem): Promise<number> {
+  try {
+    return await insertKpFilm(db, item);
+  } catch (err) {
+    if (!isDuplicateKey(err)) throw err;
+    const [row] = await db
+      .select({ id: schema.movie.id })
+      .from(schema.movie)
+      .where(eq(schema.movie.kpId, item.kinopoiskId))
+      .orderBy(schema.movie.id)
+      .limit(1);
+    if (!row) throw err;
+    return row.id;
+  }
+}
+
+// mysql2 error, possibly wrapped by Drizzle (DrizzleQueryError.cause)
+function isDuplicateKey(err: unknown): boolean {
+  for (let e: unknown = err; e && typeof e === 'object'; e = (e as { cause?: unknown }).cause) {
+    if ((e as { code?: unknown }).code === 'ER_DUP_ENTRY') return true;
+  }
+  return false;
 }
 
 async function insertKpFilm(db: Db, item: KpFilmListItem): Promise<number> {

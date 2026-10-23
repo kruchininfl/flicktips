@@ -7,6 +7,7 @@ import { HttpError } from './lib/errors.js';
 import { healthRoutes } from './routes/health.js';
 import { telegramRoutes } from './routes/telegram.js';
 import { userRoutes } from './routes/users.js';
+import { indexControllerRoutes } from './routes/index-controller.js';
 
 export interface BuildAppOptions extends FastifyServerOptions {
   resolveViewer?: ViewerResolver;
@@ -38,6 +39,7 @@ export function buildApp(deps: AppDeps, { resolveViewer, ...options }: BuildAppO
   app.register(healthRoutes(deps), { prefix: '/api' });
   app.register(telegramRoutes(deps), { prefix: '/api' });
   app.register(userRoutes(deps), { prefix: '/api' });
+  app.register(indexControllerRoutes(deps), { prefix: '/api' });
 
   return app;
 }

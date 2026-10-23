@@ -21,8 +21,13 @@ async function follow(ctx: TestContext, from: number, to: number, subscribed = 1
   await ctx.t.db.insert(schema.userFriends).values({ user1: from, user2: to, subscribed });
 }
 
-const inject = (ctx: TestContext, method: 'GET' | 'POST' | 'PATCH', url: string, headers?: Headers, payload?: object) =>
-  ctx.app.inject({ method, url, headers, payload });
+const inject = (
+  ctx: TestContext,
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+  url: string,
+  headers?: Headers,
+  payload?: object,
+) => ctx.app.inject({ method, url, headers, payload });
 
 describe.skipIf(!hasTestDb)('user routes', () => {
   const ctx = useTestApp();
@@ -574,6 +579,7 @@ describe.skipIf(!hasTestDb)('user routes', () => {
           hide_viewed: true,
           votes_count: 0,
           friend_requests: 0,
+          nickname: null,
         },
       });
       const off = await inject(ctx, 'PATCH', '/api/me', me.headers, { data: { hide_viewed: 0 } });
@@ -582,6 +588,30 @@ describe.skipIf(!hasTestDb)('user routes', () => {
       expect(untouched.json().data.hide_viewed).toBe(false);
       expect((await inject(ctx, 'PATCH', '/api/me', me.headers, { data: { hide_viewed: 'x' } })).statusCode).toBe(400);
       expect((await inject(ctx, 'PATCH', '/api/me', undefined, { data: { hide_viewed: 1 } })).statusCode).toBe(401);
+    });
+
+    it('changes the name and the nickname, which opens /u/<nickname>', async () => {
+      const me = await signIn(ctx, { username: 'Старое имя' });
+      const other = await signIn(ctx);
+      const patch = (headers: typeof me.headers, data: Record<string, unknown>) =>
+        inject(ctx, 'PATCH', '/api/me', headers, { data });
+
+      const res = await patch(me.headers, { username: '  Новое имя ', nickname: 'Artem-K' });
+      expect(res.json().data).toMatchObject({ username: 'Новое имя', nickname: 'artem-k' });
+      expect((await inject(ctx, 'GET', '/api/users/by-nickname/ARTEM-K')).json()).toEqual({ success: true, id: me.id });
+      expect((await inject(ctx, 'GET', '/api/users/by-nickname/nobody')).statusCode).toBe(404);
+
+      // taken, malformed, reserved, empty name
+      expect((await patch(other.headers, { nickname: 'artem-k' })).statusCode).toBe(409);
+      for (const nickname of ['ab', '1abc', 'имя', 'with space', 'admin']) {
+        expect((await patch(other.headers, { nickname })).statusCode).toBe(400);
+      }
+      expect((await patch(me.headers, { username: '   ' })).statusCode).toBe(400);
+
+      // the same nickname again is fine; '' clears it
+      expect((await patch(me.headers, { nickname: 'artem-k' })).statusCode).toBe(200);
+      expect((await patch(me.headers, { nickname: '' })).json().data.nickname).toBeNull();
+      expect((await patch(other.headers, { nickname: 'artem-k' })).json().data.nickname).toBe('artem-k');
     });
   });
 
@@ -722,12 +752,22 @@ describe.skipIf(!hasTestDb)('user routes', () => {
 
   describe('GET /api/me/accounts', () => {
     it('lists the linked sign-in services', async () => {
-      const me = await signIn(ctx, { vkontakteId: `vk-${Math.random()}` });
+      const me = await signIn(ctx, { vkontakteId: `vk-${Math.random()}`, vkontakteAvatar: 'https://vk.test/a.jpg' });
       expect((await inject(ctx, 'GET', '/api/me/accounts', me.headers)).json()).toEqual({
         success: true,
         services: { vkontakte: true, yandex: false },
+        avatars: { vkontakte: 'https://vk.test/a.jpg', yandex: null },
       });
       expect((await inject(ctx, 'GET', '/api/me/accounts')).statusCode).toBe(401);
+    });
+
+    it('shows the photo of a linked account, or none', async () => {
+      const me = await signIn(ctx, { vkontakteId: `vk-${Math.random()}`, vkontakteAvatar: 'https://vk.test/b.jpg' });
+      const choose = (avatar: string) => inject(ctx, 'PATCH', '/api/me', me.headers, { data: { avatar } });
+      expect((await choose('vkontakte')).json().data.avatar).toBe('https://vk.test/b.jpg');
+      expect((await choose('yandex')).statusCode).toBe(400);
+      expect((await choose('none')).json().data.avatar).toBeNull();
+      expect((await choose('facebook')).statusCode).toBe(400);
     });
   });
 
@@ -751,5 +791,34 @@ describe.skipIf(!hasTestDb)('user routes', () => {
       expect(res.statusCode, `${method} ${url}`).toBe(401);
       expect(res.json()).toEqual({ success: false, msg: 'authorization required' });
     }
+  });
+});
+
+describe.skipIf(!hasTestDb)('DELETE /api/me', () => {
+  const ctx = useTestApp();
+
+  it('deletes the user with their votes, bookmarks and follows, and signs out', async () => {
+    const me = await signIn(ctx);
+    const friend = await signIn(ctx);
+    const movie = await addMovie(ctx, { likes: 3, super: 1 });
+    await ctx.t.db.insert(schema.movieVote).values({ movieId: movie, userId: me.id, vote: 2 });
+    await ctx.t.db.insert(schema.bookmark).values({ movieId: movie, userId: me.id });
+    await follow(ctx, me.id, friend.id);
+    await follow(ctx, friend.id, me.id);
+
+    expect((await inject(ctx, 'DELETE', '/api/me', me.headers, {})).statusCode).toBe(400);
+    const res = await inject(ctx, 'DELETE', '/api/me', me.headers, { confirm: 'delete' });
+    expect(res.json()).toEqual({ success: true });
+
+    const db = ctx.t.db;
+    expect(await db.select().from(schema.user).where(eq(schema.user.id, me.id))).toEqual([]);
+    expect(await db.select().from(schema.movieVote).where(eq(schema.movieVote.userId, me.id))).toEqual([]);
+    expect(await db.select().from(schema.bookmark).where(eq(schema.bookmark.userId, me.id))).toEqual([]);
+    expect(await db.select().from(schema.userFriends).where(eq(schema.userFriends.user2, me.id))).toEqual([]);
+    const [counters] = await db.select().from(schema.movie).where(eq(schema.movie.id, movie));
+    expect({ likes: counters!.likes, super: counters!.super }).toEqual({ likes: 2, super: 1 });
+    // the session is gone with the user
+    expect((await inject(ctx, 'GET', '/api/me', me.headers)).statusCode).toBe(401);
+    expect((await inject(ctx, 'DELETE', '/api/me', undefined, { confirm: 'delete' })).statusCode).toBe(401);
   });
 });

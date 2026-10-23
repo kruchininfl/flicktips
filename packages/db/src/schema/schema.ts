@@ -406,6 +406,10 @@ export const user = mysqlTable(
     inviteCode: varchar('invite_code', { length: 16 }),
     tgUserId: bigint('tg_user_id', { mode: 'number' }),
     tgUsername: varchar('tg_username', { length: 64 }),
+    // v2 migration 004: the short profile address /u/<nickname>, the photos of the linked sign-in accounts
+    nickname: varchar({ length: 32 }),
+    vkontakteAvatar: varchar('vkontakte_avatar', { length: 255 }),
+    yandexAvatar: varchar('yandex_avatar', { length: 255 }),
   },
   (table) => [
     index('idx_username').on(table.username),
@@ -415,6 +419,7 @@ export const user = mysqlTable(
     unique('oauth_service_yandex_id').on(table.yandexId),
     unique('invite_code_UNIQUE').on(table.inviteCode),
     unique('tg_user_id_UNIQUE').on(table.tgUserId),
+    unique('nickname_UNIQUE').on(table.nickname),
   ],
 );
 

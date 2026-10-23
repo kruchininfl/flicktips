@@ -8,6 +8,8 @@ import { alias } from 'drizzle-orm/mysql-core';
 import { phpCast } from '../lib/group-rows.js';
 import { pdoRows } from '../lib/pdo-rows.js';
 
+import { isDuplicateKey } from './movies.js';
+
 const { user, userFriends } = schema;
 
 // UserRepository::$safety_fields: what other people may see of a user.
@@ -33,6 +35,8 @@ export interface PublicUser {
 
 // The signed-in user as getByCredentials returned it (validateToken, updateUser).
 export interface ViewerProfile extends PublicUser {
+  // v2: the short profile address /u/<nickname>, set in the settings
+  nickname: string | null;
   new_notifications: number;
   hide_viewed: boolean;
   votes_count: number;
@@ -69,6 +73,7 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
   const [row] = await db
     .select({
       ...publicUserFields,
+      nickname: user.nickname,
       // drizzle renders ${user.id} as a bare `id`, which inside these subqueries means movie_vote.id: bind the id
       new_notifications: sql<string>`(
         SELECT COUNT(*) FROM movie_vote
@@ -372,6 +377,27 @@ export async function getLoginServices(db: Db, uid: number): Promise<Record<Logi
   return { vkontakte: !!row && row.vkontakte !== null, yandex: !!row && row.yandex !== null };
 }
 
+// v2 settings («Сменить фото»): the photo of each linked sign-in account, null when unknown or not linked
+export async function getServiceAvatars(db: Db, uid: number): Promise<Record<LoginService, string | null>> {
+  const [row] = await db
+    .select({ vkontakte: user.vkontakteAvatar, yandex: user.yandexAvatar })
+    .from(user)
+    .where(eq(user.id, uid))
+    .limit(1);
+  return { vkontakte: row?.vkontakte || null, yandex: row?.yandex || null };
+}
+
+// Shows the photo of a linked account, or none. False when that account has no photo.
+export async function chooseAvatar(db: Db, uid: number, choice: LoginService | 'none'): Promise<boolean> {
+  let photo: string | null = null;
+  if (choice !== 'none') {
+    photo = (await getServiceAvatars(db, uid))[choice];
+    if (!photo) return false;
+  }
+  await db.update(user).set({ avatarSource: photo }).where(eq(user.id, uid));
+  return true;
+}
+
 export interface ProfileStats {
   // votes per kind; the keys are VOTE_VALUES names
   votes: { super: number; like: number; neutral: number; dislike: number };
@@ -401,4 +427,43 @@ export async function getProfileStats(db: Db, uid: number): Promise<ProfileStats
     if (name) votes[name] = Number(row.num);
   }
   return { votes, friends: phpCast(friends?.num, 'int') };
+}
+
+// A nickname: 3–32 Latin letters, digits, «-» and «_», starting with a letter, stored lower-case.
+export const NICKNAME_RE = /^[a-z][a-z0-9_-]{2,31}$/;
+
+// Addresses a nickname must not shadow (/u/<nickname> is its own namespace, but the names would confuse)
+const RESERVED_NICKNAMES = new Set(['admin', 'api', 'flicktips', 'me', 'profile', 'settings', 'support', 'user']);
+
+export function isNicknameAllowed(nickname: string): boolean {
+  return NICKNAME_RE.test(nickname) && !RESERVED_NICKNAMES.has(nickname);
+}
+
+// The settings' «Имя» and «Ник». False when the nickname belongs to someone else.
+export async function updateProfile(
+  db: Db,
+  uid: number,
+  changes: { username?: string; nickname?: string | null },
+): Promise<boolean> {
+  if (changes.nickname) {
+    const [owner] = await db.select({ id: user.id }).from(user).where(eq(user.nickname, changes.nickname)).limit(1);
+    if (owner && owner.id !== uid) return false;
+  }
+  const set: Partial<typeof user.$inferInsert> = {};
+  if (changes.username !== undefined) set.username = changes.username;
+  if (changes.nickname !== undefined) set.nickname = changes.nickname;
+  if (!Object.keys(set).length) return true;
+  try {
+    await db.update(user).set(set).where(eq(user.id, uid));
+  } catch (error) {
+    // taken by someone else between the check and the update
+    if (isDuplicateKey(error)) return false;
+    throw error;
+  }
+  return true;
+}
+
+export async function findIdByNickname(db: Db, nickname: string): Promise<number | null> {
+  const [row] = await db.select({ id: user.id }).from(user).where(eq(user.nickname, nickname.toLowerCase())).limit(1);
+  return row?.id ?? null;
 }

@@ -115,6 +115,7 @@ describe.skipIf(!hasTestDb)('auth routes', () => {
     expect(created).toMatchObject({
       username: 'Иван Петров',
       avatarSource: 'https://vk.example/100.jpg',
+      vkontakteAvatar: 'https://vk.example/100.jpg',
       gender: 'male',
       avatar: '',
       yandexId: null,
@@ -147,6 +148,7 @@ describe.skipIf(!hasTestDb)('auth routes', () => {
         hide_viewed: false,
         votes_count: 0,
         friend_requests: 0,
+        nickname: null,
       },
     });
   });
@@ -394,7 +396,7 @@ describe.skipIf(!hasTestDb)('auth routes', () => {
         services: { vkontakte: true, yandex: true },
       });
       const accounts = await ctx.app.inject({ method: 'GET', url: '/api/me/accounts', headers });
-      expect(accounts.json()).toEqual({ success: true, services: { vkontakte: true, yandex: true } });
+      expect(accounts.json()).toMatchObject({ success: true, services: { vkontakte: true, yandex: true } });
 
       // linking the same account again is a no-op
       const again = await post('/api/me/accounts/link', headers, { proof });

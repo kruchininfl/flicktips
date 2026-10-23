@@ -205,6 +205,17 @@ export const authRoutes =
       return { success: true };
     });
 
+    // DELETE /api/me — v2 settings «Удалить аккаунт»: the user and all their data, then signs out. The body must
+    // say {confirm: 'delete'} so that a stray request cannot do it.
+    app.delete('/api/me', async (request, reply) => {
+      const viewer = requireViewer(request);
+      const { confirm } = (request.body ?? {}) as { confirm?: unknown };
+      if (confirm !== 'delete') throw badRequest('confirm: delete expected');
+      if (!(await accounts.deleteUser(db, viewer.id))) throw unauthorized();
+      clearSessionCookie(reply, config.env);
+      return { success: true };
+    });
+
     // GET /api/me — UserController::validateToken (GET /api/checkUser/): the signed-in user's profile
     app.get('/api/me', async (request) => {
       const viewer = requireViewer(request);
@@ -248,7 +259,7 @@ export const authRoutes =
           merge: await accounts.getMergeSummary(db, viewer.id, ownerId),
         };
       }
-      if (ownerId === null && !(await accounts.linkService(db, viewer.id, service, identity.id))) {
+      if (ownerId === null && !(await accounts.linkService(db, viewer.id, service, identity))) {
         throw new HttpError(409, 'another account of this service is already linked');
       }
       return { success: true, status: 'linked', service, services: await getLoginServices(db, viewer.id) };

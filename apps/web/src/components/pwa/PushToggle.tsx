@@ -1,13 +1,12 @@
 'use client';
 
-// «Уведомления» on /profile/accounts/: turns Web Push about the followed users' votes (the header bell's events,
-// apps/api/docs/push.md) on or off for this browser. Renders nothing where push cannot work: no service worker
-// (dev, old browsers), iOS Safari outside a home-screen app, or a server without VAPID keys. New in v2 (the
-// Cordova app had no notifications).
-import { useEffect, useState } from 'react';
+// «Уведомления» in the settings: turns Web Push about the followed users' votes (apps/api/docs/push.md) on or off
+// for this browser. Renders nothing where push cannot work: no service worker (dev, old browsers), iOS Safari
+// outside a home-screen app, or a server without VAPID keys. New in v2 (the Cordova app had no notifications).
+// The markup is the caller's (a render prop), the state and the switching are here.
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { api } from '@/api/browser';
-import { Toggler } from '@/components/gui/Toggler';
 
 import { getBrowserSubscription, isPushSupported, subscribePush, unsubscribePush } from './push-client';
 
@@ -15,7 +14,18 @@ type State =
   | { kind: 'hidden' }
   | { kind: 'ready'; publicKey: string; subscribed: boolean; denied: boolean; busy: boolean; error: boolean };
 
-export function PushToggle() {
+interface PushView {
+  status: string;
+  error: boolean;
+  switchProps: {
+    checked: boolean;
+    disabled: boolean;
+    onCheckedChange: () => void;
+    'aria-label': string;
+  };
+}
+
+export function PushToggle({ children }: { children: (view: PushView) => ReactNode }) {
   const [state, setState] = useState<State>({ kind: 'hidden' });
 
   useEffect(() => {
@@ -63,33 +73,20 @@ export function PushToggle() {
 
   const status = state.denied
     ? 'Запрещены в настройках браузера'
-    : state.subscribed
-      ? 'Включены на этом устройстве'
-      : 'Выключены';
+    : state.error
+      ? 'Не получилось, попробуйте ещё раз'
+      : state.subscribed
+        ? 'Когда друзья оценят фильм · на этом устройстве'
+        : 'Выключены на этом устройстве';
 
-  return (
-    <div className="accounts">
-      <div className="accounts__title">Уведомления</div>
-      <div className="accounts__hint">
-        Сообщим, когда люди, на которых вы подписаны, оценят фильм. Настройка действует только на этом устройстве.
-      </div>
-
-      {state.error ? <div className="accounts__notice m-error">Не получилось, попробуйте ещё раз.</div> : null}
-
-      <ul className="accounts__list">
-        <li className="accounts__item">
-          <span className="accounts__info">
-            <span className="accounts__name">Оценки друзей</span>
-            <span className={'accounts__status' + (state.subscribed ? ' m-linked' : '')}>{status}</span>
-          </span>
-          <Toggler
-            checked={state.subscribed}
-            disabled={state.busy || state.denied}
-            onChange={toggle}
-            title={state.subscribed ? 'Выключить уведомления' : 'Включить уведомления'}
-          />
-        </li>
-      </ul>
-    </div>
-  );
+  return children({
+    status,
+    error: state.error || state.denied,
+    switchProps: {
+      checked: state.subscribed,
+      disabled: state.busy || state.denied,
+      onCheckedChange: toggle,
+      'aria-label': state.subscribed ? 'Выключить уведомления' : 'Включить уведомления',
+    },
+  });
 }

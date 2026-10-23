@@ -2,8 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
-// Component styles first, then the global sheets: the legacy bundle had the partitions' CSS before App.scss and
-// the pages' CSS after it, and some equal-specificity rules rely on that order.
 import { PwaProvider } from '@/components/pwa/PwaProvider';
 import { AppShell } from '@/components/shell/AppShell';
 import { UiProvider } from '@/components/shell/UiProvider';
@@ -12,9 +10,8 @@ import { parseTheme, SIDEBAR_COOKIE, THEME_COOKIE } from '@/lib/theme';
 import { getViewer } from '@/viewer/server';
 import { ViewerProvider } from '@/viewer/ViewerProvider';
 
-// Tailwind and the tokens first: globals.css declares the cascade layers the legacy sheets go into
+// Tailwind, the tokens and the base styles
 import '@/styles/globals.css';
-import '@/styles/legacy.scss';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -61,9 +58,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font -- the redesign's fonts plus the legacy pages' ones */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font -- the design's fonts, for every page */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap"
           rel="stylesheet"
         />
       </head>

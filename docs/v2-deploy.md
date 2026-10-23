@@ -145,7 +145,8 @@ Steps 3 and 4 for the test target, plus the backup and migrations below, are scr
 ## Database migrations (manual, backup first)
 
 `packages/db/migrations/001-v2-tmdb-optional-and-sessions.sql` (`movie.tmdb_id` nullable, `session` table) and
-`002-push-subscriptions.sql` (`push_subscription` table). Both are compatible with the legacy PHP API and parsers,
+`002-push-subscriptions.sql` (`push_subscription` table), plus `004-user-profile.sql` (`user.nickname` and the
+per-account photos for the settings page; the API from the settings PR on reads them). All are compatible with the legacy PHP API and parsers,
 so they can be applied any time before the v2 target that uses the database starts, and stay applied after a
 rollback. Order: `flicktips_test` first, check, then `flicktips`.
 
@@ -163,13 +164,14 @@ mysqldump --single-transaction --quick "$DB" | gzip > "/root/$DB-$(date +%F).sql
 # 2. the migrations (files from the repo, e.g. scp'd to /tmp)
 mysql --init-command="SET SESSION sql_mode=''" "$DB" < 001-v2-tmdb-optional-and-sessions.sql
 mysql --init-command="SET SESSION sql_mode=''" "$DB" < 002-push-subscriptions.sql
+mysql --init-command="SET SESSION sql_mode=''" "$DB" < 004-user-profile.sql
 # 3. check
-mysql "$DB" -e "SHOW COLUMNS FROM movie LIKE 'tmdb_id'; SHOW TABLES LIKE 'session'; SHOW TABLES LIKE 'push_subscription';"
+mysql "$DB" -e "SHOW COLUMNS FROM movie LIKE 'tmdb_id'; SHOW TABLES LIKE 'session'; SHOW TABLES LIKE 'push_subscription'; SHOW COLUMNS FROM user LIKE 'nickname';"
 ```
 
 (Use the MySQL admin login you normally use on the host, e.g. `-u root -p`.) The `ALTER` rebuilds `movie` (~100k
-rows) online; parsers may keep running. Both files use `CREATE TABLE IF NOT EXISTS`, and re-running the `ALTER` is
-harmless.
+rows) online; parsers may keep running. 001 and 002 use `CREATE TABLE IF NOT EXISTS`, and re-running their `ALTER` is
+harmless; 004 fails on a second run (duplicate column), which is safe.
 
 `003-movie-kp-id-unique.sql` (UNIQUE `movie.kp_id`) is **not** part of the switchover: it is marked
 `status: pending` and has its own prerequisites (no duplicate `kp_id` left after `kp-backfill dedupe-*`, kp-parser

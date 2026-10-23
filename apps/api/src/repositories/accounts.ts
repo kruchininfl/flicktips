@@ -15,11 +15,14 @@ type Executor = Db | Parameters<Parameters<Db['transaction']>[0]>[0];
 // user.<service>_id columns and their Drizzle field names
 const serviceColumn = { vkontakte: user.vkontakteId, yandex: user.yandexId } as const;
 const serviceField = { vkontakte: 'vkontakteId', yandex: 'yandexId' } as const;
+// the photo of that account (migration 004)
+const avatarField = { vkontakte: 'vkontakteAvatar', yandex: 'yandexAvatar' } as const;
 
 /**
  * The user signing in with this provider account, created on first sign-in (OAuthUserProvider::createUser:
  * `INSERT … ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)` on the unique <service>_id column). As in PHP,
- * an existing user's name, avatar and gender are left alone. Returns the user id.
+ * an existing user's name, avatar and gender are left alone (only the account's own photo is refreshed). Returns
+ * the user id.
  */
 export async function findOrCreateUser(db: Executor, service: LoginService, identity: OAuthIdentity): Promise<number> {
   const [res] = await db
@@ -31,8 +34,10 @@ export async function findOrCreateUser(db: Executor, service: LoginService, iden
       gender: identity.gender,
       registrationDate: sql`NOW()` as unknown as string,
       [serviceField[service]]: identity.id,
+      [avatarField[service]]: identity.avatar,
     })
-    .onDuplicateKeyUpdate({ set: { id: sql`LAST_INSERT_ID(${user.id})` } });
+    // the account's current photo is kept for «Сменить фото»; the photo shown does not change
+    .onDuplicateKeyUpdate({ set: { id: sql`LAST_INSERT_ID(${user.id})`, [avatarField[service]]: identity.avatar } });
   return res.insertId;
 }
 
@@ -46,11 +51,11 @@ export async function linkService(
   db: Executor,
   uid: number,
   service: LoginService,
-  serviceId: string,
+  identity: Pick<OAuthIdentity, 'id' | 'avatar'>,
 ): Promise<boolean> {
   const [res] = await db
     .update(user)
-    .set({ [serviceField[service]]: serviceId })
+    .set({ [serviceField[service]]: identity.id, [avatarField[service]]: identity.avatar })
     .where(and(eq(user.id, uid), isNull(serviceColumn[service])));
   return res.affectedRows > 0;
 }
@@ -60,7 +65,7 @@ export async function unlinkService(db: Executor, uid: number, service: LoginSer
   const others = LOGIN_SERVICES.filter((s) => s !== service).map((s) => isNotNull(serviceColumn[s]));
   const [res] = await db
     .update(user)
-    .set({ [serviceField[service]]: null })
+    .set({ [serviceField[service]]: null, [avatarField[service]]: null })
     .where(and(eq(user.id, uid), or(...others)));
   return res.affectedRows > 0;
 }
@@ -187,8 +192,14 @@ export async function mergeInto(db: Db, uid: number, otherId: number): Promise<b
 
     // unique columns move over: clear them on the other user first (it is deleted)
     const take: Partial<typeof user.$inferInsert> = {};
-    if (mine.vkontakteId === null && theirs.vkontakteId !== null) take.vkontakteId = theirs.vkontakteId;
-    if (mine.yandexId === null && theirs.yandexId !== null) take.yandexId = theirs.yandexId;
+    if (mine.vkontakteId === null && theirs.vkontakteId !== null) {
+      take.vkontakteId = theirs.vkontakteId;
+      take.vkontakteAvatar = theirs.vkontakteAvatar;
+    }
+    if (mine.yandexId === null && theirs.yandexId !== null) {
+      take.yandexId = theirs.yandexId;
+      take.yandexAvatar = theirs.yandexAvatar;
+    }
     if (mine.tgUserId === null && theirs.tgUserId !== null) {
       take.tgUserId = theirs.tgUserId;
       take.tgUsername = theirs.tgUsername;
@@ -207,6 +218,36 @@ export async function mergeInto(db: Db, uid: number, otherId: number): Promise<b
       })
       .where(eq(user.id, uid));
 
+    return true;
+  });
+}
+
+/**
+ * Settings → «Удалить аккаунт»: the user and everything of theirs. Their votes leave the movie counters, follows
+ * both ways go, Telegram rows go (messages already posted in groups stay in Telegram), every session and push
+ * subscription is dropped. False when there is no such user.
+ */
+export async function deleteUser(db: Db, uid: number): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const [locked] = await tx.select({ id: user.id }).from(user).where(eq(user.id, uid)).for('update');
+    if (!locked) return false;
+
+    const columns = ['dislikes', 'neutral', 'likes', 'super'] as const;
+    for (const [index, column] of columns.entries()) {
+      await tx.execute(sql`UPDATE movie
+          INNER JOIN movie_vote ON movie_vote.movie_id = movie.id AND movie_vote.user_id = ${uid} AND movie_vote.vote = ${index}
+          SET movie.${sql.identifier(column)} = GREATEST(movie.${sql.identifier(column)} - 1, 0)`);
+    }
+    await tx.execute(sql`DELETE FROM movie_vote WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM bookmark WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM user_friends WHERE user_1 = ${uid} OR user_2 = ${uid}`);
+    await tx.execute(sql`DELETE FROM tg_chat_member WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM tg_post WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM tg_link_code WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM vote_event WHERE user_id = ${uid}`);
+    await tx.execute(sql`DELETE FROM push_subscription WHERE user_id = ${uid}`);
+    await revokeUserSessions(tx, uid);
+    await tx.delete(user).where(eq(user.id, uid));
     return true;
   });
 }

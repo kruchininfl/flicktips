@@ -1,0 +1,15 @@
+@use 'base' as *;
+
+@media screen and (min-width: 768px) {
+  .movie-vote-icn {
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+
+    > .vote-icn {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

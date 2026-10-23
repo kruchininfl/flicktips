@@ -30,7 +30,8 @@ in PRs to `master_v2`; `master` keeps running production until the switch.
   the legacy dirs above keep their own npm installs.
 - `apps/api` — Fastify 5 API replacing PHP `api/` (`src/app.ts` builds the app with injected
   deps, `src/main.ts` wires the DB; `pnpm --filter @flicktips/api dev`, port 3002).
-- `apps/web` — Next.js 16 (App Router, SSR) replacing `web/` (port 3001, `output: standalone`).
+- `apps/web` — Next.js 16 (App Router, SSR) replacing `web/` (port 3001, `output: standalone`); porting
+  conventions and the primitives map in `apps/web/PORTING.md`.
 - `packages/db` — Drizzle over the existing MySQL schema (`pnpm --filter @flicktips/db introspect`
   pulls from `flicktips_test`; never push/migrate with drizzle-kit). `packages/shared` — zod
   schemas and types shared by api and web. `packages/config` — tsconfig and ESLint flat config.

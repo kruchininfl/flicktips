@@ -9,13 +9,16 @@
     "dev": "next dev --port 3001",
     "start": "next start --port 3001",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@flicktips/shared": "workspace:*",
     "next": "16.4.2",
+    "qrcode.react": "4.2.0",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@flicktips/config": "workspace:*",
@@ -25,6 +28,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.2",
     "sass": "1.106.1",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
   }
 }

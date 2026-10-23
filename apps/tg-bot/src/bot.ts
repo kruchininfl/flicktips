@@ -1,17 +1,18 @@
-import {Bot, Context, GrammyError, InlineKeyboard} from 'grammy';
-import {SITE_URL} from './env';
-import {botUrl, escapeHtml, userName, welcomeText} from './texts';
-import * as store from './store';
+import type { Context } from 'grammy';
+import { Bot, GrammyError, InlineKeyboard } from 'grammy';
+import { SITE_URL } from './env.js';
+import { botUrl, escapeHtml, userName, welcomeText } from './texts.js';
+import * as store from './store.js';
 
-type GroupChat = {id: number; title: string};
+type GroupChat = { id: number; title: string };
 
 function isGroup(ctx: Context) {
   return ctx.chat?.type === 'group' || ctx.chat?.type === 'supergroup';
 }
 
 function groupOf(ctx: Context): GroupChat {
-  const chat = ctx.chat as {id: number; title?: string};
-  return {id: chat.id, title: chat.title || ''};
+  const chat = ctx.chat as { id: number; title?: string };
+  return { id: chat.id, title: chat.title || '' };
 }
 
 function welcomeKeyboard() {
@@ -26,7 +27,7 @@ function siteLinkKeyboard(code: string) {
 export function createBot(token: string, apiRoot?: string) {
   // A request hanging on the relay would stall all updates (they are handled one by one), so give
   // up well before grammY's default of 500 s. Long polling waits 10 s (app.ts), well inside the limit.
-  const bot = new Bot(token, {client: {timeoutSeconds: 20, ...(apiRoot ? {apiRoot} : {})}});
+  const bot = new Bot(token, { client: { timeoutSeconds: 20, ...(apiRoot ? { apiRoot } : {}) } });
 
   // The welcome message lists who takes part; it is edited in place, or sent again if it is gone.
   async function refreshWelcome(chatId: string) {
@@ -40,7 +41,7 @@ export function createBot(token: string, apiRoot?: string) {
 
     if (chat.welcome_message_id) {
       try {
-        await bot.api.editMessageText(chatId, chat.welcome_message_id, text, {reply_markup: welcomeKeyboard()});
+        await bot.api.editMessageText(chatId, chat.welcome_message_id, text, { reply_markup: welcomeKeyboard() });
         await store.setWelcome(chatId, chat.welcome_message_id);
         return;
       } catch (e) {
@@ -54,7 +55,7 @@ export function createBot(token: string, apiRoot?: string) {
       }
     }
 
-    const message = await bot.api.sendMessage(chatId, text, {reply_markup: welcomeKeyboard()});
+    const message = await bot.api.sendMessage(chatId, text, { reply_markup: welcomeKeyboard() });
     await store.setWelcome(chatId, message.message_id);
   }
 
@@ -84,7 +85,7 @@ export function createBot(token: string, apiRoot?: string) {
     const chatId = String(ctx.chat!.id);
     const user = await store.findUserByTelegram(ctx.from!.id);
 
-    if (user && await store.leaveChat(chatId, user.id)) {
+    if (user && (await store.leaveChat(chatId, user.id))) {
       await refreshWelcome(chatId);
       return true;
     }
@@ -100,8 +101,11 @@ export function createBot(token: string, apiRoot?: string) {
 
     const chat = groupOf(ctx);
     const member = ctx.myChatMember.new_chat_member;
-    const wasIn = ['member', 'administrator', 'creator', 'restricted'].includes(ctx.myChatMember.old_chat_member.status);
-    const isIn = ['member', 'administrator', 'creator'].includes(member.status) ||
+    const wasIn = ['member', 'administrator', 'creator', 'restricted'].includes(
+      ctx.myChatMember.old_chat_member.status,
+    );
+    const isIn =
+      ['member', 'administrator', 'creator'].includes(member.status) ||
       (member.status === 'restricted' && member.is_member && member.can_send_messages);
 
     if (isIn) {
@@ -132,8 +136,8 @@ export function createBot(token: string, apiRoot?: string) {
 
       await ctx.reply(
         `Готово, ваш Telegram привязан к FlickTips (${userName(user)}).\n\n` +
-        'Теперь добавьте меня в группу, и я буду публиковать там ваши оценки.',
-        {parse_mode: 'HTML', reply_markup: new InlineKeyboard().url('Добавить в группу', botUrl('add', true))}
+          'Теперь добавьте меня в группу, и я буду публиковать там ваши оценки.',
+        { parse_mode: 'HTML', reply_markup: new InlineKeyboard().url('Добавить в группу', botUrl('add', true)) },
       );
       return;
     }
@@ -148,8 +152,9 @@ export function createBot(token: string, apiRoot?: string) {
         if (await store.joinChat(joinChatId, user.id)) {
           await refreshWelcome(joinChatId);
         }
-        await ctx.reply(`Готово, ваши оценки будут появляться в группе «${escapeHtml(chat.title)}».`,
-          {parse_mode: 'HTML'});
+        await ctx.reply(`Готово, ваши оценки будут появляться в группе «${escapeHtml(chat.title)}».`, {
+          parse_mode: 'HTML',
+        });
         return;
       }
     }
@@ -157,8 +162,8 @@ export function createBot(token: string, apiRoot?: string) {
     if (user) {
       await ctx.reply(
         `Ваш Telegram привязан к FlickTips (${userName(user)}). Добавьте меня в группу, ` +
-        'и я буду публиковать там ваши оценки фильмов.',
-        {parse_mode: 'HTML', reply_markup: new InlineKeyboard().url('Добавить в группу', botUrl('add', true))}
+          'и я буду публиковать там ваши оценки фильмов.',
+        { parse_mode: 'HTML', reply_markup: new InlineKeyboard().url('Добавить в группу', botUrl('add', true)) },
       );
       return;
     }
@@ -166,10 +171,10 @@ export function createBot(token: string, apiRoot?: string) {
     const code = await store.createTelegramCode(ctx.from, joinChatId);
     await ctx.reply(
       'Я публикую оценки фильмов с FlickTips в группы Telegram. ' +
-      'Войдите на сайте, чтобы привязать к нему этот Telegram' +
-      (joinChatId ? ', и я сразу добавлю вас в группу.' : '.') +
-      '\n\nСсылка действует 15 минут.',
-      {reply_markup: siteLinkKeyboard(code)}
+        'Войдите на сайте, чтобы привязать к нему этот Telegram' +
+        (joinChatId ? ', и я сразу добавлю вас в группу.' : '.') +
+        '\n\nСсылка действует 15 минут.',
+      { reply_markup: siteLinkKeyboard(code) },
     );
   });
 
@@ -184,7 +189,7 @@ export function createBot(token: string, apiRoot?: string) {
       await store.useSiteCode(payload, ctx.from);
     }
 
-    if (!await joinFromGroup(ctx)) {
+    if (!(await joinFromGroup(ctx))) {
       await refreshWelcome(String(chat.id));
     }
   });
@@ -195,7 +200,7 @@ export function createBot(token: string, apiRoot?: string) {
     }
 
     await ctx.reply('Сначала привяжите FlickTips к Telegram, это займёт минуту.', {
-      reply_markup: new InlineKeyboard().url('Привязать', botUrl('join_' + ctx.chat.id))
+      reply_markup: new InlineKeyboard().url('Привязать', botUrl('join_' + ctx.chat.id)),
     });
   });
 
@@ -210,23 +215,25 @@ export function createBot(token: string, apiRoot?: string) {
     }
 
     if (await joinFromGroup(ctx)) {
-      await ctx.answerCallbackQuery({text: 'Готово, ваши оценки будут появляться здесь.'});
+      await ctx.answerCallbackQuery({ text: 'Готово, ваши оценки будут появляться здесь.' });
       return;
     }
 
     // a t.me link with a start parameter opens the private chat with the bot
-    await ctx.answerCallbackQuery({url: botUrl('join_' + ctx.chat!.id)});
+    await ctx.answerCallbackQuery({ url: botUrl('join_' + ctx.chat!.id) });
   });
 
   bot.callbackQuery('leave', async (ctx) => {
-    const left = isGroup(ctx) && await leaveFromGroup(ctx);
-    await ctx.answerCallbackQuery({text: left ? 'Ваши оценки больше не будут появляться здесь.' : 'Вы и так не участвуете.'});
+    const left = isGroup(ctx) && (await leaveFromGroup(ctx));
+    await ctx.answerCallbackQuery({
+      text: left ? 'Ваши оценки больше не будут появляться здесь.' : 'Вы и так не участвуете.',
+    });
   });
 
   bot.on('message:left_chat_member', async (ctx) => {
     const user = await store.findUserByTelegram(ctx.message.left_chat_member.id);
 
-    if (user && await store.leaveChat(String(ctx.chat.id), user.id)) {
+    if (user && (await store.leaveChat(String(ctx.chat.id), user.id))) {
       await refreshWelcome(String(ctx.chat.id));
     }
   });
@@ -243,5 +250,5 @@ export function createBot(token: string, apiRoot?: string) {
     console.error('Update failed:', err.error);
   });
 
-  return {bot, refreshWelcome};
+  return { bot, refreshWelcome };
 }

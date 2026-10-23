@@ -1,7 +1,9 @@
-import {Api, GrammyError, InlineKeyboard} from 'grammy';
-import {exec, select, selectOne} from './db';
-import {changedText, Movie, movieUrl, posterUrl, postText, User} from './texts';
-import * as store from './store';
+import type { Api } from 'grammy';
+import { GrammyError, InlineKeyboard } from 'grammy';
+import { exec, select, selectOne } from './db.js';
+import type { Movie, User } from './texts.js';
+import { changedText, movieUrl, posterUrl, postText } from './texts.js';
+import * as store from './store.js';
 
 // A rating is published once it has not changed for this long, so quick re-clicks make one post.
 const SETTLE_SECONDS = 60;
@@ -47,8 +49,10 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
   }
 
   function isChatGone(e: unknown) {
-    return e instanceof GrammyError && (e.error_code === 403 || /chat not found|bot was kicked|not enough rights/i
-      .test(e.description));
+    return (
+      e instanceof GrammyError &&
+      (e.error_code === 403 || /chat not found|bot was kicked|not enough rights/i.test(e.description))
+    );
   }
 
   // «Участвовать» is handled by the same 'join' callback as on the welcome message
@@ -59,17 +63,19 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
   async function sendPost(chatId: string, user: User, movie: Movie, vote: number) {
     const text = postText(user, movie, vote);
     const keyboard = postKeyboard(movie);
-    const cached = await selectOne<{file_id: string}>('SELECT file_id FROM tg_poster WHERE movie_id = ?', [movie.id]);
+    const cached = await selectOne<{ file_id: string }>('SELECT file_id FROM tg_poster WHERE movie_id = ?', [movie.id]);
     const photo = cached?.file_id || posterUrl(movie);
 
     if (photo) {
       try {
         const message = await call(chatId, () =>
-          api.sendPhoto(chatId, photo, {caption: text, parse_mode: 'HTML', reply_markup: keyboard}));
+          api.sendPhoto(chatId, photo, { caption: text, parse_mode: 'HTML', reply_markup: keyboard }),
+        );
 
-        if (!cached && message.photo?.length) {
-          await exec('INSERT IGNORE INTO tg_poster (movie_id, file_id) VALUES (?, ?)',
-            [movie.id, message.photo[message.photo.length - 1].file_id]);
+        const largest = message.photo?.at(-1);
+
+        if (!cached && largest) {
+          await exec('INSERT IGNORE INTO tg_poster (movie_id, file_id) VALUES (?, ?)', [movie.id, largest.file_id]);
         }
 
         return message.message_id;
@@ -84,11 +90,13 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
       }
     }
 
-    const message = await call(chatId, () => api.sendMessage(chatId, text, {
-      parse_mode: 'HTML',
-      reply_markup: keyboard,
-      link_preview_options: {is_disabled: true}
-    }));
+    const message = await call(chatId, () =>
+      api.sendMessage(chatId, text, {
+        parse_mode: 'HTML',
+        reply_markup: keyboard,
+        link_preview_options: { is_disabled: true },
+      }),
+    );
 
     return message.message_id;
   }
@@ -98,13 +106,14 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
     const text = postText(user, movie, vote);
     const keyboard = postKeyboard(movie);
     const attempts = [
-      () => api.editMessageCaption(chatId, messageId, {caption: text, parse_mode: 'HTML', reply_markup: keyboard}),
+      () => api.editMessageCaption(chatId, messageId, { caption: text, parse_mode: 'HTML', reply_markup: keyboard }),
       // posts without a poster are plain text
-      () => api.editMessageText(chatId, messageId, text, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-        link_preview_options: {is_disabled: true}
-      })
+      () =>
+        api.editMessageText(chatId, messageId, text, {
+          parse_mode: 'HTML',
+          reply_markup: keyboard,
+          link_preview_options: { is_disabled: true },
+        }),
     ];
 
     for (const attempt of attempts) {
@@ -131,13 +140,20 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
   }
 
   async function publishToChat(chatId: string, user: User, movie: Movie, vote: number) {
-    const post = await selectOne<{message_id: number; vote: number}>(
-      'SELECT message_id, vote FROM tg_post WHERE user_id = ? AND movie_id = ? AND chat_id = ?', [user.id, movie.id, chatId]);
+    const post = await selectOne<{ message_id: number; vote: number }>(
+      'SELECT message_id, vote FROM tg_post WHERE user_id = ? AND movie_id = ? AND chat_id = ?',
+      [user.id, movie.id, chatId],
+    );
 
     if (!post) {
       const messageId = await sendPost(chatId, user, movie, vote);
-      await exec('INSERT INTO tg_post (user_id, movie_id, chat_id, message_id, vote) VALUES (?, ?, ?, ?, ?)',
-        [user.id, movie.id, chatId, messageId, vote]);
+      await exec('INSERT INTO tg_post (user_id, movie_id, chat_id, message_id, vote) VALUES (?, ?, ?, ?, ?)', [
+        user.id,
+        movie.id,
+        chatId,
+        messageId,
+        vote,
+      ]);
       return;
     }
 
@@ -147,17 +163,28 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
 
     if (await editPost(chatId, post.message_id, user, movie, vote)) {
       // the edit alone is easy to miss in a busy group, so the bot also answers the post
-      await call(chatId, () => api.sendMessage(chatId, changedText(user, vote), {
-        reply_parameters: {message_id: post.message_id, allow_sending_without_reply: true}
-      }));
-      await exec('UPDATE tg_post SET vote = ? WHERE user_id = ? AND movie_id = ? AND chat_id = ?',
-        [vote, user.id, movie.id, chatId]);
+      await call(chatId, () =>
+        api.sendMessage(chatId, changedText(user, vote), {
+          reply_parameters: { message_id: post.message_id, allow_sending_without_reply: true },
+        }),
+      );
+      await exec('UPDATE tg_post SET vote = ? WHERE user_id = ? AND movie_id = ? AND chat_id = ?', [
+        vote,
+        user.id,
+        movie.id,
+        chatId,
+      ]);
       return;
     }
 
     const messageId = await sendPost(chatId, user, movie, vote);
-    await exec('UPDATE tg_post SET message_id = ?, vote = ? WHERE user_id = ? AND movie_id = ? AND chat_id = ?',
-      [messageId, vote, user.id, movie.id, chatId]);
+    await exec('UPDATE tg_post SET message_id = ?, vote = ? WHERE user_id = ? AND movie_id = ? AND chat_id = ?', [
+      messageId,
+      vote,
+      user.id,
+      movie.id,
+      chatId,
+    ]);
   }
 
   // Once a day per member: did they leave the group while the bot was not looking?
@@ -168,7 +195,8 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
 
     try {
       const member = await api.getChatMember(chatId, Number(user.tg_user_id));
-      const isIn = ['member', 'administrator', 'creator'].includes(member.status) ||
+      const isIn =
+        ['member', 'administrator', 'creator'].includes(member.status) ||
         (member.status === 'restricted' && member.is_member);
 
       if (!isIn) {
@@ -188,22 +216,35 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
   }
 
   async function markProcessed(userId: number, movieId: number, lastId: string) {
-    await exec('UPDATE vote_event SET processed_at = NOW() WHERE user_id = ? AND movie_id = ? AND id <= ? AND processed_at IS NULL',
-      [userId, movieId, lastId]);
+    await exec(
+      'UPDATE vote_event SET processed_at = NOW() WHERE user_id = ? AND movie_id = ? AND id <= ? AND processed_at IS NULL',
+      [userId, movieId, lastId],
+    );
   }
 
-  async function processPair(pair: {user_id: number; movie_id: number; last_id: string; last_at: string; stale: number}) {
+  async function processPair(pair: {
+    user_id: number;
+    movie_id: number;
+    last_id: string;
+    last_at: string;
+    stale: number;
+  }) {
     // events that waited more than a day (the bot was down) are not news any more
     if (Number(pair.stale)) {
       return 'done';
     }
 
     // the current rating is the source of truth, events only say "something changed"
-    const current = await selectOne<{vote: number}>(
-      'SELECT vote FROM movie_vote WHERE user_id = ? AND movie_id = ?', [pair.user_id, pair.movie_id]);
+    const current = await selectOne<{ vote: number }>(
+      'SELECT vote FROM movie_vote WHERE user_id = ? AND movie_id = ?',
+      [pair.user_id, pair.movie_id],
+    );
     const user = await store.findUser(pair.user_id);
-    const movie = await selectOne<Movie>(`SELECT id, title, original_title, release_date, first_air_date,
-      tmdb_poster_path, kp_id FROM movie WHERE id = ?`, [pair.movie_id]);
+    const movie = await selectOne<Movie>(
+      `SELECT id, title, original_title, release_date, first_air_date,
+      tmdb_poster_path, kp_id FROM movie WHERE id = ?`,
+      [pair.movie_id],
+    );
 
     // a removed rating leaves its posts as they are
     if (!current || !user || !movie) {
@@ -211,17 +252,20 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
     }
 
     // only ratings made after joining the group
-    const chats = await select<{chat_id: string; needs_check: number}>(`SELECT tg_chat_member.chat_id,
+    const chats = await select<{ chat_id: string; needs_check: number }>(
+      `SELECT tg_chat_member.chat_id,
       (tg_chat_member.checked_at IS NULL OR tg_chat_member.checked_at < NOW() - INTERVAL 1 DAY) AS needs_check
       FROM tg_chat_member
       INNER JOIN tg_chat ON tg_chat.chat_id = tg_chat_member.chat_id AND tg_chat.active = 1
-      WHERE tg_chat_member.user_id = ? AND tg_chat_member.joined_at <= ?`, [pair.user_id, pair.last_at]);
+      WHERE tg_chat_member.user_id = ? AND tg_chat_member.joined_at <= ?`,
+      [pair.user_id, pair.last_at],
+    );
 
     let result: 'done' | 'deferred' | 'failed' = 'done';
 
     for (const chat of chats) {
       try {
-        if (Number(chat.needs_check) && !await stillMember(chat.chat_id, user)) {
+        if (Number(chat.needs_check) && !(await stillMember(chat.chat_id, user))) {
           continue;
         }
         await publishToChat(chat.chat_id, user, movie, Number(current.vote));
@@ -246,8 +290,14 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
       await refreshWelcomeSafe(chatId);
     }
 
-    const pairs = await select<{user_id: number; movie_id: number; last_id: string; last_at: string;
-      attempts: number; stale: number}>(`SELECT user_id, movie_id, MAX(id) AS last_id, MAX(created_at) AS last_at,
+    const pairs = await select<{
+      user_id: number;
+      movie_id: number;
+      last_id: string;
+      last_at: string;
+      attempts: number;
+      stale: number;
+    }>(`SELECT user_id, movie_id, MAX(id) AS last_id, MAX(created_at) AS last_at,
       MAX(attempts) AS attempts, MAX(created_at) < NOW() - INTERVAL 1 DAY AS stale
       FROM vote_event WHERE processed_at IS NULL
       GROUP BY user_id, movie_id
@@ -260,8 +310,10 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
       if (result === 'done' || (result === 'failed' && Number(pair.attempts) + 1 >= MAX_ATTEMPTS)) {
         await markProcessed(pair.user_id, pair.movie_id, pair.last_id);
       } else if (result === 'failed') {
-        await exec('UPDATE vote_event SET attempts = attempts + 1 WHERE user_id = ? AND movie_id = ? AND processed_at IS NULL',
-          [pair.user_id, pair.movie_id]);
+        await exec(
+          'UPDATE vote_event SET attempts = attempts + 1 WHERE user_id = ? AND movie_id = ? AND processed_at IS NULL',
+          [pair.user_id, pair.movie_id],
+        );
       }
     }
   }
@@ -280,5 +332,5 @@ export function createPublisher(api: Api, refreshWelcome: (chatId: string) => Pr
     }
   }
 
-  return {tick};
+  return { tick };
 }

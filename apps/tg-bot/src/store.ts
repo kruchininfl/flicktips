@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import {exec, select, selectOne} from './db';
-import {User} from './texts';
+import { exec, select, selectOne } from './db.js';
+import type { User } from './texts.js';
 
 const LINK_CODE_TTL = 15 * 60;
 const USER_FIELDS = 'id, username, gender, tg_user_id';
@@ -20,7 +20,10 @@ export function findUser(id: number) {
 
 // a Telegram account belongs to one FlickTips user: the newest link wins
 export async function linkTelegram(userId: number, from: TgUser) {
-  await exec('UPDATE user SET tg_user_id = NULL, tg_username = NULL WHERE tg_user_id = ? AND id <> ?', [from.id, userId]);
+  await exec('UPDATE user SET tg_user_id = NULL, tg_username = NULL WHERE tg_user_id = ? AND id <> ?', [
+    from.id,
+    userId,
+  ]);
   await exec('UPDATE user SET tg_user_id = ?, tg_username = ? WHERE id = ?', [from.id, from.username || null, userId]);
 }
 
@@ -29,8 +32,10 @@ export async function linkTelegram(userId: number, from: TgUser) {
  * Returns the user, or undefined for an unknown or expired code.
  */
 export async function useSiteCode(code: string, from: TgUser) {
-  const link = await selectOne<{user_id: number}>(
-    'SELECT user_id FROM tg_link_code WHERE code = ? AND user_id IS NOT NULL AND expires_at > NOW()', [code]);
+  const link = await selectOne<{ user_id: number }>(
+    'SELECT user_id FROM tg_link_code WHERE code = ? AND user_id IS NOT NULL AND expires_at > NOW()',
+    [code],
+  );
 
   if (!link) {
     return undefined;
@@ -53,20 +58,28 @@ export function isSiteCode(text: string) {
 export async function createTelegramCode(from: TgUser, chatId: string | null) {
   const code = crypto.randomBytes(8).toString('hex');
 
-  await exec(`INSERT INTO tg_link_code (code, tg_user_id, tg_username, chat_id, expires_at)
-    VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ${LINK_CODE_TTL} SECOND))`, [code, from.id, from.username || null, chatId]);
+  await exec(
+    `INSERT INTO tg_link_code (code, tg_user_id, tg_username, chat_id, expires_at)
+    VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ${LINK_CODE_TTL} SECOND))`,
+    [code, from.id, from.username || null, chatId],
+  );
 
   return code;
 }
 
 export async function saveChat(chatId: string, title: string) {
-  await exec(`INSERT INTO tg_chat (chat_id, title, active) VALUES (?, ?, 1)
-    ON DUPLICATE KEY UPDATE title = VALUES(title), active = 1`, [chatId, title]);
+  await exec(
+    `INSERT INTO tg_chat (chat_id, title, active) VALUES (?, ?, 1)
+    ON DUPLICATE KEY UPDATE title = VALUES(title), active = 1`,
+    [chatId, title],
+  );
 }
 
 export function getChat(chatId: string) {
-  return selectOne<{chat_id: string; title: string; active: number; welcome_message_id: number | null}>(
-    'SELECT chat_id, title, active, welcome_message_id FROM tg_chat WHERE chat_id = ?', [chatId]);
+  return selectOne<{ chat_id: string; title: string; active: number; welcome_message_id: number | null }>(
+    'SELECT chat_id, title, active, welcome_message_id FROM tg_chat WHERE chat_id = ?',
+    [chatId],
+  );
 }
 
 export async function deactivateChat(chatId: string) {
@@ -78,22 +91,28 @@ export async function setWelcome(chatId: string, messageId: number | null) {
 }
 
 export async function getDirtyWelcomes() {
-  return (await select<{chat_id: string}>('SELECT chat_id FROM tg_chat WHERE welcome_dirty = 1 AND active = 1'))
-    .map((row) => row.chat_id);
+  return (await select<{ chat_id: string }>('SELECT chat_id FROM tg_chat WHERE welcome_dirty = 1 AND active = 1')).map(
+    (row) => row.chat_id,
+  );
 }
 
 export async function getMemberNames(chatId: string) {
-  const rows = await select<{username: string | null}>(`SELECT user.username FROM tg_chat_member
+  const rows = await select<{ username: string | null }>(
+    `SELECT user.username FROM tg_chat_member
     INNER JOIN user ON user.id = tg_chat_member.user_id
-    WHERE tg_chat_member.chat_id = ? ORDER BY tg_chat_member.joined_at`, [chatId]);
+    WHERE tg_chat_member.chat_id = ? ORDER BY tg_chat_member.joined_at`,
+    [chatId],
+  );
 
   return rows.map((row) => row.username || 'Без имени');
 }
 
 // true if the user was not a member before
 export async function joinChat(chatId: string, userId: number) {
-  const result = await exec('INSERT IGNORE INTO tg_chat_member (chat_id, user_id, checked_at) VALUES (?, ?, NOW())',
-    [chatId, userId]);
+  const result = await exec('INSERT IGNORE INTO tg_chat_member (chat_id, user_id, checked_at) VALUES (?, ?, NOW())', [
+    chatId,
+    userId,
+  ]);
 
   return result.affectedRows > 0;
 }

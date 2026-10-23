@@ -1,4 +1,4 @@
-# Only the v2 code is in the workspace. Legacy web/, api/, tg-bot/, kp-parser/, ft-parser/
+# Only the v2 code is in the workspace. Legacy web/, api/, kp-parser/, ft-parser/
 # keep their own npm installs until they are ported.
 packages:
   - apps/*

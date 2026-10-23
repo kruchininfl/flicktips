@@ -1,10 +1,13 @@
 // @FlickTipsBot: posts the movie ratings of FlickTips users to the Telegram groups they joined.
 // Updates come by long polling, so the service needs no open ports. The API queues rating changes
 // in vote_event (see api/migrations/2026-10-21-telegram.sql); the loop below publishes them.
-import {closeDb} from './db';
-import {createBot} from './bot';
-import {createPublisher} from './publisher';
-import {cleanup} from './store';
+import { closeDb, openDb } from './db.js';
+import { createBot } from './bot.js';
+import { createPublisher } from './publisher.js';
+import { cleanup } from './store.js';
+
+// fails fast on missing DB settings, as the module-level pool of the legacy bot did
+openDb();
 
 const TICK_MS = 10 * 1000;
 const CLEANUP_MS = 60 * 60 * 1000;
@@ -21,7 +24,7 @@ async function main() {
     return;
   }
 
-  const {bot, refreshWelcome} = createBot(token, process.env.TELEGRAM_API_ROOT);
+  const { bot, refreshWelcome } = createBot(token, process.env.TELEGRAM_API_ROOT);
   const publisher = createPublisher(bot.api, refreshWelcome);
   let running = true;
 
@@ -34,21 +37,28 @@ async function main() {
   process.once('SIGTERM', stop);
   process.once('SIGINT', stop);
 
-  await bot.api.setMyCommands([
-    {command: 'join', description: 'Публиковать здесь мои оценки'},
-    {command: 'leave', description: 'Больше не публиковать мои оценки'}
-  ], {scope: {type: 'all_group_chats'}}).catch((e) => console.error('setMyCommands failed:', e));
+  await bot.api
+    .setMyCommands(
+      [
+        { command: 'join', description: 'Публиковать здесь мои оценки' },
+        { command: 'leave', description: 'Больше не публиковать мои оценки' },
+      ],
+      { scope: { type: 'all_group_chats' } },
+    )
+    .catch((e) => console.error('setMyCommands failed:', e));
 
-  bot.start({
-    allowed_updates: ['message', 'callback_query', 'my_chat_member'],
-    // short long-poll: through the relay (TELEGRAM_API_ROOT) a long one sometimes hangs until the
-    // request timeout in bot.ts and delays updates by about a minute
-    timeout: 10,
-    onStart: (me) => console.log(`Bot @${me.username} started`)
-  }).catch((e) => {
-    console.error('Polling stopped:', e);
-    process.exit(1);
-  });
+  bot
+    .start({
+      allowed_updates: ['message', 'callback_query', 'my_chat_member'],
+      // short long-poll: through the relay (TELEGRAM_API_ROOT) a long one sometimes hangs until the
+      // request timeout in bot.ts and delays updates by about a minute
+      timeout: 10,
+      onStart: (me) => console.log(`Bot @${me.username} started`),
+    })
+    .catch((e) => {
+      console.error('Polling stopped:', e);
+      process.exit(1);
+    });
 
   let lastCleanup = 0;
 

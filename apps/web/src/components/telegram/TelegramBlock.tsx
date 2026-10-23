@@ -45,7 +45,7 @@ function Step({
   );
 }
 
-// Own profile: link Telegram and see the groups where @FlickTipsBot posts my ratings (bot: tg-bot/).
+// Own profile: link Telegram and see the groups where @FlickTipsBot posts my ratings (bot: apps/tg-bot/).
 // Port of web/src/partitions/TelegramBlock; loads its data on mount.
 export function TelegramBlock() {
   const [state, setState] = useState<State | null>(null);

@@ -153,6 +153,11 @@ const updateFilm = async (film) => {
   } catch (err) {
     await connection.rollback();
     console.log(err);
+
+    // Another movie already holds this kp_id (UNIQUE key): mark this one as checked so it isn't retried every run
+    if (err.code === 'ER_DUP_ENTRY') {
+      await insertError(film.my_id, 'duplicate');
+    }
   }
 };
 

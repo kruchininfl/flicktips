@@ -71,11 +71,13 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # @FlickTipsBot (tg-bot/): long polling, no ports. Capped so it never takes memory from the site.
+  # @FlickTipsBot (apps/tg-bot, built from the repo root): long polling, no ports. Capped so it never takes memory
+  # from the site.
   tg-bot:
     image: infamoustill/flicktips-tg-bot:${TAG:-latest}
     build:
-      context: ./tg-bot
+      context: .
+      dockerfile: apps/tg-bot/Dockerfile
     network_mode: host
     restart: unless-stopped
     env_file:

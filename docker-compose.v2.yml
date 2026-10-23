@@ -1,0 +1,111 @@
+# FlickTips v2 (apps/api, apps/web, apps/tg-bot), next to the legacy docker-compose.yml, which keeps running
+# production until the switchover. Runbook: docs/v2-deploy.md.
+#
+# One copy per target, each in its own directory on the server with its own .env (.env.v2.example):
+#   /var/www/flicktips-v2/test   V2_TARGET=test  project flicktips-v2-test  web :3201  api :3202
+#   /var/www/flicktips-v2/prod   V2_TARGET=prod  project flicktips-v2-prod  web :3101  api :3102
+# The legacy project lives in /var/www/flicktips.ru (web :3001, php-fpm :9000, nginx :80/:443; tg-brew :3002).
+#
+# Images are built and pushed by .github/workflows/deploy-v2.yml (never on the server); docker/v2.sh pulls them
+# and keeps the active tag as V2_TAG in .env. All services use network_mode: host, like the legacy ones, so they
+# reach the host MySQL on 127.0.0.1:3306 and each other on loopback; Node listens on 127.0.0.1 only.
+#
+# Profiles (COMPOSE_PROFILES in .env): `bot` runs the Telegram bot (one bot token can be polled by one process
+# only, so prod enables it at the switchover, when the legacy tg-bot stops; test only with its own test bot);
+# `edge` runs nginx on :80/:443 (prod, from the switchover on).
+#
+#   docker/v2.sh up <tag>        # on the server, in the target directory
+name: flicktips-v2-${V2_TARGET:?set V2_TARGET (test or prod) in .env}
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
+services:
+  api:
+    image: infamoustill/flicktips2-api:${V2_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    network_mode: host
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      API_HOST: 127.0.0.1
+      API_PORT: ${V2_API_PORT:?set V2_API_PORT in .env}
+      NODE_OPTIONS: --max-old-space-size=${V2_API_HEAP_MB:-96}
+    mem_limit: ${V2_API_MEM:-160m}
+    memswap_limit: ${V2_API_MEM:-160m}
+    logging: *logging
+
+  # No env_file: the site needs no secrets. NEXT_PUBLIC_SITE_URL and the rewrite target are baked into the image
+  # (apps/web/Dockerfile), so each target has its own web image: <target>-<tag>.
+  web:
+    image: infamoustill/flicktips2-web:${V2_TARGET}-${V2_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL:?set SITE_URL in .env}
+        API_INTERNAL_URL: http://127.0.0.1:${V2_API_PORT}
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      HOSTNAME: 127.0.0.1
+      PORT: ${V2_WEB_PORT:?set V2_WEB_PORT in .env}
+      API_INTERNAL_URL: http://127.0.0.1:${V2_API_PORT}
+      SITE_URL: ${SITE_URL}
+      NODE_OPTIONS: --max-old-space-size=${V2_WEB_HEAP_MB:-160}
+    mem_limit: ${V2_WEB_MEM:-256m}
+    memswap_limit: ${V2_WEB_MEM:-256m}
+    logging: *logging
+
+  # @FlickTipsBot (apps/tg-bot): long polling, no ports.
+  tg-bot:
+    profiles: [bot]
+    image: infamoustill/flicktips2-tg-bot:${V2_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/tg-bot/Dockerfile
+    network_mode: host
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_OPTIONS: --max-old-space-size=96
+    mem_limit: 128m
+    memswap_limit: 128m
+    logging: *logging
+
+  # Edge proxy on :80/:443 after the switchover (replaces the legacy nginx service). Stock image; its conf.d is the
+  # nginx/ directory next to this file: flicktips.v2.conf (= nginx/conf.d/flicktips.v2.conf.example, copied by the
+  # workflow) and, while a test target runs, zz-flicktips-v2-test.conf (docker/v2.sh vhost). A directory, not single-file
+  # mounts, so a replaced file is seen after `nginx -s reload` (docker/v2.sh up reloads). The certificates stay where
+  # certbot keeps them for the legacy project (docker/certbot-*.sh).
+  nginx:
+    profiles: [edge]
+    image: nginx:1.28-alpine
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - web
+      - api
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ${CERTBOT_DIR:-/var/www/flicktips.ru/data/certbot}/conf:/etc/letsencrypt:ro
+      - ${CERTBOT_DIR:-/var/www/flicktips.ru/data/certbot}/www:/var/www/certbot:ro
+    healthcheck:
+      test: ['CMD', 'nginx', '-t', '-q']
+      interval: 60s
+      timeout: 5s
+      retries: 3
+    mem_limit: 64m
+    memswap_limit: 64m
+    logging: *logging

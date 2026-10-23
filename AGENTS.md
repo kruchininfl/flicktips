@@ -102,6 +102,12 @@ The rest run inside the subproject dir (`npm install` first; there is no root in
 
 ## Deploy
 
+v2 (`apps/api`, `apps/web`, `apps/tg-bot`) deploys separately: `.github/workflows/deploy-v2.yml` (manual only,
+target `test` or `prod`) → `tools/deploy-v2.sh` → `docker/v2.sh` on the server, compose file `docker-compose.v2.yml`,
+one directory and `.env` per target under `/var/www/flicktips-v2/`, images `infamoustill/flicktips2-*`, nginx
+`nginx/conf.d/flicktips.v2.conf.example` + the test vhost template. Runbook (env vars, migrations, test domain,
+switchover, rollback): `docs/v2-deploy.md`. The legacy deploy below is unchanged.
+
 GitHub Actions (`.github/workflows/deploy.yml`) runs `tools/deploy.sh`, started by hand only
 (Actions → Deploy → Run workflow; pushes to `master` do not deploy). A run can rebuild only
 some services or roll back. The same script still works by hand from a dev Mac (needs `docker login` as

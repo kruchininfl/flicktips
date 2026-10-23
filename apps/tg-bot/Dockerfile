@@ -1,7 +1,10 @@
 # tg-bot: @FlickTipsBot, posts FlickTips ratings to Telegram groups (long polling, no open ports).
 # Build from the repository root (the workspace packages are needed):
 #   docker build -f apps/tg-bot/Dockerfile .
-FROM node:22-slim AS build
+#   docker build -f apps/tg-bot/Dockerfile --build-arg NODE_IMAGE=mirror.gcr.io/library/node:22-slim .
+ARG NODE_IMAGE=node:22-slim
+
+FROM ${NODE_IMAGE} AS build
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
@@ -22,9 +25,13 @@ RUN pnpm --filter @flicktips/db build \
  && pnpm --filter @flicktips/tg-bot build \
  && pnpm --filter @flicktips/tg-bot deploy --legacy --prod /out
 
-FROM node:22-slim
+FROM ${NODE_IMAGE}
+
+ENV NODE_ENV=production
 
 WORKDIR /app
-COPY --from=build /out ./
+COPY --from=build --chown=node:node /out ./
+
+USER node
 
 CMD ["node", "dist/app.js"]

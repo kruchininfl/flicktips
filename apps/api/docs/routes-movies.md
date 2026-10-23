@@ -71,6 +71,10 @@ TMDB is gone; everything it provided now comes from Кинопоиск or from c
 - **Digital releases**: ordered by first torrent date, then `movie.id DESC` (PHP: `tmdb_id DESC`). The
   movies are looked up by `movie.id` instead of `tmdb_id`. The debug key `results.sth` (the SQL text) is no
   longer returned. `pages` uses `DIGITAL_LIST_SIZE` (24, same value as the `HOME_LIST_SIZE` the PHP used).
+- `GET /api/people/search?q=` (new) answers `{success, results}` for the search's «Люди»: up to 5 people
+  whose Russian or original name contains `q` (2 characters or more), prefix matches first, then more movies.
+  Each is `{id, name, original_name, kp_photo, role, movies_count}`, `role` being the `title_singular` of the
+  group with the most movies. Suspended people and movies are left out.
 - `GET /api/users/:id/votes` takes a new optional `vote=super|like|neutral|dislike`: only the votes of
   that kind (`total` and `pages` count those too).
 - `GET /api/users/me/votes` without a viewer: `401 {success: false, msg: 'Access denied'}` (PHP: 200 with

@@ -19,8 +19,9 @@ function DialogContent({
   className,
   children,
   closeLabel = 'Закрыть',
+  showClose = true,
   ...props
-}: ComponentProps<typeof DialogPrimitive.Content> & { closeLabel?: string }) {
+}: ComponentProps<typeof DialogPrimitive.Content> & { closeLabel?: string; showClose?: boolean }) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-overlay backdrop-blur-md data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
@@ -33,10 +34,12 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-foreground outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-brand-line">
-          <IconX className="size-[18px]" />
-          <span className="sr-only">{closeLabel}</span>
-        </DialogPrimitive.Close>
+        {showClose && (
+          <DialogPrimitive.Close className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-foreground outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-brand-line">
+            <IconX className="size-[18px]" />
+            <span className="sr-only">{closeLabel}</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   );

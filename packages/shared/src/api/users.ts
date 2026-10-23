@@ -85,9 +85,16 @@ export interface ListedUser extends PublicUser {
 
 export type FriendsType = 'following' | 'followers';
 
+// GET /api/users/search: `follows_me` and the counts for the search's «Возможные друзья»
+export interface SearchedUser extends ListedUser {
+  follows_me: boolean;
+  votes_count: number;
+  common_friends: number;
+}
+
 export interface UsersSearchResponse {
   success: true;
-  results: ListedUser[];
+  results: SearchedUser[];
 }
 
 // GET /api/me/recommendations

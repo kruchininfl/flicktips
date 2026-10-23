@@ -644,19 +644,24 @@ describe.skipIf(!hasTestDb)('user routes', () => {
       const contains = await signIn(ctx, { username: 'Анна Поисковикова' });
       await signIn(ctx, { username: 'Поиск_овик' });
       await follow(ctx, viewer.id, contains.id);
-      const row = (u: { id: number }, username: string, subscribed: boolean) => ({
-        id: u.id,
-        username,
-        avatar: null,
-        gender: null,
-        registration_date: null,
-        subscribed,
-      });
+      // prefix follows the viewer and their common friend, and has voted once
+      await follow(ctx, prefix.id, viewer.id);
+      await follow(ctx, prefix.id, contains.id);
+      await ctx.t.db.insert(schema.movieVote).values({ movieId: await addMovie(ctx), userId: prefix.id, vote: 3 });
+      const row = (
+        u: { id: number },
+        username: string,
+        subscribed: boolean,
+        extra: { follows_me: boolean; votes_count: number; common_friends: number },
+      ) => ({ id: u.id, username, avatar: null, gender: null, registration_date: null, subscribed, ...extra });
 
       const res = await inject(ctx, 'GET', `/api/users/search?q=${encodeURIComponent('  поисковик ')}`, viewer.headers);
       expect(res.json()).toEqual({
         success: true,
-        results: [row(prefix, 'Поисковик Второй', false), row(contains, 'Анна Поисковикова', true)],
+        results: [
+          row(prefix, 'Поисковик Второй', false, { follows_me: true, votes_count: 1, common_friends: 1 }),
+          row(contains, 'Анна Поисковикова', true, { follows_me: false, votes_count: 0, common_friends: 0 }),
+        ],
       });
 
       const anonymous = await inject(ctx, 'GET', `/api/users/search?q=${encodeURIComponent('Поисковик')}`);

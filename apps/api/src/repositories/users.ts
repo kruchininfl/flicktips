@@ -43,6 +43,13 @@ export interface ListedUser extends PublicUser {
   subscribed: boolean;
 }
 
+// GET /api/users/search: what the search's «Возможные друзья» shows
+export interface SearchedUser extends ListedUser {
+  follows_me: boolean;
+  votes_count: number;
+  common_friends: number;
+}
+
 export type FriendsType = 'following' | 'followers';
 
 export const LOGIN_SERVICES = ['vkontakte', 'yandex'] as const;
@@ -208,17 +215,33 @@ export async function setSubscribed(db: Db, uid: number, userId: number, subscri
  * Users whose name contains `query`, prefix matches first. `viewerId` (0 for anonymous) is excluded and
  * gets a `subscribed` flag per user.
  */
-export async function searchUsers(db: Db, query: string, viewerId: number, limit: number): Promise<ListedUser[]> {
+export async function searchUsers(db: Db, query: string, viewerId: number, limit: number): Promise<SearchedUser[]> {
   const like = query.replace(/[\\%_]/g, (c) => `\\${c}`);
   const uf = alias(userFriends, 'uf');
   const rows = await db
-    .select({ ...publicUserFields, subscribed: sql<number>`IFNULL(${uf.subscribed}, 0)` })
+    .select({
+      ...publicUserFields,
+      subscribed: sql<number>`IFNULL(${uf.subscribed}, 0)`,
+      votes_count: sql<number>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${user.id})`,
+      follows_me: sql<number>`(SELECT IFNULL(MAX(back.subscribed), 0) FROM user_friends back
+        WHERE back.user_1 = ${user.id} AND back.user_2 = ${viewerId})`,
+      // people both follow
+      common_friends: sql<number>`(SELECT COUNT(*) FROM user_friends theirs
+        INNER JOIN user_friends mine ON mine.user_1 = ${viewerId} AND mine.user_2 = theirs.user_2 AND mine.subscribed = 1
+        WHERE theirs.user_1 = ${user.id} AND theirs.subscribed = 1)`,
+    })
     .from(user)
     .leftJoin(uf, and(eq(uf.user1, viewerId), eq(uf.user2, user.id)))
     .where(and(sql`${user.username} LIKE ${`%${like}%`}`, sql`${user.id} <> ${viewerId}`))
     .orderBy(desc(sql`${user.username} LIKE ${`${like}%`}`), asc(user.username))
     .limit(limit);
-  return rows.map((row) => ({ ...row, subscribed: phpCast(row.subscribed, 'bool') }));
+  return rows.map((row) => ({
+    ...row,
+    subscribed: phpCast(row.subscribed, 'bool'),
+    follows_me: phpCast(row.follows_me, 'bool'),
+    votes_count: phpCast(row.votes_count, 'int'),
+    common_friends: phpCast(row.common_friends, 'int'),
+  }));
 }
 
 export async function getInviteCode(db: Db, uid: number): Promise<string | null> {

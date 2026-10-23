@@ -92,6 +92,8 @@ neutral, dislike}, friends, bookmarks?}}` for the profile header: votes per kind
 - **Profile id.** `GET /api/users/:id` answers 404 for a non-numeric id (MySQL cast `'12abc'` to 12).
 - **Search** keeps `q`, PHP `trim` (ASCII whitespace only) and the 2–64 character window counted in code
   points (`mb_strlen` / `mb_substr`).
+  Each result adds `follows_me`, `votes_count` and `common_friends` (people both follow) for the search's
+  «Возможные друзья».
 - **`PATCH /api/me`** returns the same `data` as PHP's `getByCredentials` (`id, username, avatar, gender,
 registration_date, new_notifications, hide_viewed`), loaded by id; `new_notifications` counts votes of
   followed users newer than `last_seen_notifications` with a `COUNT(*)` subquery instead of the

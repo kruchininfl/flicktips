@@ -13,8 +13,12 @@ const OTHER_GROUP = -1009876543210;
 describe.skipIf(!hasTestDb)('telegram routes', () => {
   const ctx = useTestApp();
   const db = () => ctx.t.db;
-  const inject = (method: 'GET' | 'POST' | 'DELETE', url: string, headers?: Record<string, string>, payload?: object) =>
-    ctx.app.inject({ method, url, headers, payload });
+  const inject = (
+    method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+    url: string,
+    headers?: Record<string, string>,
+    payload?: object,
+  ) => ctx.app.inject({ method, url, headers, payload });
 
   const unauthorized = { success: false, msg: 'authorization required' };
 
@@ -42,7 +46,25 @@ describe.skipIf(!hasTestDb)('telegram routes', () => {
       username: null,
       botUsername: 'FlickTipsBot',
       groups: [],
+      publish: ['dislike', 'neutral', 'like', 'super'],
     });
+  });
+
+  it('keeps the votes to publish', async () => {
+    const { id, headers } = await signIn(ctx);
+    const res = await inject('PATCH', '/api/me/telegram', headers, { publish: ['super', 'like', 'like'] });
+    expect(res.json()).toEqual({ success: true, publish: ['like', 'super'] });
+    const [row] = await db().select({ mask: user.tgPublishVotes }).from(user).where(eq(user.id, id));
+    expect(row!.mask).toBe(0b1100);
+    expect((await inject('GET', '/api/me/telegram', headers)).json()).toMatchObject({ publish: ['like', 'super'] });
+
+    expect((await inject('PATCH', '/api/me/telegram', headers, { publish: [] })).json()).toEqual({
+      success: true,
+      publish: [],
+    });
+    expect((await inject('PATCH', '/api/me/telegram', headers, { publish: ['meh'] })).statusCode).toBe(400);
+    expect((await inject('PATCH', '/api/me/telegram', headers, {})).statusCode).toBe(400);
+    expect((await inject('PATCH', '/api/me/telegram', undefined, { publish: [] })).statusCode).toBe(401);
   });
 
   it('reports a linked account with its groups, newest first', async () => {
@@ -69,6 +91,7 @@ describe.skipIf(!hasTestDb)('telegram routes', () => {
         { chat_id: String(OTHER_GROUP), title: 'Old group', active: false },
         { chat_id: String(GROUP), title: 'Кино по пятницам', active: true },
       ],
+      publish: ['dislike', 'neutral', 'like', 'super'],
     });
     await db().delete(tgChatMember).where(eq(tgChatMember.userId, id));
     await db().delete(tgChat);
@@ -271,6 +294,7 @@ describe.skipIf(!hasTestDb)('telegram routes', () => {
       username: null,
       botUsername: 'FlickTipsBot',
       groups: [],
+      publish: ['dislike', 'neutral', 'like', 'super'],
     });
     await db().delete(tgChat);
   });

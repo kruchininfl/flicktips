@@ -145,8 +145,9 @@ Steps 3 and 4 for the test target, plus the backup and migrations below, are scr
 ## Database migrations (manual, backup first)
 
 `packages/db/migrations/001-v2-tmdb-optional-and-sessions.sql` (`movie.tmdb_id` nullable, `session` table) and
-`002-push-subscriptions.sql` (`push_subscription` table), plus `004-user-profile.sql` (`user.nickname` and the
-per-account photos for the settings page; the API from the settings PR on reads them). All are compatible with the legacy PHP API and parsers,
+`002-push-subscriptions.sql` (`push_subscription` table), plus `004-user-profile.sql` (`user.nickname`, the
+per-account photos for the settings page and `tg_publish_votes` for the bot's «Что публиковать»; the API and the bot
+from the settings PR on read them). All are compatible with the legacy PHP API and parsers,
 so they can be applied any time before the v2 target that uses the database starts, and stay applied after a
 rollback. Order: `flicktips_test` first, check, then `flicktips`.
 

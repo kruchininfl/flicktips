@@ -410,6 +410,8 @@ export const user = mysqlTable(
     nickname: varchar({ length: 32 }),
     vkontakteAvatar: varchar('vkontakte_avatar', { length: 255 }),
     yandexAvatar: varchar('yandex_avatar', { length: 255 }),
+    // v2 migration 004: the votes @FlickTipsBot posts, bit `1 << vote`
+    tgPublishVotes: tinyint('tg_publish_votes', { unsigned: true }).default(15).notNull(),
   },
   (table) => [
     index('idx_username').on(table.username),

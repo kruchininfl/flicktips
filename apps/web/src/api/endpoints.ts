@@ -35,6 +35,7 @@ import type {
   SubscribeResponse,
   TelegramConfirmResponse,
   TelegramLinkResponse,
+  TelegramPublishResponse,
   TelegramResponse,
   ToggleBookmarkResponse,
   ToggleVoteResponse,
@@ -148,6 +149,9 @@ export function createApi(fetchJson: Transport) {
         leaveGroup: (chatId: string) =>
           fetchJson<{ success: true }>(`/api/me/telegram/groups/${id(chatId)}`, { method: 'DELETE' }),
         unlink: () => fetchJson<{ success: true }>('/api/me/telegram', { method: 'DELETE' }),
+        // «Что публиковать»
+        setPublish: (publish: VoteName[]) =>
+          fetchJson<TelegramPublishResponse>('/api/me/telegram', { method: 'PATCH', body: { publish } }),
       },
       // Web Push subscriptions of this browser (apps/api/docs/push.md)
       push: {

@@ -5,7 +5,11 @@ export interface User {
   username: string | null;
   gender: string | null;
   tg_user_id: string | null;
+  // «Что публиковать» in the site's settings: bit `1 << vote` for every vote to post
+  tg_publish_votes: number;
 }
+
+export const publishesVote = (user: User, vote: number) => (Number(user.tg_publish_votes) & (1 << vote)) !== 0;
 
 export interface Movie {
   id: number;

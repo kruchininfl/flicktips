@@ -1,9 +1,12 @@
 import type { FastifyPluginAsync } from 'fastify';
+import { z } from 'zod';
 
 import { requireViewer } from '../auth/viewer.js';
 import type { AppDeps } from '../deps.js';
-import { HttpError, notFound } from '../lib/errors.js';
-import { telegramRepository } from '../repositories/telegram.js';
+import { badRequest, HttpError, notFound } from '../lib/errors.js';
+import { publishedVotes, telegramRepository, VOTE_NAMES } from '../repositories/telegram.js';
+
+const publishBody = z.object({ publish: z.array(z.enum(VOTE_NAMES)).max(VOTE_NAMES.length) });
 
 // The «Telegram» block of the profile: linking a Telegram account and the groups where @FlickTipsBot
 // posts the user's ratings. Port of api/src/Controllers/TelegramController.php.
@@ -34,7 +37,18 @@ export const telegramRoutes =
         username: account?.tgUsername ?? null,
         botUsername: deps.config.telegramBotUsername,
         groups: await repo.getGroups(viewer.id),
+        // v2: «Что публиковать», the votes the bot posts
+        publish: publishedVotes(account?.tgPublishVotes ?? 15),
       };
+    });
+
+    // «Что публиковать»: the votes the bot posts to the groups; the others are not posted (their old posts stay)
+    app.patch('/me/telegram', async (request) => {
+      const viewer = requireViewer(request);
+      const body = publishBody.safeParse(request.body ?? {});
+      if (!body.success) throw badRequest('publish: a list of dislike, neutral, like, super');
+      await repo.setPublishedVotes(viewer.id, body.data.publish);
+      return { success: true, publish: publishedVotes((await repo.getAccount(viewer.id))?.tgPublishVotes ?? 15) };
     });
 
     // A fresh one-time code and the t.me links that pass it to the bot: one opens a chat with it (links

@@ -19,7 +19,16 @@ export interface TelegramGroup {
 export interface TelegramAccount {
   tgUserId: number | null;
   tgUsername: string | null;
+  tgPublishVotes: number;
 }
+
+// «Что публиковать»: user.tg_publish_votes has bit `1 << movie_vote.vote` set for every vote the bot posts
+export const VOTE_NAMES = ['dislike', 'neutral', 'like', 'super'] as const;
+export type VoteName = (typeof VOTE_NAMES)[number];
+
+export const publishedVotes = (mask: number): VoteName[] => VOTE_NAMES.filter((_, vote) => mask & (1 << vote));
+const publishMask = (votes: readonly VoteName[]) =>
+  votes.reduce((mask, name) => mask | (1 << VOTE_NAMES.indexOf(name)), 0);
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
@@ -52,10 +61,17 @@ export function telegramRepository(db: Db) {
   return {
     async getAccount(uid: number): Promise<TelegramAccount | null> {
       const [row] = await db
-        .select({ tgUserId: user.tgUserId, tgUsername: user.tgUsername })
+        .select({ tgUserId: user.tgUserId, tgUsername: user.tgUsername, tgPublishVotes: user.tgPublishVotes })
         .from(user)
         .where(eq(user.id, uid));
       return row ?? null;
+    },
+
+    async setPublishedVotes(uid: number, votes: readonly VoteName[]): Promise<void> {
+      await db
+        .update(user)
+        .set({ tgPublishVotes: publishMask(votes) })
+        .where(eq(user.id, uid));
     },
 
     // Groups whose posts include this user's ratings.

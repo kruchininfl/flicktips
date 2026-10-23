@@ -1,0 +1,86 @@
+@use 'sass:meta';
+@use 'base' as *;
+@use 'movie';
+@use 'movie-tablets';
+
+// Phones: a row with the poster on the left; tablets and up: a poster-first tile (MoviePreviewTablets)
+.movie-prev {
+  color: $color-muted;
+  position: relative;
+  padding: 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  .movie-prev-list & {
+    border-bottom: 1px solid $color-line;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+.movie-cover.movie-cover__prev {
+  float: none;
+  flex: none;
+  width: 96px;
+  align-self: flex-start;
+  box-shadow: $shadow;
+}
+.movie-prev__content {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+
+  .movie-title {
+    font-size: 15px;
+  }
+  .movie-eStat {
+    margin-top: 2px;
+  }
+}
+.movie-prev__meta {
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.movie-prev__time {
+  font-size: 12px;
+  color: $color-text-soft;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  // "сегодня в 14:32" opens the line on its own here
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+.movie-prev__votes {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.movie-prev__link {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  font-size: 0;
+}
+.movie-prev__friends-votes {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  z-index: 2;
+  max-width: calc(100% - 10px);
+}
+
+@include meta.load-css('MoviePreviewTablets');

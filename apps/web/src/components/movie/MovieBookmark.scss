@@ -1,0 +1,62 @@
+@use 'base' as *;
+
+.movie-bookmark {
+  cursor: pointer;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  @include glass();
+  box-shadow: 0 0 0 1px $color-glass-line;
+  opacity: 0;
+  transition:
+    opacity 200ms,
+    background-color 200ms,
+    transform 150ms $ease-out;
+
+  // empty bookmarks show on hover only, so posters stay clean; touch screens always show them
+  .movie-prev:hover &,
+  .movie__cover &,
+  &.m-active {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    opacity: 1;
+  }
+
+  &.m-active {
+    color: $color-bg;
+    background: $color-accent;
+    box-shadow: $glow-accent;
+  }
+
+  &:hover {
+    transform: scale(1.08);
+  }
+  &:active {
+    transform: scale(0.94);
+  }
+}
+.movie-bookmark__icn {
+  font-size: 13px;
+  line-height: 1;
+}
+
+@media screen and (min-width: 768px) {
+  .movie-bookmark {
+    top: 8px;
+    left: 8px;
+    width: 32px;
+    height: 32px;
+  }
+  .movie-bookmark__icn {
+    font-size: 15px;
+  }
+}

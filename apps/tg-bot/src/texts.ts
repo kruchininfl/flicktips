@@ -1,4 +1,4 @@
-import {BOT_USERNAME, SITE_URL} from './env';
+import { BOT_USERNAME, SITE_URL } from './env.js';
 
 export interface User {
   id: number;
@@ -62,8 +62,10 @@ export function postText(user: User, movie: Movie, vote: number) {
   const title = escapeHtml(movie.title || movie.original_title || 'Без названия');
   const year = (movie.release_date || movie.first_air_date || '').slice(0, 4);
 
-  return `${userLink(user)} ${byGender(user, ['оценил', 'оценила', 'оценил(а)'])} ` +
-    `<b>${title}</b>${year ? ` (${year})` : ''}\n${VOTES[vote]}`;
+  return (
+    `${userLink(user)} ${byGender(user, ['оценил', 'оценила', 'оценил(а)'])} ` +
+    `<b>${title}</b>${year ? ` (${year})` : ''}\n${VOTES[vote]}`
+  );
 }
 
 export function changedText(user: User, vote: number) {
@@ -71,9 +73,11 @@ export function changedText(user: User, vote: number) {
 }
 
 export function welcomeText(members: string[]) {
-  return 'Привет! Я буду публиковать сюда оценки фильмов с FlickTips.\n\n' +
+  return (
+    'Привет! Я буду публиковать сюда оценки фильмов с FlickTips.\n\n' +
     (members.length ? `Участвуют: ${members.map(escapeHtml).join(', ')}` : 'Пока никто не участвует.') +
-    '\n\nЧтобы ваши оценки тоже появлялись здесь, нажмите «Участвовать».';
+    '\n\nЧтобы ваши оценки тоже появлялись здесь, нажмите «Участвовать».'
+  );
 }
 
 export function botUrl(start?: string, group = false) {

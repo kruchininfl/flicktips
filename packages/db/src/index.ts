@@ -12,6 +12,8 @@ export interface DbConfig {
   password: string;
   database: string;
   connectionLimit?: number;
+  /** Extra mysql2 pool options (e.g. supportBigNumbers, dateStrings); applied last. */
+  poolOptions?: Partial<mysql.PoolOptions>;
 }
 
 export type Db = MySql2Database<typeof schema>;
@@ -25,6 +27,7 @@ export function createDb(config: DbConfig): { db: Db; pool: mysql.Pool } {
     database: config.database,
     connectionLimit: config.connectionLimit ?? 10,
     charset: 'utf8mb4',
+    ...config.poolOptions,
   });
   return { db: drizzle(pool, { schema, mode: 'default' }), pool };
 }

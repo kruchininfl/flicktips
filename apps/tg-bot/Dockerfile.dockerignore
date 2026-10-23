@@ -1,0 +1,7 @@
+# Used by BuildKit for `docker build -f apps/tg-bot/Dockerfile .` (repo root context)
+**/node_modules
+**/dist
+**/.turbo
+**/.next
+.git
+.env

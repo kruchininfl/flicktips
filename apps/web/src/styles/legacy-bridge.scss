@@ -1,7 +1,7 @@
 @use 'base' as *;
 
 // Temporary: the pages that are not redrawn yet keep their dark «Кинозал» look inside a panel of the new shell
-// (components/shell/AppShell, REDESIGNED). Delete with the last legacy page.
+// (components/shell/AppShell, LEGACY). Delete with the last legacy page.
 .legacy-content {
   min-height: calc(100vh - 96px);
   border-radius: var(--radius-card);

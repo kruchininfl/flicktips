@@ -20,20 +20,10 @@ import { PendingActions } from './PendingActions';
 import { CollapsedSidebar, Sidebar } from './Sidebar';
 import { MobileHeader, TopBar } from './TopBar';
 
-// Pages already redrawn for the new design. The rest keep the legacy markup and styles inside a dark panel
-// until they are ported (stage 2 of the redesign); drop this when the list covers every page. `legacy` keeps the
-// redesign's base styles off the old markup (styles/globals.css).
-const REDESIGNED = [
-  '/',
-  '/layout',
-  '/movie/*',
-  '/user/*',
-  '/profile/bookmarks',
-  '/profile/friends',
-  '/telegram',
-  '/about',
-  '/person/*',
-];
+// Pages not redrawn for the new design yet (stage 4 of the redesign): they keep the legacy markup and styles inside
+// a dark panel; drop this with the last of them. `legacy` keeps the redesign's base styles off the old markup
+// (styles/globals.css). Every other page, the 404 included, is in the new design.
+const LEGACY = ['/profile/accounts'];
 
 // Full-screen pages without the sidebar and the header (Figma «Вход», «Инвайт»)
 const BARE = ['/signin', '/invite/*'];
@@ -45,7 +35,7 @@ const matches = (pages: string[], pathname: string) => {
 
 function PageContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  if (matches(REDESIGNED, pathname)) return <>{children}</>;
+  if (!matches(LEGACY, pathname)) return <>{children}</>;
   return (
     <div className="legacy legacy-content">
       <div className="container">{children}</div>

@@ -7,6 +7,7 @@ import type { MovieVote, Paged, ProfileStats, PublicUser, UserVoteMovie } from '
 
 import { api } from '@/api/browser';
 import { MovieCard, MovieGrid } from '@/components/film/MovieCard';
+import { fromFriendVotes } from '@/components/film/VoterPill';
 import { useUi } from '@/components/shell/UiProvider';
 import { Button } from '@/components/ui/button';
 import { ToggleCount } from '@/components/ui/toggle';
@@ -33,15 +34,7 @@ function cardVotes(movie: UserVoteMovie, user: PublicUser): MovieVote[] {
     value: movie.vote,
     timestamp: Number(movie.timestamp),
   };
-  const friends = (movie.friend_votes ?? [])
-    .filter((vote) => vote.user_id !== user.id)
-    .map((vote) => ({
-      user_id: vote.user_id,
-      user_name: vote.user_name,
-      user_avatar: vote.user_avatar,
-      value: vote.vote,
-      timestamp: vote.vote_timestamp,
-    }));
+  const friends = fromFriendVotes(movie.friend_votes).filter((vote) => vote.user_id !== user.id);
   return [own, ...friends];
 }
 

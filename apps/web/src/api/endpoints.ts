@@ -91,8 +91,15 @@ export function createApi(fetchJson: Transport) {
         fetchJson<PagedResponse<ListedUser>>('/api/me/friends', { query: { page, size, type } }),
       friendsVotes: (page = 1) =>
         fetchJson<FriendsVotesResponse>('/api/me/friends/votes', { query: { page }, signInOn401: false }),
-      bookmarks: ({ page = 1, size }: { page?: number; size?: number } = {}) =>
-        fetchJson<BookmarksResponse>('/api/me/bookmarks', { query: { page, size } }),
+      bookmarks: ({
+        page = 1,
+        size,
+        type,
+        liked,
+      }: { page?: number; size?: number; type?: 'movie' | 'tv'; liked?: boolean } = {}) =>
+        fetchJson<BookmarksResponse>('/api/me/bookmarks', {
+          query: { page, size, type, liked: liked ? 1 : undefined },
+        }),
       // sets the vote, or removes it when the same vote is sent again
       vote: (movieId: number, vote: VoteName) =>
         fetchJson<ToggleVoteResponse>('/api/me/votes', { method: 'POST', body: { id: movieId, vote } }),

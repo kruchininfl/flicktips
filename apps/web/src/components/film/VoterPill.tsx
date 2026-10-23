@@ -1,4 +1,4 @@
-import type { MovieVote } from '@flicktips/shared';
+import type { FriendVote, MovieVote } from '@flicktips/shared';
 
 import { UserAvatar } from '@/components/brand/UserAvatar';
 import { VoteGlyph } from '@/components/votes/votes';
@@ -44,4 +44,17 @@ export function MoreVoters({ count }: { count: number }) {
 // The movie's votes, latest first (the API doesn't sort a feed movie's votes).
 export function latestVotes(votes: MovieVote[] | undefined): MovieVote[] {
   return (votes ?? []).slice().sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+}
+
+// a `friend_votes` list (a user's votes, bookmarks) as MovieVote, latest first
+export function fromFriendVotes(votes: FriendVote[] | undefined): MovieVote[] {
+  return latestVotes(
+    (votes ?? []).map((vote) => ({
+      user_id: vote.user_id,
+      user_name: vote.user_name,
+      user_avatar: vote.user_avatar,
+      value: vote.vote,
+      timestamp: vote.vote_timestamp,
+    })),
+  );
 }

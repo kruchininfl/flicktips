@@ -77,6 +77,8 @@ wrong'}` but no longer includes the `error` object.
 - **Invite codes.** A user whose `invite_code` is `''` (not `NULL`) made PHP recurse forever; the empty
   string now counts as missing and gets replaced. An empty `code` in `accept` / `GET /invites/:code` is
   "not found" (PHP matched users whose code was `''`).
+- **Bookmark filters (new).** `GET /api/me/bookmarks` takes `type=movie|tv` and `liked=1` (someone the
+  viewer follows voted like or super); `total` and `pages` count the filtered list.
 - **Profile numbers (new).** `GET /api/users/:id/stats` answers `{success, stats: {votes: {super, like,
 neutral, dislike}, friends, bookmarks?}}` for the profile header: votes per kind, mutual follows, and the
   bookmark count only on the viewer's own profile.

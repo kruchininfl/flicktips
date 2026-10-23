@@ -44,6 +44,9 @@ const pagingQuery = z.object({ page: pageNumber, size: pageNumber.pipe(z.number(
 // 1/0, "1"/"0" or a boolean, as the legacy pages send flags
 const flag = z.union([z.boolean(), z.literal(0), z.literal(1), z.literal('0'), z.literal('1')]).transform((v) => !!+v);
 
+// new in v2: the bookmark filters
+const bookmarksQuery = z.object({ type: z.enum(['movie', 'tv']).optional(), liked: flag.optional() });
+
 function paging(query: unknown, defaultSize: number) {
   const { page = 1, size = defaultSize } = parse(pagingQuery, query);
   return { page, size, offset: (page - 1) * size };
@@ -142,12 +145,13 @@ export const userRoutes =
       return pageResult(total, page, size, entities);
     });
 
-    // UserController::getBookmarks — GET /api/user/bookmarks/?page&size
+    // UserController::getBookmarks — GET /api/user/bookmarks/?page&size (+ type, liked)
     app.get('/me/bookmarks', async (request) => {
       const viewer = requireViewer(request);
       const { page, size, offset } = paging(request.query, BOOKMARKS_LIST_SIZE);
-      const total = await countBookmarks(db, viewer.id);
-      const entities = total ? await listBookmarks(db, viewer.id, size, offset) : [];
+      const filter = parse(bookmarksQuery, request.query);
+      const total = await countBookmarks(db, viewer.id, filter);
+      const entities = total ? await listBookmarks(db, viewer.id, size, offset, filter) : [];
       return pageResult(total, page, size, entities);
     });
 

@@ -304,6 +304,30 @@ describe.skipIf(!hasTestDb)('user routes', () => {
       expect(after.json().results.entities.map((m: { id: number }) => m.id)).toEqual([third, first]);
     });
 
+    it('filters by type and by what the followed users liked', async () => {
+      const me = await signIn(ctx);
+      const friend = await signIn(ctx);
+      await follow(ctx, me.id, friend.id);
+      const film = await addMovie(ctx, { type: 'movie' });
+      const show = await addMovie(ctx, { type: 'tv' });
+      const meh = await addMovie(ctx, { type: 'movie' });
+      for (const movieId of [film, show, meh]) {
+        await inject(ctx, 'POST', '/api/me/bookmarks/toggle', me.headers, { movieId });
+      }
+      await inject(ctx, 'POST', '/api/me/votes', friend.headers, { id: show, vote: 'super' });
+      await inject(ctx, 'POST', '/api/me/votes', friend.headers, { id: meh, vote: 'neutral' });
+
+      const ids = async (query: string) => {
+        const res = (await inject(ctx, 'GET', `/api/me/bookmarks?${query}`, me.headers)).json();
+        return [res.results.total, res.results.entities.map((m: { id: number }) => m.id)];
+      };
+      expect(await ids('type=movie')).toEqual([2, [meh, film]]);
+      expect(await ids('type=tv')).toEqual([1, [show]]);
+      expect(await ids('liked=1')).toEqual([1, [show]]);
+      expect(await ids('type=movie&liked=1')).toEqual([0, []]);
+      expect((await inject(ctx, 'GET', '/api/me/bookmarks?type=film', me.headers)).statusCode).toBe(400);
+    });
+
     it('returns an empty page, 404 for unknown movies and 401 without a viewer', async () => {
       const me = await signIn(ctx);
       const empty = await inject(ctx, 'GET', '/api/me/bookmarks?page=3', me.headers);

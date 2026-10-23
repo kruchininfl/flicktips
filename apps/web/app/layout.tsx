@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-// Component styles first and the global sheet last: the legacy bundle had the partitions' CSS before App.scss,
-// and some equal-specificity rules rely on that order.
+// Component styles first, then the global sheets: the legacy bundle had the partitions' CSS before App.scss and
+// the pages' CSS after it, and some equal-specificity rules rely on that order.
 import { AppShell } from '@/components/shell/AppShell';
 import { UiProvider } from '@/components/shell/UiProvider';
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/config';
@@ -10,6 +10,7 @@ import { getViewer } from '@/viewer/server';
 import { ViewerProvider } from '@/viewer/ViewerProvider';
 
 import '@/styles/app.scss';
+import '@/styles/pages.scss';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

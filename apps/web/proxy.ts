@@ -14,9 +14,8 @@ export function proxy(request: NextRequest) {
   }
   if (!target) return NextResponse.next();
 
-  const url = request.nextUrl.clone();
-  url.pathname = target;
-  return NextResponse.redirect(url, 308);
+  // a plain URL: NextURL re-applies the request's own trailing slash when serialized
+  return NextResponse.redirect(new URL(target + request.nextUrl.search, request.url), 308);
 }
 
 export const config = {

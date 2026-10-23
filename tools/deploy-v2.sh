@@ -12,7 +12,7 @@
 # deploy). Images must stay secret-free: secrets live only in the target's .env on the server.
 #
 # Env: DEPLOY_HOST (default root@45.15.252.159), DEPLOY_V2_PATH (default /var/www/flicktips-v2; the target directory
-#      is $DEPLOY_V2_PATH/<target>), V2_TEST_SITE_URL (default https://v2.flicktips.ru), ALLOW_DIRTY=1,
+#      is $DEPLOY_V2_PATH/<target>), V2_TEST_SITE_URL (default https://dev.flicktips.ru), ALLOW_DIRTY=1,
 #      BUILDX_CACHE=gha (set by the workflow), NODE_IMAGE (base image, default node:22-slim).
 set -euo pipefail
 
@@ -28,7 +28,7 @@ SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 "$DEPLOY_HOST")
 case "$TARGET" in
   # ports: docker-compose.v2.yml header; the web image bakes the API port in
   prod) SITE_URL="https://flicktips.ru" API_PORT=3102 ;;
-  test) SITE_URL="${V2_TEST_SITE_URL:-https://v2.flicktips.ru}" API_PORT=3202 ;;
+  test) SITE_URL="${V2_TEST_SITE_URL:-https://dev.flicktips.ru}" API_PORT=3202 ;;
   *) sed -n '2,18p' "$0"; exit 1 ;;
 esac
 SITE_URL="${SITE_URL%/}"

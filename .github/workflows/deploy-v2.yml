@@ -21,7 +21,7 @@ on:
       test_site_url:
         description: 'Public URL of the test target (must match SITE_URL in its .env); ignored for prod'
         required: false
-        default: 'https://v2.flicktips.ru'
+        default: 'https://dev.flicktips.ru'
       rollback:
         description: 'Roll the target back to V2_PREV_TAG instead of deploying'
         type: boolean

@@ -175,30 +175,30 @@ it is due, apply it the same way (backup, `flicktips_test` first); it sets its o
 
 ## Test domain run (side by side with production)
 
-Example name `v2.flicktips.ru`; any name works (`test_site_url` input of the workflow = `SITE_URL` of the test `.env`).
+Example name `dev.flicktips.ru`; any name works (`test_site_url` input of the workflow = `SITE_URL` of the test `.env`).
 
-1. DNS: `A v2.flicktips.ru → 45.15.252.159`. Wait until it resolves.
+1. DNS: `A dev.flicktips.ru → 45.15.252.159`. Wait until it resolves.
 2. Certificate, through the legacy nginx (its first `:80` server answers ACME challenges for any name):
 
    ```sh
    cd /var/www/flicktips.ru
    docker run --rm -v "$PWD/data/certbot/conf:/etc/letsencrypt" -v "$PWD/data/certbot/www:/var/www/certbot" \
      certbot/certbot certonly --webroot --webroot-path /var/www/certbot --email <you> --agree-tos --no-eff-email \
-     --non-interactive -d v2.flicktips.ru
+     --non-interactive -d dev.flicktips.ru
    ```
 
    The existing renewal cron (`docker/certbot-renew.sh`) renews it with the others.
 3. Migrations on `flicktips_test` (above). The test target uses `flicktips_test`; to try it on real data set
    `DB_NAME=flicktips` (then votes and sign-ins on the test domain are real; apply the migrations to `flicktips` first).
-4. Test `.env` ready (preparation step 3, `V2_TARGET=test`, `SITE_URL=https://v2.flicktips.ru`, ports 3201/3202,
+4. Test `.env` ready (preparation step 3, `V2_TARGET=test`, `SITE_URL=https://dev.flicktips.ru`, ports 3201/3202,
    lower memory caps on the small box). Bot: leave `COMPOSE_PROFILES` empty, or a separate test bot token +
    `COMPOSE_PROFILES=bot`.
-5. Actions → **Deploy v2** → Run workflow from `master_v2`, target `test`, `test_site_url=https://v2.flicktips.ru`.
+5. Actions → **Deploy v2** → Run workflow from `master_v2`, target `test`, `test_site_url=https://dev.flicktips.ru`.
    The workflow builds and pushes the images, syncs `docker-compose.v2.yml`, `.env.v2.example`, `docker/v2.sh` and
    the nginx files, starts api + web, waits for their health checks, then `docker/v2.sh vhost` renders the test vhost
    into the running legacy nginx as `conf.d/zz-flicktips-v2-test.conf` (last in include order, so it never becomes
    the default server), runs `nginx -t` (on failure it removes the file again and does not reload) and reloads.
-   Finally it checks `https://v2.flicktips.ru/`, `/robots.txt` and `/api/health` from the runner.
+   Finally it checks `https://dev.flicktips.ru/`, `/robots.txt` and `/api/health` from the runner.
 6. The vhost lives inside the legacy nginx container: a legacy deploy recreates that container and drops it. Re-add it
    with `cd /var/www/flicktips-v2/test && docker/v2.sh vhost` (or run the v2 test deploy again).
    Remove it with `docker/v2.sh vhost-remove`; stop the test stack with `docker/v2.sh compose down`.
@@ -207,7 +207,7 @@ Example name `v2.flicktips.ru`; any name works (`test_site_url` input of the wor
 
 ## Smoke test checklist
 
-Run on the test domain before the switchover and on flicktips.ru right after it (`H=https://v2.flicktips.ru` or
+Run on the test domain before the switchover and on flicktips.ru right after it (`H=https://dev.flicktips.ru` or
 `H=https://flicktips.ru`):
 
 - [ ] `curl -s $H/api/health` → `{"status":"ok","db":"up"}`
@@ -292,8 +292,8 @@ The API sends `SITE_URL + /auth/<provider>/callback` (`apps/api/docs/auth.md`):
 
 | provider                                            | production (same as PHP today)                 | test domain                                       |
 | --------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------- |
-| VK ID (id.vk.ru cabinet, «Доверенный redirect URL») | `https://flicktips.ru/auth/vkontakte/callback` | `https://v2.flicktips.ru/auth/vkontakte/callback` |
-| Yandex ID (oauth.yandex.ru, «Redirect URI»)         | `https://flicktips.ru/auth/yandex/callback`    | `https://v2.flicktips.ru/auth/yandex/callback`    |
+| VK ID (id.vk.ru cabinet, «Доверенный redirect URL») | `https://flicktips.ru/auth/vkontakte/callback` | `https://dev.flicktips.ru/auth/vkontakte/callback` |
+| Yandex ID (oauth.yandex.ru, «Redirect URI»)         | `https://flicktips.ru/auth/yandex/callback`    | `https://dev.flicktips.ru/auth/yandex/callback`    |
 
 Check that the production ones are registered exactly like that (no `www`, https); add the test ones. VK ID may also
 need the test domain as a trusted domain of the app.

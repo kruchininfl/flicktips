@@ -4,8 +4,8 @@ Port of `api/src/Controllers/UserController.php` (with `UserRepository`, `Mapper
 `TelegramRepository::queueVote`) to `apps/api/src/routes/users.ts`. Repositories:
 `src/repositories/users.ts`, `votes.ts`, `bookmarks.ts`; `Mapper::group` is `src/lib/group-rows.ts`.
 
-Auth stays the legacy `uid` + `access-token` headers (`request.viewer`). A route that needs a viewer answers
-`401 {success: false, msg: 'authorization required'}`, as PHP did.
+Auth is the `ft_session` cookie (`request.viewer`, see `auth.md`; stage 3 used the legacy `uid` + `access-token`
+headers). A route that needs a viewer answers `401 {success: false, msg: 'authorization required'}`, as PHP did.
 
 ## Route mapping
 

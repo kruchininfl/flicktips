@@ -1,7 +1,7 @@
 import { healthResponseSchema } from '@flicktips/shared';
 import { describe, expect, it } from 'vitest';
 
-import { hasTestDb, signIn, useTestApp } from '../test/helpers.js';
+import { fakeOAuth, hasTestDb, signIn, useTestApp } from '../test/helpers.js';
 import { buildApp } from './app.js';
 import { requireViewer } from './auth/viewer.js';
 import { loadConfig } from './config.js';
@@ -12,7 +12,8 @@ const deps = (pingDb: AppDeps['pingDb']) =>
     pingDb,
     db: {} as AppDeps['db'],
     kp: {} as AppDeps['kp'],
-    config: { env: 'dev', telegramBotUsername: 'x' },
+    oauth: fakeOAuth(),
+    config: { env: 'dev', telegramBotUsername: 'x', siteUrl: 'https://flicktips.test', authSecret: 's' },
   }) as AppDeps;
 
 describe('GET /api/health', () => {
@@ -44,23 +45,35 @@ describe('loadConfig', () => {
     expect(loadConfig({}).db.database).toBe('flicktips');
     expect(loadConfig({ DB_NAME: 'other' }).db.database).toBe('other');
   });
+
+  it('normalizes SITE_URL to an origin and derives the auth secret from the OAuth secrets', () => {
+    expect(loadConfig({}).siteUrl).toBe('https://flicktips.ru');
+    expect(loadConfig({ SITE_URL: 'https://flicktips.local/' }).siteUrl).toBe('https://flicktips.local');
+    const a = loadConfig({ VKONTAKTE_API_SECRET: 'a', YANDEX_CLIENT_SECRET: 'b' }).authSecret;
+    const b = loadConfig({ VKONTAKTE_API_SECRET: 'a', YANDEX_CLIENT_SECRET: 'c' }).authSecret;
+    expect(a).toHaveLength(64);
+    expect(a).not.toBe(b);
+    expect(loadConfig({ AUTH_SECRET: 'explicit' }).authSecret).toBe('explicit');
+  });
 });
 
-describe.skipIf(!hasTestDb)('legacy token auth', () => {
+describe.skipIf(!hasTestDb)('session cookie auth', () => {
   const ctx = useTestApp(undefined, (app) => {
     app.get('/api/_whoami', async (request) => ({ id: requireViewer(request).id }));
   });
 
-  it('resolves the viewer from uid + access-token', async () => {
+  it('resolves the viewer from the session cookie', async () => {
     const { id, headers } = await signIn(ctx);
     const ok = await ctx.app.inject({ method: 'GET', url: '/api/_whoami', headers });
     expect(ok.json()).toEqual({ id });
     const bad = await ctx.app.inject({
       method: 'GET',
       url: '/api/_whoami',
-      headers: { ...headers, 'access-token': 'wrong' },
+      headers: { cookie: 'ft_session=wrong' },
     });
     expect(bad.statusCode).toBe(401);
     expect(bad.json()).toEqual({ success: false, msg: 'authorization required' });
+    const none = await ctx.app.inject({ method: 'GET', url: '/api/_whoami' });
+    expect(none.statusCode).toBe(401);
   });
 });

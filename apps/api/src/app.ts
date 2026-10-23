@@ -5,6 +5,7 @@ import { legacyTokenResolver, type ViewerResolver } from './auth/viewer.js';
 import type { AppDeps } from './deps.js';
 import { HttpError } from './lib/errors.js';
 import { healthRoutes } from './routes/health.js';
+import { indexControllerRoutes } from './routes/index-controller.js';
 
 export interface BuildAppOptions extends FastifyServerOptions {
   resolveViewer?: ViewerResolver;
@@ -34,6 +35,7 @@ export function buildApp(deps: AppDeps, { resolveViewer, ...options }: BuildAppO
 
   // Route modules: one file per area under src/routes, each a plugin taking the deps.
   app.register(healthRoutes(deps), { prefix: '/api' });
+  app.register(indexControllerRoutes(deps), { prefix: '/api' });
 
   return app;
 }

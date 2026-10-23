@@ -11,7 +11,8 @@ import { getPosterUrl } from '@/lib/movies';
 import { BookmarkButton } from './BookmarkButton';
 import { FriendVotes } from './FriendVotes';
 import { movieMeta } from './meta';
-import { MovieVoteButtons, votable } from './MovieVoteButtons';
+import { MovieVoteButtons } from './MovieVoteButtons';
+import { votable } from './votable';
 import { Ratings } from './Ratings';
 import { firstName, latestVotes, MoreVoters, VoterPill } from './VoterPill';
 

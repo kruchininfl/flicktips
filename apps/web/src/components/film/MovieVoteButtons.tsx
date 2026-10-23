@@ -6,14 +6,14 @@ import { useMovieState, useVote } from '@/components/movie/useMovieState';
 import { VoteButton } from '@/components/votes/VoteButton';
 import type { VoteKind } from '@/components/votes/votes';
 
+import type { VotableMovie } from './votable';
+
 const VOTES = [
   { kind: 'super', counter: 'super', flag: 'isSuper' },
   { kind: 'like', counter: 'likes', flag: 'isLiked' },
   { kind: 'neutral', counter: 'neutral', flag: 'isNeutral' },
   { kind: 'dislike', counter: 'dislikes', flag: 'isDisliked' },
 ] as const satisfies readonly { kind: VoteKind; counter: keyof VoteCounters; flag: keyof ViewerFlags }[];
-
-export type VotableMovie = { id: number } & Partial<VoteCounters> & ViewerFlags;
 
 // The four votes of a movie with their counters: S on posters, L on the hero and the film page. A click votes
 // (guests get the sign-in popup); the counters come back from the API.
@@ -40,10 +40,4 @@ export function MovieVoteButtons({
       className={buttonClassName}
     />
   ));
-}
-
-// The movie's own vote fields, for passing a big row object to a client component.
-export function votable(movie: VotableMovie): VotableMovie {
-  const { id, super: superCount, likes, neutral, dislikes, isSuper, isLiked, isNeutral, isDisliked } = movie;
-  return { id, super: superCount, likes, neutral, dislikes, isSuper, isLiked, isNeutral, isDisliked };
 }

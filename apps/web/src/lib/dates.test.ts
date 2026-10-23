@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatCardTime,
   formatDuration,
+  formatHoursMinutes,
   formatLongDate,
   formatShortDate,
   formatVoteTime,
@@ -41,6 +42,14 @@ describe('formatCardTime', () => {
     expect(formatCardTime(seconds(Date.UTC(2025, 4, 3, 18, 10)), NOW)).toBe('3 мая 2025');
     expect(formatCardTime(seconds(Date.UTC(2026, 9, 23, 6, 5)), NOW, true)).toBe('09:05');
     expect(formatCardTime(0, NOW)).toBe('');
+  });
+});
+
+describe('formatHoursMinutes', () => {
+  it('writes a running time', () => {
+    expect(formatHoursMinutes(166)).toBe('2 ч 46 мин');
+    expect(formatHoursMinutes(46)).toBe('46 мин');
+    expect(formatHoursMinutes(120)).toBe('2 ч');
   });
 });
 

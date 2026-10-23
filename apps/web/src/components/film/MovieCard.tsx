@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 
 import { BookmarkButton } from './BookmarkButton';
 import { movieMeta } from './meta';
-import { MovieVoteButtons, votable } from './MovieVoteButtons';
+import { MovieVoteButtons } from './MovieVoteButtons';
+import { votable } from './votable';
 import { Ratings } from './Ratings';
 import { latestVotes, MoreVoters, VoterPill } from './VoterPill';
 

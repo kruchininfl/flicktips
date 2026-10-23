@@ -23,11 +23,14 @@ import { MobileHeader, TopBar } from './TopBar';
 // Pages already redrawn for the new design. The rest keep the legacy markup and styles inside a dark panel
 // until they are ported (stage 2 of the redesign); drop this when the list covers every page. `legacy` keeps the
 // redesign's base styles off the old markup (styles/globals.css).
-const REDESIGNED = ['/', '/layout'];
+const REDESIGNED = ['/', '/layout', '/movie/*'];
+
+const isRedesigned = (pathname: string) =>
+  REDESIGNED.some((page) => (page.endsWith('*') ? pathname.startsWith(page.slice(0, -1)) : pathname === page));
 
 function PageContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  if (REDESIGNED.includes(pathname)) return <>{children}</>;
+  if (isRedesigned(pathname)) return <>{children}</>;
   return (
     <div className="legacy legacy-content">
       <div className="container">{children}</div>

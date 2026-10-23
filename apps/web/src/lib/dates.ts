@@ -108,6 +108,15 @@ export function formatDuration(minutes: number): string {
   return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
 }
 
+// «2 ч 46 мин», «46 мин»
+export function formatHoursMinutes(minutes: number): string {
+  const total = Math.max(0, Math.round(minutes));
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (!hours) return `${rest} мин`;
+  return rest ? `${hours} ч ${rest} мин` : `${hours} ч`;
+}
+
 function plural(forms: [string, string, string], n: number): string {
   if (n % 10 === 1 && n % 100 !== 11) return forms[0];
   if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return forms[1];

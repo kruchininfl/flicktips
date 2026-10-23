@@ -60,14 +60,14 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
   const [row] = await db
     .select({
       ...publicUserFields,
+      // drizzle renders ${user.id} as a bare `id`, which inside these subqueries means movie_vote.id: bind the id
       new_notifications: sql<string>`(
         SELECT COUNT(*) FROM movie_vote
         WHERE movie_vote.user_id IN (
-          SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ${user.id} AND user_friends.subscribed = 1
+          SELECT user_friends.user_2 FROM user_friends WHERE user_friends.user_1 = ${id} AND user_friends.subscribed = 1
         ) AND movie_vote.timestamp > ${user.lastSeenNotifications}
       )`,
       hide_viewed: user.hideViewed,
-      // the bound id, not ${user.id}: unqualified `id` inside the subquery would be movie_vote.id
       votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${id})`,
     })
     .from(user)

@@ -1,136 +1,121 @@
 'use client';
 
+import { IconBookmark, IconPlayerPlay, IconShare } from '@tabler/icons-react';
 import { useState } from 'react';
 
-import { Button } from '@/components/gui/Button';
-import { Spinner } from '@/components/gui/Spinner';
+import { Avatar } from '@/ui/Avatar';
+import { Badge } from '@/ui/Badge';
+import { Button } from '@/ui/Button';
+import { Chip } from '@/ui/Chip';
+import { Logo } from '@/ui/Logo';
+import { Segmented } from '@/ui/Segmented';
+import { Switch } from '@/ui/Switch';
+import { VoteButton } from '@/ui/VoteButton';
+import { VOTE_KINDS, VOTE_LABELS, VoteGlyph, type VoteKind } from '@/ui/votes';
 
-// web/src/components/LayoutPage: the GUI kit (buttons, spinners, form controls) on one page.
+import styles from './LayoutShowcase.module.scss';
+
+const FEED_TABS = [
+  { value: 'friends', label: 'Друзья' },
+  { value: 'all', label: 'Все оценки' },
+] as const;
+
+// /layout: the redesign's UI kit (Figma page «Основа и компоненты»), to check the components in both themes.
 export function LayoutShowcase() {
-  const [loadingBtn, setLoadingBtn] = useState<number | null>(null);
-  const toggle = (index: number) => () => setLoadingBtn(loadingBtn === index ? null : index);
+  const [vote, setVote] = useState<VoteKind | null>('super');
+  const [filter, setFilter] = useState<VoteKind | 'all'>('all');
+  const [tab, setTab] = useState<(typeof FEED_TABS)[number]['value']>('friends');
+  const [on, setOn] = useState(true);
 
   return (
-    <div className="layout-page">
-      <h1>Buttons</h1>
-      <Button loading={loadingBtn === 1} onClick={toggle(1)}>
-        Button
-      </Button>
-      <Button loading={loadingBtn === 2} onClick={toggle(2)} color="gray">
-        Button
-      </Button>
-      <Button loading={loadingBtn === 3} onClick={toggle(3)} color="green">
-        Button
-      </Button>
-      <Button loading={loadingBtn === 4} onClick={toggle(4)} color="blue">
-        Button
-      </Button>
-      <Button disabled>Button</Button>
-      <br />
-      <Button loading={loadingBtn === 5} onClick={toggle(5)} size="big">
-        Button
-      </Button>
+    <div className={styles.page}>
+      <h1>Компоненты</h1>
+      <p className={styles.lead}>Основа нового дизайна. Тема переключается луной в сайдбаре.</p>
 
-      <h1>Spinners</h1>
-      <Spinner active />
-      <span style={{ marginLeft: 5, marginRight: 10 }}>- стандартный спинер</span>
-      <Spinner active size="small" />
-      <span style={{ marginLeft: 5, marginRight: 10 }}>- маленький спинер</span>
+      <section>
+        <h2>Логотип и аватары</h2>
+        <div className={styles.row}>
+          <Logo />
+          <Avatar src={null} name="Артём Кручинин" size={24} />
+          <Avatar src={null} name="Артём Кручинин" size={32} />
+          <Avatar src={null} name="Артём Кручинин" size={40} />
+          <Avatar src={null} name="Артём Кручинин" size={96} />
+        </div>
+      </section>
 
-      <h1>Form</h1>
-      <div className="fc">
-        <label className="fc__label" htmlFor="input-1">
-          Label:
-        </label>
-        <input id="input-1" type="text" className="fc__input" placeholder="Placeholder" />
-      </div>
-      <div className="fc">
-        <label className="fc__label" htmlFor="input-2">
-          Label:
-        </label>
-        <input id="input-2" type="text" className="fc__input" placeholder="Placeholder" disabled readOnly />
-      </div>
-      <div className="fc">
-        <label className="fc__label" htmlFor="input-3">
-          Label:
-        </label>
-        <input id="input-3" type="text" className="fc__input" value="Value" disabled readOnly />
-      </div>
-      <br />
-      <div className="fc">
-        <label htmlFor="select-1" className="fc__label">
-          Label:
-        </label>
-        <select name="select-1" id="select-1" className="fc__select">
-          <option value="1">Item 1</option>
-          <option value="2">Item 2</option>
-          <option value="3">Item 3</option>
-          <option value="4">Item 4</option>
-          <option value="5">Item 5</option>
-        </select>
-      </div>
-      <div className="fc">
-        <label htmlFor="select-2" className="fc__label">
-          Label:
-        </label>
-        <select name="select-2" id="select-2" className="fc__select" disabled>
-          <option value="1">Item 1</option>
-          <option value="2">Item 2</option>
-          <option value="3">Item 3</option>
-          <option value="4">Item 4</option>
-          <option value="5">Item 5</option>
-        </select>
-      </div>
-      <br />
-      <div className="fc">
-        <input className="fc__checkbox" type="checkbox" id="checkbox-1" value="1" />
-        <label htmlFor="checkbox-1" className="fc__label">
-          Checkbox
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__checkbox" type="checkbox" id="checkbox-2" value="1" checked readOnly />
-        <label htmlFor="checkbox-2" className="fc__label">
-          Checkbox
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__checkbox" type="checkbox" id="checkbox-3" value="1" disabled readOnly />
-        <label htmlFor="checkbox-3" className="fc__label">
-          Checkbox
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__checkbox" type="checkbox" id="checkbox-4" value="1" checked disabled readOnly />
-        <label htmlFor="checkbox-4" className="fc__label">
-          Checkbox
-        </label>
-      </div>
-      <br />
-      <div className="fc">
-        <input className="fc__radio" name="radio" type="radio" id="radio-1" value="1" />
-        <label htmlFor="radio-1" className="fc__label">
-          Radio
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__radio" name="radio" type="radio" id="radio-2" value="1" checked readOnly />
-        <label htmlFor="radio-2" className="fc__label">
-          Radio
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__radio" name="radio" type="radio" id="radio-3" value="1" disabled readOnly />
-        <label htmlFor="radio-3" className="fc__label">
-          Radio
-        </label>
-      </div>
-      <div className="fc">
-        <input className="fc__radio" name="radio" type="radio" id="radio-4" value="1" checked disabled readOnly />
-        <label htmlFor="radio-4" className="fc__label">
-          Radio
-        </label>
-      </div>
+      <section>
+        <h2>Кнопки</h2>
+        {(['m', 's'] as const).map((size) => (
+          <div key={size} className={styles.row}>
+            <Button size={size}>Основная</Button>
+            <Button size={size} variant="outline" icon={<IconBookmark />}>
+              В закладки
+            </Button>
+            <Button size={size} variant="outline" icon={<IconPlayerPlay />}>
+              Трейлер
+            </Button>
+            <Button size={size} variant="ghost">
+              Призрак
+            </Button>
+            <Button size={size} variant="accent" icon={<IconShare />}>
+              Поделиться
+            </Button>
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <h2>Вкладки и фильтры</h2>
+        <div className={styles.row}>
+          <Segmented options={FEED_TABS} value={tab} onChange={setTab} />
+        </div>
+        <div className={styles.row}>
+          <Chip selected={filter === 'all'} count={48} onClick={() => setFilter('all')}>
+            Все
+          </Chip>
+          {VOTE_KINDS.map((kind, index) => (
+            <Chip
+              key={kind}
+              selected={filter === kind}
+              count={[12, 20, 9, 7][index]}
+              icon={<VoteGlyph kind={kind} />}
+              onClick={() => setFilter(kind)}
+            >
+              {VOTE_LABELS[kind]}
+            </Chip>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2>Оценки</h2>
+        {(['l', 'm', 's'] as const).map((size) => (
+          <div key={size} className={styles.row}>
+            {VOTE_KINDS.map((kind, index) => (
+              <VoteButton
+                key={kind}
+                kind={kind}
+                size={size}
+                count={[14, 23, 4, 1][index]}
+                selected={vote === kind}
+                onClick={() => setVote(vote === kind ? null : kind)}
+              />
+            ))}
+          </div>
+        ))}
+      </section>
+
+      <section>
+        <h2>Бейджи и переключатель</h2>
+        <div className={styles.row}>
+          <Badge status="positive">Подключён</Badge>
+          <Badge status="warning">Нужна настройка</Badge>
+          <Badge status="destructive">Ошибка</Badge>
+          <Badge status="accent">Работает</Badge>
+          <Badge status="neutral">Импортировано 214</Badge>
+          <Switch checked={on} onChange={setOn} label="Пример" />
+        </div>
+      </section>
     </div>
   );
 }

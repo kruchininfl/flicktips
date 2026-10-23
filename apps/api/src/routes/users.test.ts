@@ -469,6 +469,7 @@ describe.skipIf(!hasTestDb)('user routes', () => {
           registration_date: '2019-05-05 05:05:05',
           new_notifications: 0,
           hide_viewed: true,
+          votes_count: 0,
         },
       });
       const off = await inject(ctx, 'PATCH', '/api/me', me.headers, { data: { hide_viewed: 0 } });

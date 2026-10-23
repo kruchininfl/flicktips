@@ -1,0 +1,42 @@
+@use 'type';
+
+.chip {
+  @include type.body;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover:not(.selected) {
+    background: var(--bg-muted);
+  }
+}
+
+.count {
+  @include type.mono(11px);
+  color: var(--text-faint);
+}
+
+.selected {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--accent-on-fill);
+  font-weight: 500;
+
+  .count {
+    color: var(--accent-on-fill);
+    opacity: 0.6;
+  }
+}

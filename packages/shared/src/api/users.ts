@@ -16,6 +16,8 @@ export interface PublicUser {
 export interface ViewerProfile extends PublicUser {
   new_notifications: number;
   hide_viewed: boolean;
+  // all the user's votes («248 оценок» in the sidebar)
+  votes_count: number;
 }
 
 export interface MeResponse {

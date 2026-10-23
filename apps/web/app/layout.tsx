@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
 // Component styles first, then the global sheets: the legacy bundle had the partitions' CSS before App.scss and
@@ -7,11 +8,15 @@ import { PwaProvider } from '@/components/pwa/PwaProvider';
 import { AppShell } from '@/components/shell/AppShell';
 import { UiProvider } from '@/components/shell/UiProvider';
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/config';
+import { parseTheme, SIDEBAR_COOKIE, THEME_COOKIE } from '@/lib/theme';
 import { getViewer } from '@/viewer/server';
 import { ViewerProvider } from '@/viewer/ViewerProvider';
 
 import '@/styles/app.scss';
 import '@/styles/pages.scss';
+// the redesign's tokens and base styles after the legacy sheets, so they win where both style the page
+import '@/styles/legacy-bridge.scss';
+import '@/styles/theme.scss';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -42,20 +47,25 @@ export const viewport: Viewport = {
   maximumScale: 1,
   minimumScale: 1,
   userScalable: false,
-  themeColor: '#0d0e12',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fbfaf9' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c0a09' },
+  ],
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const viewer = await getViewer();
+  const [viewer, cookieStore] = await Promise.all([getViewer(), cookies()]);
+  const theme = parseTheme(cookieStore.get(THEME_COOKIE)?.value);
+  const sidebarCollapsed = cookieStore.get(SIDEBAR_COOKIE)?.value === 'collapsed';
 
   return (
-    <html lang="ru">
+    <html lang="ru" data-theme={theme}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font -- the legacy fonts, loaded the same way */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font -- the redesign's fonts plus the legacy pages' ones */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -64,7 +74,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <PwaProvider>
             <ViewerProvider initialViewer={viewer}>
               <UiProvider>
-                <AppShell>{children}</AppShell>
+                <AppShell initialCollapsed={sidebarCollapsed}>{children}</AppShell>
               </UiProvider>
             </ViewerProvider>
           </PwaProvider>

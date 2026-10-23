@@ -22,7 +22,12 @@ src/components/shell/       header, tab bar, search, loading bar, UiProvider (si
 src/components/{auth,invite,telegram}/   sign-in panel/modal, invite popup, Telegram block
 src/lib/                    helpers replacing moment/js-cookie/Immutable logic (dates, movies, cookies, metadata)
 src/styles/                 _reset, _base (verbatim), app.scss (App.scss), pages.scss (legacy page sheets)
+src/styles/theme.scss       redesign tokens (CSS variables, light/dark), _type.scss text styles and breakpoints
+src/ui/                     redesign components (Figma «Основа и компоненты»), CSS modules on the tokens
 ```
+
+The redesign (Figma «FlickTips — новый дизайн») replaces the legacy look page by page: a redrawn page goes into
+`REDESIGNED` in `components/shell/AppShell.tsx`; the others render inside the dark `.legacy-content` panel.
 
 DTO types live in `@flicktips/shared` (`packages/shared/src/api/*`); import them from there or `@/api/types`.
 

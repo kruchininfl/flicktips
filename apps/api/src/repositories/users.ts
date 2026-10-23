@@ -35,6 +35,7 @@ export interface PublicUser {
 export interface ViewerProfile extends PublicUser {
   new_notifications: number;
   hide_viewed: boolean;
+  votes_count: number;
 }
 
 export interface ListedUser extends PublicUser {
@@ -53,7 +54,7 @@ export async function findPublicUser(db: Db, id: number): Promise<PublicUser | n
 
 /**
  * getByCredentials without the token check: the profile plus `new_notifications` (votes of the people the
- * user follows newer than last_seen_notifications) and `hide_viewed`.
+ * user follows newer than last_seen_notifications), `hide_viewed` and `votes_count` (new in v2, for the sidebar).
  */
 export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfile | null> {
   const [row] = await db
@@ -66,12 +67,18 @@ export async function getViewerProfile(db: Db, id: number): Promise<ViewerProfil
         ) AND movie_vote.timestamp > ${user.lastSeenNotifications}
       )`,
       hide_viewed: user.hideViewed,
+      votes_count: sql<string>`(SELECT COUNT(*) FROM movie_vote WHERE movie_vote.user_id = ${user.id})`,
     })
     .from(user)
     .where(eq(user.id, id))
     .limit(1);
   if (!row) return null;
-  return { ...row, new_notifications: phpCast(row.new_notifications, 'int'), hide_viewed: !!row.hide_viewed };
+  return {
+    ...row,
+    new_notifications: phpCast(row.new_notifications, 'int'),
+    hide_viewed: !!row.hide_viewed,
+    votes_count: phpCast(row.votes_count, 'int'),
+  };
 }
 
 export async function setHideViewed(db: Db, id: number, hideViewed: 0 | 1): Promise<void> {

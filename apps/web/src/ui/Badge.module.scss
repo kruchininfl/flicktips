@@ -1,0 +1,45 @@
+@use 'type';
+
+.badge {
+  @include type.caption;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.positive {
+  color: var(--status-positive);
+  border-color: var(--status-positive-line);
+}
+
+.warning {
+  color: var(--status-warning);
+  border-color: var(--status-warning-line);
+}
+
+.destructive {
+  color: var(--status-destructive);
+  border-color: var(--status-destructive-line);
+}
+
+.accent {
+  color: var(--accent-text);
+  border-color: var(--accent-text-line);
+}
+
+.neutral {
+  color: var(--text-secondary);
+  border-color: var(--text-secondary-line);
+}

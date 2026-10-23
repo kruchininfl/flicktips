@@ -1,0 +1,108 @@
+// Text styles of the Figma file («Заголовок/…», «Текст/…»). `@use 'type';` from any component sheet.
+
+@mixin h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 39px;
+  letter-spacing: -0.025em;
+}
+
+@mixin h1-mobile {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.025em;
+}
+
+@mixin h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.015em;
+}
+
+@mixin h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+
+@mixin metric {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+}
+
+@mixin logo {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+@mixin large {
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 25px;
+}
+
+@mixin body($weight: 400) {
+  font-family: var(--font-text);
+  font-weight: $weight;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@mixin caption($weight: 400) {
+  font-family: var(--font-text);
+  font-weight: $weight;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@mixin section-label {
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@mixin mono($size: 12px) {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: $size;
+  line-height: 16px;
+}
+
+// The breakpoints of the Figma pages: «Десктоп 1440» from 1024px, «Планшет 768», «Мобайл 390» below 600px.
+$desktop: 1024px;
+$phone: 600px;
+
+@mixin desktop {
+  @media (min-width: $desktop) {
+    @content;
+  }
+}
+
+@mixin below-desktop {
+  @media (max-width: ($desktop - 1px)) {
+    @content;
+  }
+}
+
+@mixin phone {
+  @media (max-width: ($phone - 1px)) {
+    @content;
+  }
+}

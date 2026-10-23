@@ -1,0 +1,19 @@
+@use 'type';
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.word {
+  @include type.logo;
+  white-space: nowrap;
+
+  em {
+    font-style: normal;
+    color: var(--accent-text);
+  }
+}

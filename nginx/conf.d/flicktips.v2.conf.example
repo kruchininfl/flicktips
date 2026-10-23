@@ -1,0 +1,217 @@
+# FlickTips v2 edge config for production: Next.js web (:3101) + Fastify API (:3102), see docs/v2-deploy.md.
+# Not loaded by the legacy nginx image (its conf.d glob is *.conf). The v2 compose file (profile `edge`) mounts it as
+# /etc/nginx/conf.d/default.conf of a stock nginx; .github/workflows/deploy-v2.yml copies it to the server as
+# nginx/flicktips.v2.conf. It replaces nginx/conf.d/flicktips.conf at the switchover.
+#
+# All containers use network_mode: host, so the upstreams are on 127.0.0.1. Keep the ports in sync with
+# V2_WEB_PORT / V2_API_PORT of the prod .env (docker-compose.v2.yml).
+upstream flicktips_v2_web {
+    server 127.0.0.1:3101;
+    keepalive 16;
+}
+
+upstream flicktips_v2_api {
+    server 127.0.0.1:3102;
+    keepalive 16;
+}
+
+# Movie posters from Кинопоиск (see location /poster/kp/). The server disk is nearly full, so the cache is capped;
+# it lives in the container and starts empty after the container is recreated.
+proxy_cache_path /var/cache/nginx/posters levels=1:2 keys_zone=posters:10m max_size=1g
+                 inactive=60d use_temp_path=off;
+
+# Sitemap XML (up to ~3 MB per file, built by Next.js from the API): crawlers get it from here for an hour.
+proxy_cache_path /var/cache/nginx/sitemaps levels=1:2 keys_zone=sitemaps:1m max_size=100m
+                 inactive=1d use_temp_path=off;
+
+# default_server: requests for any other name (and ACME challenges for them) land here, whatever the include order
+server {
+    listen 80 default_server;
+    server_name flicktips.ru www.flicktips.ru;
+
+    access_log /var/log/nginx/flicktips.access.log;
+    error_log  /var/log/nginx/flicktips.error.log;
+
+    # ACME challenge for certbot --webroot (must stay on :80 for renewal). As the default server it also answers for
+    # other names on this host (the v2 test domain), so their certificates validate here too.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # straight to the bare domain: the API accepts only the SITE_URL origin (apps/api/docs/auth.md, "CSRF")
+    location / {
+        return 301 https://flicktips.ru$request_uri;
+    }
+}
+
+server {
+    listen 80;
+    server_name 45.15.252.159;
+
+    access_log /var/log/nginx/tg-brew.access.log;
+    error_log  /var/log/nginx/tg-brew.error.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# www → bare domain over HTTPS too (the certificate covers both names, see docker/certbot-init.sh)
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name www.flicktips.ru;
+
+    ssl_certificate     /etc/letsencrypt/live/flicktips.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/flicktips.ru/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    access_log /var/log/nginx/flicktips.access.log;
+    error_log  /var/log/nginx/flicktips.error.log;
+
+    location / {
+        return 301 https://flicktips.ru$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl default_server;
+    http2 on;
+    server_name flicktips.ru;
+
+    ssl_certificate     /etc/letsencrypt/live/flicktips.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/flicktips.ru/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:5m;
+    ssl_session_timeout 1d;
+
+    access_log /var/log/nginx/flicktips.access.log;
+    error_log  /var/log/nginx/flicktips.error.log;
+
+    client_max_body_size 20m;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
+    gzip_min_length 1024;
+
+    # inherited by every location below that sets no proxy_set_header of its own (nginx drops all inherited ones
+    # as soon as a location sets one, so /sitemaps/ repeats them)
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Live vote counters (SSE, apps/api/docs/events.md): no buffering, no gzip, and a read timeout well above the
+    # 25 s heartbeat. One connection per open tab of a signed-in viewer.
+    location = /api/events {
+        proxy_pass http://flicktips_v2_api;
+        proxy_buffering off;
+        proxy_cache off;
+        gzip off;
+        proxy_read_timeout 1h;
+    }
+
+    # REST API (Fastify)
+    location /api {
+        proxy_pass http://flicktips_v2_api;
+    }
+
+    # OAuth sign-in and callbacks are API routes (apps/api/docs/auth.md)
+    location /auth {
+        proxy_pass http://flicktips_v2_api;
+    }
+
+    # Posters by kp_id, fetched from Кинопоиск and cached here: image.tmdb.org is often unreachable from Russia.
+    # ?tmdb=<poster_path> is the fallback when Кинопоиск has no poster or is down (getPosterUrl in
+    # apps/web/src/lib/movies.ts).
+    location ~ ^/poster/kp/(\d+)\.jpg$ {
+        set $kp_poster_id $1;
+        # a variable in proxy_pass resolves at request time, so a DNS hiccup can't stop nginx
+        resolver 77.88.8.8 1.1.1.1 valid=300s ipv6=off;
+        resolver_timeout 5s;
+        proxy_pass https://kinopoiskapiunofficial.tech/images/posters/kp_small/$kp_poster_id.jpg;
+        proxy_ssl_server_name on;
+        proxy_set_header Host kinopoiskapiunofficial.tech;
+        proxy_set_header Cookie "";
+        proxy_hide_header Set-Cookie;
+        proxy_ignore_headers Set-Cookie Cache-Control Expires;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 10s;
+
+        proxy_cache posters;
+        proxy_cache_key $kp_poster_id;
+        proxy_cache_valid 200 30d;
+        proxy_cache_valid 403 404 1d;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Poster-Cache $upstream_cache_status;
+        expires 30d;
+
+        proxy_intercept_errors on;
+        error_page 403 404 500 502 503 504 = @poster_tmdb;
+    }
+
+    location @poster_tmdb {
+        # only a bare TMDb file name, so this can't be used as an open redirect
+        if ($arg_tmdb ~ "^/[A-Za-z0-9_-]+\.(jpg|png)$") {
+            return 302 https://image.tmdb.org/t/p/w342$arg_tmdb;
+        }
+        return 404;
+    }
+
+    # Next.js build assets: content-hashed file names, so they never change
+    location /_next/static/ {
+        proxy_pass http://flicktips_v2_web;
+        access_log off;
+        # one Cache-Control header, ours (Next.js sends the same value)
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
+
+    # legacy /public/* files (favicons, logo, placeholders), served by Next.js from apps/web/public/public
+    location /public/ {
+        proxy_pass http://flicktips_v2_web;
+        # Next.js sends max-age=0 for public/ files; the legacy site cached them for 30 days
+        proxy_hide_header Cache-Control;
+        expires 30d;
+    }
+
+    # Sitemaps (apps/api/docs/sitemap.md): anonymous, so a shared cache keeps crawlers off the 1-vCPU box. nginx keeps
+    # them as long as Next.js's Cache-Control says (max-age=86400); proxy_cache_valid applies only without one.
+    location /sitemaps/ {
+        proxy_pass http://flicktips_v2_web;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Cookie "";
+        proxy_ignore_headers Set-Cookie;
+        proxy_hide_header Set-Cookie;
+        proxy_cache sitemaps;
+        proxy_cache_valid 200 1h;
+        proxy_cache_valid 404 10m;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Sitemap-Cache $upstream_cache_status;
+    }
+
+    # PWA (stage 6, apps/web/PORTING.md): the service worker must never be cached by a proxy. Next.js sends it with
+    # `Cache-Control: no-cache` and `Service-Worker-Allowed: /`; nginx passes both through and caches nothing here.
+    location /serwist/ {
+        proxy_pass http://flicktips_v2_web;
+    }
+
+    # every page (SSR), plus /manifest.webmanifest and /offline.html (PWA), no nginx cache
+    location / {
+        proxy_pass http://flicktips_v2_web;
+    }
+}

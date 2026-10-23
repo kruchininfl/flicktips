@@ -1,0 +1,148 @@
+# FlickTips v2 on a test domain, side by side with production on the same server and MySQL (docs/v2-deploy.md).
+# A template, not loaded as is: `docker/v2.sh vhost` (run by .github/workflows/deploy-v2.yml for target=test)
+# replaces @SERVER_NAME@, @WEB_PORT@ and @API_PORT@ from the test .env (V2_SERVER_NAME, V2_WEB_PORT, V2_API_PORT),
+# then copies the result into the running edge nginx (the legacy one before the switchover, the v2 one after it)
+# as conf.d/zz-flicktips-v2-test.conf (last in the include order) and reloads it after `nginx -t`.
+#
+# The certificate must exist before this file is installed (`nginx -t` fails without it, and docker/v2.sh then
+# leaves the edge untouched): the edge's first :80 server (flicktips.ru) answers the ACME challenge for any name,
+# so certbot --webroot works before this file is loaded (docs/v2-deploy.md, "Test domain").
+#
+# Names (upstreams, cache zone) differ from the production config, so both load into one nginx.
+upstream flicktips_v2test_web {
+    server 127.0.0.1:@WEB_PORT@;
+    keepalive 4;
+}
+
+upstream flicktips_v2test_api {
+    server 127.0.0.1:@API_PORT@;
+    keepalive 4;
+}
+
+proxy_cache_path /var/cache/nginx/posters-v2test levels=1:2 keys_zone=posters_v2test:2m max_size=200m
+                 inactive=7d use_temp_path=off;
+
+server {
+    listen 80;
+    server_name @SERVER_NAME@;
+
+    access_log /var/log/nginx/flicktips-v2test.access.log;
+    error_log  /var/log/nginx/flicktips-v2test.error.log;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://@SERVER_NAME@$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name @SERVER_NAME@;
+
+    ssl_certificate     /etc/letsencrypt/live/@SERVER_NAME@/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/@SERVER_NAME@/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    access_log /var/log/nginx/flicktips-v2test.access.log;
+    error_log  /var/log/nginx/flicktips-v2test.error.log;
+
+    client_max_body_size 20m;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
+    gzip_min_length 1024;
+
+    # keep the test copy out of search engines (duplicate content of flicktips.ru)
+    add_header X-Robots-Tag "noindex, nofollow" always;
+
+    # Optional: close the test site with a password (htpasswd file in the certbot dir, mounted read-only)
+    # auth_basic "FlickTips v2 test";
+    # auth_basic_user_file /etc/letsencrypt/v2test.htpasswd;
+
+    # inherited by every location below that sets no proxy_set_header of its own
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    location = /robots.txt {
+        default_type text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+
+    # Live vote counters (SSE, apps/api/docs/events.md)
+    location = /api/events {
+        proxy_pass http://flicktips_v2test_api;
+        proxy_buffering off;
+        proxy_cache off;
+        gzip off;
+        proxy_read_timeout 1h;
+    }
+
+    location /api {
+        proxy_pass http://flicktips_v2test_api;
+    }
+
+    location /auth {
+        proxy_pass http://flicktips_v2test_api;
+    }
+
+    location ~ ^/poster/kp/(\d+)\.jpg$ {
+        set $kp_poster_id $1;
+        resolver 77.88.8.8 1.1.1.1 valid=300s ipv6=off;
+        resolver_timeout 5s;
+        proxy_pass https://kinopoiskapiunofficial.tech/images/posters/kp_small/$kp_poster_id.jpg;
+        proxy_ssl_server_name on;
+        proxy_set_header Host kinopoiskapiunofficial.tech;
+        proxy_set_header Cookie "";
+        proxy_hide_header Set-Cookie;
+        proxy_ignore_headers Set-Cookie Cache-Control Expires;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 10s;
+
+        proxy_cache posters_v2test;
+        proxy_cache_key $kp_poster_id;
+        proxy_cache_valid 200 30d;
+        proxy_cache_valid 403 404 1d;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Poster-Cache $upstream_cache_status;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+        expires 30d;
+
+        proxy_intercept_errors on;
+        error_page 403 404 500 502 503 504 = @poster_tmdb;
+    }
+
+    location @poster_tmdb {
+        if ($arg_tmdb ~ "^/[A-Za-z0-9_-]+\.(jpg|png)$") {
+            return 302 https://image.tmdb.org/t/p/w342$arg_tmdb;
+        }
+        return 404;
+    }
+
+    location /_next/static/ {
+        proxy_pass http://flicktips_v2test_web;
+        access_log off;
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
+
+    location /public/ {
+        proxy_pass http://flicktips_v2test_web;
+        proxy_hide_header Cache-Control;
+        expires 30d;
+    }
+
+    # everything else (pages, sitemaps, /serwist/sw.js, /manifest.webmanifest, /offline.html): no nginx cache, so the
+    # service worker keeps the no-cache header Next.js gives it
+    location / {
+        proxy_pass http://flicktips_v2test_web;
+    }
+}

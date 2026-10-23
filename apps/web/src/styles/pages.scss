@@ -2,7 +2,7 @@
 // legacy single CSS bundle had them, after App.scss). Ported pages add theirs here, not in page.tsx.
 @use 'sass:meta';
 
-// TODO(batch A): LastGradedPage.scss with MovieHero/FriendsVote/SidebarPanel
+@include meta.load-css('pages/last-graded-page');
 @include meta.load-css('pages/layout-page');
 // TODO: Profile.scss, ProfileAccounts.scss, ProfileTablets.scss, UserSearch.scss (batches C, D)
 // TODO: MoviePage.scss, MoviePageTablets.scss (batch B)

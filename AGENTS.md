@@ -1,7 +1,8 @@
 # AGENTS.md
 
-Movie recommendation site (flicktips.ru). No root package/workspace config — each
-subproject is installed and run independently from its own directory.
+Movie recommendation site (flicktips.ru). The legacy subprojects below have no shared
+install — each is installed and run independently from its own directory. The root
+`package.json` is only for the v2 pnpm workspace (see "v2 workspace").
 
 ## Layout
 
@@ -18,6 +19,25 @@ subproject is installed and run independently from its own directory.
   `api/migrations/2026-10-21-telegram.sql`. Profile block: `web/src/partitions/TelegramBlock`.
 - `tools/` — shared Babel config only. `mobileApp/` (Cordova), `design/`, `proxy/`,
   `adv/`, `mysql-queries/` are legacy/assets, not part of the build.
+
+## v2 workspace (branch master_v2)
+
+Stack migration in progress, plan: https://claude.ai/artifact/VDqfMb8bj9uEjoGHAa1kAM. Work goes
+in PRs to `master_v2`; `master` keeps running production until the switch.
+
+- pnpm workspace + Turborepo at the repo root (`pnpm-workspace.yaml`, `turbo.json`), Node 22
+  (`.nvmrc`), TypeScript 5.9 strict, ESM. Only `apps/*` and `packages/*` are in the workspace;
+  the legacy dirs above keep their own npm installs.
+- `apps/api` — Fastify 5 API replacing PHP `api/` (`src/app.ts` builds the app with injected
+  deps, `src/main.ts` wires the DB; `pnpm --filter @flicktips/api dev`, port 3002).
+- `apps/web` — Next.js 16 (App Router, SSR) replacing `web/` (port 3001, `output: standalone`).
+- `packages/db` — Drizzle over the existing MySQL schema (`pnpm --filter @flicktips/db introspect`
+  pulls from `flicktips_test`; never push/migrate with drizzle-kit). `packages/shared` — zod
+  schemas and types shared by api and web. `packages/config` — tsconfig and ESLint flat config.
+- Internal packages compile to `dist/` (`tsc`); turbo builds dependencies before
+  `typecheck`/`lint`/`test`. From the root: `pnpm install`, `pnpm lint`, `pnpm typecheck`,
+  `pnpm test` (vitest), `pnpm build`, `pnpm format` (Prettier: single quotes, semi, width 120).
+- CI: `.github/workflows/ci.yml` runs all of the above on PRs and pushes to `master_v2`.
 
 ## Commands
 

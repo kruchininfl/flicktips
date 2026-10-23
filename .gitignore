@@ -6,3 +6,8 @@ node_modules/
 /data/
 .env
 /docker/local/certs/
+.turbo/
+.next/
+dist/
+next-env.d.ts
+*.tsbuildinfo

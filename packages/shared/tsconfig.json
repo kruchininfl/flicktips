@@ -1,0 +1,1 @@
+{ "extends": "@flicktips/config/tsconfig.node.json" }

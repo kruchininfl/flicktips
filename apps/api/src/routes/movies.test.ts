@@ -667,6 +667,31 @@ describe.skipIf(!hasTestDb)('IndexController routes', () => {
       expect(anon.person.movies[0]).not.toHaveProperty('isSuper');
     });
 
+    it('GET /api/people/search finds people by either name, skipping suspended ones', async () => {
+      const search = async (q: string) => (await get(`/api/people/search?q=${encodeURIComponent(q)}`)).json();
+      const actor = {
+        id: s.people.actor,
+        name: 'Сергей Бодров',
+        original_name: 'Сергей Бодров (en)',
+        kp_photo: 'p2.jpg',
+        role: 'Актер',
+        movies_count: 2,
+      };
+      const director = {
+        id: s.people.director,
+        name: 'Алексей Балабанов',
+        original_name: 'Алексей Балабанов (en)',
+        kp_photo: 'p1.jpg',
+        role: 'Режиссер',
+        movies_count: 1,
+      };
+      expect(await search('бодров')).toEqual({ success: true, results: [actor] });
+      // no prefix match: more movies first; the suspended actor is not there
+      expect(await search('(en)')).toEqual({ success: true, results: [actor, director] });
+      expect(await search('Скрытый')).toEqual({ success: true, results: [] });
+      expect(await search('а')).toEqual({ success: true, results: [] });
+    });
+
     it('GET /api/people/:id answers 404 for missing, suspended and movie-less people', async () => {
       const [lonely] = await ctx.t.db.insert(schema.people).values({ name: 'Без фильмов', kpId: 99 });
       for (const id of [999999, s.people.banned, lonely.insertId, 'x']) {

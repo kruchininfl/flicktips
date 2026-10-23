@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { plural } from './plural';
+import { compactCount, plural } from './plural';
 
 describe('plural', () => {
   it('picks the form by the last digits', () => {
@@ -17,5 +17,15 @@ describe('plural', () => {
       'друзей',
       'друзей',
     ]);
+  });
+});
+
+describe('compactCount', () => {
+  it('shortens thousands and millions', () => {
+    expect(compactCount(940)).toBe('940');
+    expect(compactCount(1250)).toBe('1,3 тыс.');
+    expect(compactCount(310_400)).toBe('310 тыс.');
+    expect(compactCount(1_200_000)).toBe('1,2 млн');
+    expect(compactCount(3_000_000)).toBe('3 млн');
   });
 });

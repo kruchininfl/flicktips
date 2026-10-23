@@ -61,3 +61,43 @@ export async function getPerson(db: Db, id: number, viewerId: number | null): Pr
   delete person.kp_id;
   return { ...person, movies };
 }
+
+export interface FoundPerson {
+  id: number;
+  name: string | null;
+  original_name: string | null;
+  kp_photo: string | null;
+  // the role with the most movies, «Режиссер» or «Актер»
+  role: string | null;
+  movies_count: number;
+}
+
+// The search's «Люди»: by the Russian or the original name, prefix matches first, then whoever has more movies.
+export async function searchPeople(db: Db, query: string, limit: number): Promise<FoundPerson[]> {
+  const like = query.replace(/[\\%_]/g, (c) => `\\${c}`);
+  const rows = await selectRows(
+    db,
+    sql`SELECT people.id, people.name, people.original_name, people.kp_photo,
+        COUNT(DISTINCT movie_people.movie_id) AS movies_count,
+        (SELECT \`group\`.title_singular FROM movie_people role
+          INNER JOIN \`group\` ON \`group\`.id = role.group_id
+          WHERE role.people_id = people.id
+          GROUP BY role.group_id ORDER BY COUNT(*) DESC, role.group_id LIMIT 1) AS role
+      FROM people
+      INNER JOIN movie_people ON movie_people.people_id = people.id
+      INNER JOIN movie ON movie.id = movie_people.movie_id AND movie.suspend <> 1
+      WHERE people.suspend <> 1 AND (people.name LIKE ${`%${like}%`} OR people.original_name LIKE ${`%${like}%`})
+      GROUP BY people.id
+      ORDER BY MAX(people.name LIKE ${`${like}%`} OR people.original_name LIKE ${`${like}%`}) DESC,
+        movies_count DESC, people.id
+      LIMIT ${limit}`,
+  );
+  return rows.map((row) => ({
+    id: phpCast(row.id, 'int'),
+    name: row.name as string | null,
+    original_name: row.original_name as string | null,
+    kp_photo: row.kp_photo as string | null,
+    role: row.role as string | null,
+    movies_count: phpCast(row.movies_count, 'int'),
+  }));
+}

@@ -2,6 +2,7 @@
 export const FRIENDS_VOTES_LIST_SIZE = 24;
 export const FRIENDS_LIST_SIZE = 24;
 export const USERS_SEARCH_SIZE = 20;
+export const PEOPLE_SEARCH_SIZE = 5;
 export const USERS_RECOMMENDATIONS_SIZE = 12;
 export const BOOKMARKS_LIST_SIZE = 24;
 export const VOTES_LIST_SIZE = 24;

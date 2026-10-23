@@ -19,6 +19,7 @@ import type {
   MeResponse,
   MergeAccountResponse,
   PagedResponse,
+  PeopleSearchResponse,
   PersonResponse,
   ProfileStatsResponse,
   PushKeyResponse,
@@ -70,6 +71,8 @@ export function createApi(fetchJson: Transport) {
     },
     people: {
       get: (personId: number | string) => fetchJson<PersonResponse>(`/api/people/${id(personId)}`),
+      search: (q: string) =>
+        fetchJson<PeopleSearchResponse>('/api/people/search', { query: { q }, signInOn401: false }),
     },
     users: {
       get: (userId: number | string) => fetchJson<UserResponse>(`/api/users/${id(userId)}`),

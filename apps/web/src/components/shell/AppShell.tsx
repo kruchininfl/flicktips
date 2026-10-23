@@ -6,13 +6,13 @@ import { usePathname } from 'next/navigation';
 import { Suspense, useState, type ReactNode } from 'react';
 
 import { SignInModal } from '@/components/auth/SignInModal';
+import { SearchDialog } from '@/components/search/SearchDialog';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { setCookie } from '@/lib/cookies';
 import { cn } from '@/lib/utils';
 import { SIDEBAR_COOKIE } from '@/lib/theme';
 
-import { HeaderSearch } from './HeaderSearch';
 import { LiveUpdates } from './LiveUpdates';
 import { LoadingBar } from './LoadingBar';
 import { Metrika } from './Metrika';
@@ -67,8 +67,8 @@ export function AppShell({ children, initialCollapsed }: { children: ReactNode; 
       <Suspense fallback={null}>
         <SignInModal />
       </Suspense>
+      <SearchDialog />
       <div className="legacy contents">
-        <HeaderSearch />
         <PendingActions />
       </div>
       <LiveUpdates />

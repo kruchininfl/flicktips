@@ -22,3 +22,18 @@ export interface PersonResponse {
   success: true;
   person: Person;
 }
+
+// GET /api/people/search?q=: the search's «Люди»; `role` is the role with the most movies.
+export interface FoundPerson {
+  id: number;
+  name: string | null;
+  original_name: string | null;
+  kp_photo: string | null;
+  role: string | null;
+  movies_count: number;
+}
+
+export interface PeopleSearchResponse {
+  success: true;
+  results: FoundPerson[];
+}

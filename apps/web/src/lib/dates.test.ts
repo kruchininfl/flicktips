@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDuration, formatLongDate, formatShortDate, formatVoteTime, timeAgo, yearOf } from './dates';
+import {
+  formatCardTime,
+  formatDuration,
+  formatLongDate,
+  formatShortDate,
+  formatVoteTime,
+  timeAgo,
+  yearOf,
+} from './dates';
 
 // 2026-10-23 12:00 MSK
 const NOW = Date.UTC(2026, 9, 23, 9, 0);
@@ -22,6 +30,17 @@ describe('formatVoteTime', () => {
 
   it('is empty without a timestamp', () => {
     expect(formatVoteTime(0, NOW)).toBe('');
+  });
+});
+
+describe('formatCardTime', () => {
+  it('writes the card label of a vote', () => {
+    expect(formatCardTime(seconds(Date.UTC(2026, 9, 23, 6, 5)), NOW)).toBe('сегодня, 09:05');
+    expect(formatCardTime(seconds(Date.UTC(2026, 9, 22, 15, 5)), NOW)).toBe('вчера, 18:05');
+    expect(formatCardTime(seconds(Date.UTC(2026, 9, 18, 19, 31)), NOW)).toBe('18 окт, 22:31');
+    expect(formatCardTime(seconds(Date.UTC(2025, 4, 3, 18, 10)), NOW)).toBe('3 мая 2025');
+    expect(formatCardTime(seconds(Date.UTC(2026, 9, 23, 6, 5)), NOW, true)).toBe('09:05');
+    expect(formatCardTime(0, NOW)).toBe('');
   });
 });
 

@@ -73,6 +73,23 @@ export function formatVoteTime(timestamp: number, now = Date.now()): string {
   return t.year === today.year ? `${date} в ${time}` : `${date} ${t.year} в ${time}`;
 }
 
+const MONTHS_CARD = ['янв', 'февр', 'мар', 'апр', 'мая', 'июня', 'июля', 'авг', 'сент', 'окт', 'нояб', 'дек'];
+
+// The redesign's vote time on cards: "сегодня, 21:40", "вчера, 18:05", "18 окт, 22:31", "3 мая 2025";
+// `short` (phones) drops «сегодня»
+export function formatCardTime(timestamp: number, now = Date.now(), short = false): string {
+  if (!timestamp) return '';
+  const t = parts(timestamp * 1000);
+  const today = parts(now);
+  const time = `${pad(t.hour)}:${pad(t.minute)}`;
+
+  if (sameDay(t, today)) return short ? time : `сегодня, ${time}`;
+  if (sameDay(t, parts(now - 24 * 3600 * 1000))) return `вчера, ${time}`;
+
+  const date = `${t.day} ${MONTHS_CARD[t.month - 1]}`;
+  return t.year === today.year ? `${date}, ${time}` : `${date} ${t.year}`;
+}
+
 // 'DD.MM.YY'
 export function formatShortDate(ms: number): string {
   const t = parts(ms);

@@ -1,6 +1,6 @@
 import { getCookie, setCookie } from './cookies';
 
-// The visitor's choice of colour theme; without the cookie the site follows the system (styles/theme.scss).
+// The visitor's choice of colour theme; without the cookie the site follows the system (styles/globals.css).
 export const THEME_COOKIE = 'theme';
 export type Theme = 'light' | 'dark';
 

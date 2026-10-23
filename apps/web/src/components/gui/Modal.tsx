@@ -85,7 +85,7 @@ export function Modal({
   };
 
   return createPortal(
-    <div className="ReactModalPortal">
+    <div className="ReactModalPortal legacy">
       <div
         className={'ReactModal__Overlay' + (afterOpen ? ' ReactModal__Overlay--after-open' : '')}
         style={OVERLAY_STYLE}

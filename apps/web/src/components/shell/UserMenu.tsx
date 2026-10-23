@@ -2,88 +2,82 @@
 
 import { IconEyeOff, IconLogout, IconSettings } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import type { ViewerProfile } from '@flicktips/shared';
 
-import { cx } from '@/lib/cx';
-import { Avatar } from '@/ui/Avatar';
-import { Switch } from '@/ui/Switch';
+import { UserAvatar } from '@/components/brand/UserAvatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import { useViewerActions } from '@/viewer/ViewerProvider';
 
 import { votesLabel } from './nav';
-import styles from './Shell.module.scss';
 
-// Figma «Меню пользователя»: opened from the profile in the sidebar footer.
+// Figma «Меню пользователя»: opened from the profile in the sidebar footer, above it in the full sidebar and to
+// the right of the collapsed one.
 export function UserMenu({
   viewer,
-  onClose,
-  placement,
+  side,
+  children,
 }: {
   viewer: ViewerProfile;
-  onClose: () => void;
-  // above the footer of the full sidebar, to the right of the collapsed one
-  placement: 'above' | 'right';
+  side: ComponentProps<typeof DropdownMenuContent>['side'];
+  // the trigger
+  children: ReactNode;
 }) {
   const { updateProfile, logout } = useViewerActions();
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onPointer = (event: PointerEvent) => {
-      if (!ref.current?.contains(event.target as Node)) onClose();
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    // the click that opened the menu must not close it
-    const timer = setTimeout(() => document.addEventListener('pointerdown', onPointer));
-    document.addEventListener('keydown', onKey);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [onClose]);
 
   return (
-    <div ref={ref} role="menu" className={cx(styles.userMenu, styles[placement])}>
-      <div className={styles.userMenuHead}>
-        <Avatar src={viewer.avatar} name={viewer.username} size={40} />
-        <div className={styles.userMenuName}>
-          <b>{viewer.username}</b>
-          <span>{votesLabel(viewer.votes_count)}</span>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuContent side={side} align="start" sideOffset={side === 'right' ? 12 : 4} className="w-[280px]">
+        <div className="flex items-center gap-3 p-2.5">
+          <UserAvatar src={viewer.avatar} name={viewer.username} size={40} />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <b className="truncate font-medium">{viewer.username}</b>
+            <span className="type-caption text-muted-foreground">{votesLabel(viewer.votes_count)}</span>
+          </div>
         </div>
-      </div>
-      <hr />
-      <label className={styles.userMenuRow}>
-        <IconEyeOff />
-        <span className={styles.userMenuText}>
-          <b>Скрыть просмотренные</b>
-          <span>Не показывать фильмы, которые вы уже оценили</span>
-        </span>
-        <Switch
-          checked={viewer.hide_viewed}
-          onChange={(checked) => void updateProfile({ hide_viewed: checked })}
-          label="Скрыть просмотренные"
-        />
-      </label>
-      <hr />
-      <Link href="/profile/accounts/" className={styles.userMenuRow} onClick={onClose} role="menuitem">
-        <IconSettings />
-        Настройки
-      </Link>
-      <button
-        type="button"
-        role="menuitem"
-        className={cx(styles.userMenuRow, styles.danger)}
-        onClick={() => {
-          onClose();
-          void logout();
-        }}
-      >
-        <IconLogout />
-        Выйти
-      </button>
-    </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          role="menuitemcheckbox"
+          aria-checked={viewer.hide_viewed}
+          className="gap-3 [&_svg:not([class*='size-'])]:size-[18px]"
+          onSelect={(event) => {
+            // the switch flips, the menu stays open
+            event.preventDefault();
+            void updateProfile({ hide_viewed: !viewer.hide_viewed });
+          }}
+        >
+          <IconEyeOff />
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="font-medium whitespace-nowrap">Скрыть просмотренные</span>
+            <span className="type-caption text-muted-foreground">Не показывать фильмы, которые вы уже оценили</span>
+          </span>
+          <Switch checked={viewer.hide_viewed} tabIndex={-1} aria-hidden className="pointer-events-none" />
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="gap-3 [&_svg:not([class*='size-'])]:size-[18px]">
+          <Link href="/profile/accounts/">
+            <IconSettings />
+            Настройки
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          variant="destructive"
+          className="gap-3 [&_svg:not([class*='size-'])]:size-[18px]"
+          onSelect={() => void logout()}
+        >
+          <IconLogout />
+          Выйти
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

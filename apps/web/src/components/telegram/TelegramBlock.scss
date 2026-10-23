@@ -1,158 +1,163 @@
+@use 'layers';
 @use 'sass:color';
 @use 'base' as *;
 
-.tg-block {
-  margin: 10px;
-  padding: 16px;
-  border: 1px solid $color-line;
-  border-radius: 12px;
-  background: $color-surface-2;
-}
-.tg-block__title {
-  font-size: 14px;
-  font-weight: 700;
-}
-.tg-block__text {
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.45;
-  color: $color-text-soft;
-}
-.tg-block__link {
-  color: $color-link;
-  cursor: pointer;
-}
-.tg-block__groups {
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.tg-block__group {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-top: 1px solid $color-line;
-  font-size: 13px;
-
-  &:first-child {
-    border-top: 0;
-  }
-}
-.tg-block__group-title {
-  overflow: hidden;
-  margin-right: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.tg-block__group-note {
-  color: $color-muted;
-}
-.tg-block__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-
-  .btn {
-    text-decoration: none;
-  }
-}
-
-.tg-block__steps {
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.tg-block__step {
-  position: relative;
-  display: flex;
-  padding-bottom: 18px;
-
-  // the line between the step marks
-  &:not(:last-child):before {
-    content: '';
-    position: absolute;
-    top: 30px;
-    bottom: 4px;
-    left: 13px;
-    width: 2px;
-    background: $color-line;
-  }
-  &:last-child {
-    padding-bottom: 0;
-  }
-}
-.tg-block__step-mark {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 28px;
-  height: 28px;
-  margin-right: 12px;
-  border: 2px solid $color-glass-line;
-  border-radius: 50%;
-  font-size: 13px;
-  font-weight: 700;
-  color: $color-text-soft;
-
-  .m-done & {
-    border-color: $color-accent;
-    background: $color-accent;
-    color: $color-bg;
-  }
-}
-.tg-block__step-body {
-  flex: 1;
-  min-width: 0;
-  padding-top: 4px;
-}
-.tg-block__step-title {
-  font-size: 14px;
-  font-weight: 600;
-
-  .m-done & {
-    color: $color-text-soft;
-  }
-}
-
-// the opener in the header user menu, in Telegram colors like the invite popup's share button
-.tg-open-btn .btn__inn {
-  background: #2aa3df;
-  color: #ffffff;
-
-  &:hover {
-    background: color.adjust(#2aa3df, $lightness: -10%);
-  }
-}
-.tg-open-btn__icn {
-  margin-right: 6px;
-  font-size: 16px;
-  line-height: 0;
-  vertical-align: -3px;
-}
-
-// inside the popup (TelegramButton): no card, the popup is the frame
-.tg-popup {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 460px;
-  text-align: left;
-
+// legacy component styles: under the redesign's base styles (styles/globals.css) and under the legacy global
+// sheets, as in the old bundle, which had the components' CSS first
+@layer legacy.parts {
   .tg-block {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: none;
+    margin: 10px;
+    padding: 16px;
+    border: 1px solid $color-line;
+    border-radius: 12px;
+    background: $color-surface-2;
   }
   .tg-block__title {
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
   }
-  > .tg-block > .tg-block__text {
-    text-align: center;
+  .tg-block__text {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: $color-text-soft;
+  }
+  .tg-block__link {
+    color: $color-link;
+    cursor: pointer;
+  }
+  .tg-block__groups {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tg-block__group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-top: 1px solid $color-line;
+    font-size: 13px;
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+  .tg-block__group-title {
+    overflow: hidden;
+    margin-right: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tg-block__group-note {
+    color: $color-muted;
+  }
+  .tg-block__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+
+    .btn {
+      text-decoration: none;
+    }
+  }
+
+  .tg-block__steps {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tg-block__step {
+    position: relative;
+    display: flex;
+    padding-bottom: 18px;
+
+    // the line between the step marks
+    &:not(:last-child):before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      bottom: 4px;
+      left: 13px;
+      width: 2px;
+      background: $color-line;
+    }
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+  .tg-block__step-mark {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    border: 2px solid $color-glass-line;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    color: $color-text-soft;
+
+    .m-done & {
+      border-color: $color-accent;
+      background: $color-accent;
+      color: $color-bg;
+    }
+  }
+  .tg-block__step-body {
+    flex: 1;
+    min-width: 0;
+    padding-top: 4px;
+  }
+  .tg-block__step-title {
+    font-size: 14px;
+    font-weight: 600;
+
+    .m-done & {
+      color: $color-text-soft;
+    }
+  }
+
+  // the opener in the header user menu, in Telegram colors like the invite popup's share button
+  .tg-open-btn .btn__inn {
+    background: #2aa3df;
+    color: #ffffff;
+
+    &:hover {
+      background: color.adjust(#2aa3df, $lightness: -10%);
+    }
+  }
+  .tg-open-btn__icn {
+    margin-right: 6px;
+    font-size: 16px;
+    line-height: 0;
+    vertical-align: -3px;
+  }
+
+  // inside the popup (TelegramButton): no card, the popup is the frame
+  .tg-popup {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 460px;
+    text-align: left;
+
+    .tg-block {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+    .tg-block__title {
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+    }
+    > .tg-block > .tg-block__text {
+      text-align: center;
+    }
   }
 }

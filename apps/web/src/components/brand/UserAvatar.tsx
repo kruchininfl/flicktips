@@ -1,6 +1,5 @@
-import { cx } from '@/lib/cx';
-
-import styles from './Avatar.module.scss';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 // «Артём Кручинин» -> «АК», «Маша» -> «М»
 export function initials(name: string | null | undefined): string {
@@ -11,8 +10,15 @@ export function initials(name: string | null | undefined): string {
     .join('');
 }
 
+const SIZES = {
+  24: 'size-6 text-[10px]',
+  32: 'size-8 type-caption font-medium',
+  40: 'size-10 type-body font-medium',
+  96: 'size-24 type-metric',
+} as const;
+
 // Figma «Аватар»: Размер = 24 / 32 / 40 / 96; the photo or the initials on a muted circle.
-export function Avatar({
+export function UserAvatar({
   src,
   name,
   size = 32,
@@ -20,17 +26,13 @@ export function Avatar({
 }: {
   src: string | null | undefined;
   name: string | null | undefined;
-  size?: 24 | 32 | 40 | 96;
+  size?: keyof typeof SIZES;
   className?: string;
 }) {
   return (
-    <span className={cx(styles.avatar, styles[`s${size}`], className)}>
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element -- avatars come from VK/Yandex CDNs
-        <img src={src} alt="" loading="lazy" />
-      ) : (
-        initials(name)
-      )}
-    </span>
+    <Avatar className={cn(SIZES[size], className)}>
+      {src && <AvatarImage src={src} alt="" />}
+      <AvatarFallback>{initials(name)}</AvatarFallback>
+    </Avatar>
   );
 }

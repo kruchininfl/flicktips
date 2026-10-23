@@ -1,173 +1,178 @@
+@use 'layers';
 @use 'base' as *;
 
-.header-search__container {
-  position: absolute;
-  z-index: 1;
-  top: -101%;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: $color-surface;
-  transition: top 300ms;
+// legacy component styles: under the redesign's base styles (styles/globals.css) and under the legacy global
+// sheets, as in the old bundle, which had the components' CSS first
+@layer legacy.parts {
+  .header-search__container {
+    position: absolute;
+    z-index: 1;
+    top: -101%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: $color-surface;
+    transition: top 300ms;
 
-  &.m-opened {
-    top: 0;
+    &.m-opened {
+      top: 0;
+    }
   }
-}
-.header-search__toggle {
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 0;
-
-  &:hover {
-    color: $color-accent;
-  }
-}
-.header-search__toggle-text {
-  display: none;
-}
-
-// on desktop the search toggle is a compact labelled button
-@media screen and (min-width: 768px) {
   .header-search__toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 36px;
-    box-sizing: border-box;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
-    color: $color-text;
-    transition:
-      background-color 200ms,
-      color 200ms;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 0;
 
     &:hover {
-      color: $color-text;
-      background: $color-glass;
+      color: $color-accent;
     }
   }
   .header-search__toggle-text {
-    display: block;
-    font-size: 13px;
+    display: none;
   }
-}
-.header-search__head {
-  height: 100%;
-  position: relative;
-  z-index: 1;
-  border-bottom: 1px solid $color-line;
-}
-.header-search__head-input {
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  height: 100%;
-  padding: 0 55px;
-  font-size: 18px;
-}
-.header-search__head-spinner,
-.header-search__head-icn {
-  position: absolute;
-  left: 20px;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
-  color: $color-text;
-  margin: auto 0;
-  line-height: 1;
-}
-.header-search__head-icn {
-  opacity: 1;
-  transition: opacity 200ms;
 
-  .spinner_active + & {
-    opacity: 0;
-    transition-duration: 0ms;
-  }
-}
-.header-search__head-cross {
-  cursor: pointer;
-  position: absolute;
-  right: 20px;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  height: 20px;
-  margin: auto 0;
-  font-size: 20px;
-  color: $color-text;
+  // on desktop the search toggle is a compact labelled button
+  @media screen and (min-width: 768px) {
+    .header-search__toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      box-sizing: border-box;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      color: $color-text;
+      transition:
+        background-color 200ms,
+        color 200ms;
 
-  &:hover {
-    opacity: 0.6;
+      &:hover {
+        color: $color-text;
+        background: $color-glass;
+      }
+    }
+    .header-search__toggle-text {
+      display: block;
+      font-size: 13px;
+    }
   }
-  &:after {
-    content: '';
+  .header-search__head {
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid $color-line;
+  }
+  .header-search__head-input {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    height: 100%;
+    padding: 0 55px;
+    font-size: 18px;
+  }
+  .header-search__head-spinner,
+  .header-search__head-icn {
     position: absolute;
-    top: -5px;
-    bottom: -5px;
-    left: -5px;
-    right: -5px;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: $color-text;
+    margin: auto 0;
+    line-height: 1;
   }
-}
-.header-search__result-wrap {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 300ms,
-    top 300ms;
-
-  // the header's backdrop-filter makes it the containing block of this fixed layer, so size it from the header down
-  .header-search__container.m-opened & {
-    visibility: visible;
+  .header-search__head-icn {
     opacity: 1;
-    top: 100%;
-    bottom: auto;
-    height: calc(100vh - 60px);
+    transition: opacity 200ms;
 
-    @media screen and (min-width: 768px) {
-      height: calc(100vh - 64px);
+    .spinner_active + & {
+      opacity: 0;
+      transition-duration: 0ms;
     }
   }
-}
-.header-search__result {
-  max-width: 720px;
-  margin: 0 auto;
-  background: $color-surface;
-  border-radius: 0 0 $radius-lg $radius-lg;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 100ms;
-  overflow-y: auto;
+  .header-search__head-cross {
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    margin: auto 0;
+    font-size: 20px;
+    color: $color-text;
 
-  .header-search__container.m-opened & {
-    max-height: 100%;
-    box-sizing: border-box;
-    transition-delay: 200ms;
-
-    @media screen and (max-width: 767px) {
-      padding-bottom: calc(#{$tabbar-height} + env(safe-area-inset-bottom));
+    &:hover {
+      opacity: 0.6;
     }
-    transition-duration: 500ms;
+    &:after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      bottom: -5px;
+      left: -5px;
+      right: -5px;
+    }
   }
-}
-.header-search__result-item {
-  border-bottom: 1px solid $color-line;
-}
-.header-search__result-empty {
-  padding: 20px;
-  color: $color-gray;
-  text-align: center;
-  background: $color-surface;
-  border-top: 1px solid $color-line;
+  .header-search__result-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 300ms,
+      top 300ms;
+
+    // the header's backdrop-filter makes it the containing block of this fixed layer, so size it from the header down
+    .header-search__container.m-opened & {
+      visibility: visible;
+      opacity: 1;
+      top: 100%;
+      bottom: auto;
+      height: calc(100vh - 60px);
+
+      @media screen and (min-width: 768px) {
+        height: calc(100vh - 64px);
+      }
+    }
+  }
+  .header-search__result {
+    max-width: 720px;
+    margin: 0 auto;
+    background: $color-surface;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 100ms;
+    overflow-y: auto;
+
+    .header-search__container.m-opened & {
+      max-height: 100%;
+      box-sizing: border-box;
+      transition-delay: 200ms;
+
+      @media screen and (max-width: 767px) {
+        padding-bottom: calc(#{$tabbar-height} + env(safe-area-inset-bottom));
+      }
+      transition-duration: 500ms;
+    }
+  }
+  .header-search__result-item {
+    border-bottom: 1px solid $color-line;
+  }
+  .header-search__result-empty {
+    padding: 20px;
+    color: $color-gray;
+    text-align: center;
+    background: $color-surface;
+    border-top: 1px solid $color-line;
+  }
 }

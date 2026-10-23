@@ -1,12 +1,11 @@
 'use client';
 
-import { IconLayoutSidebar, IconMenu2, IconSearch, IconX } from '@tabler/icons-react';
+import { IconLayoutSidebar, IconMenu2, IconSearch } from '@tabler/icons-react';
 import { useEffect, useSyncExternalStore } from 'react';
 
-import { IconButton } from '@/ui/IconButton';
-import { Logo } from '@/ui/Logo';
+import { Logo } from '@/components/brand/Logo';
+import { Button } from '@/components/ui/button';
 
-import styles from './Shell.module.scss';
 import { useUi } from './UiProvider';
 
 const noSubscribe = () => () => {};
@@ -30,10 +29,16 @@ function SearchButton() {
   }, [openSearch]);
 
   return (
-    <button type="button" className={styles.searchButton} onClick={openSearch}>
-      <IconSearch />
+    <button
+      type="button"
+      onClick={openSearch}
+      className="flex h-9 items-center gap-2 rounded-full border border-border bg-card pr-2 pl-3 text-faint hover:border-border-strong"
+    >
+      <IconSearch className="size-4 text-foreground" />
       <span>Найти фильм или друга</span>
-      <kbd>{mac ? '⌘ K' : 'Ctrl K'}</kbd>
+      <kbd className="rounded-[6px] bg-muted px-1.5 py-0.5 text-[11px] leading-4 text-muted-foreground">
+        {mac ? '⌘ K' : 'Ctrl K'}
+      </kbd>
     </button>
   );
 }
@@ -41,27 +46,27 @@ function SearchButton() {
 // Figma «Верхняя панель» (desktop): the sidebar toggle on the left, the search on the right.
 export function TopBar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   return (
-    <header className={styles.topBar}>
-      <IconButton label="Свернуть меню" onClick={onToggleSidebar}>
+    <header className="hidden h-14 items-center justify-between py-2 pr-10 pl-8 lg:flex">
+      <Button variant="ghost" size="icon" aria-label="Свернуть меню" title="Свернуть меню" onClick={onToggleSidebar}>
         <IconLayoutSidebar />
-      </IconButton>
+      </Button>
       <SearchButton />
     </header>
   );
 }
 
 // Figma «Мобильная шапка» (tablet and phone): the menu, the logo and the search.
-export function MobileHeader({ menuOpen, onToggleMenu }: { menuOpen: boolean; onToggleMenu: () => void }) {
+export function MobileHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
   const { openSearch } = useUi();
   return (
-    <header className={styles.mobileHeader}>
-      <IconButton label={menuOpen ? 'Закрыть меню' : 'Меню'} onClick={onToggleMenu} aria-expanded={menuOpen}>
-        {menuOpen ? <IconX /> : <IconMenu2 />}
-      </IconButton>
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-1 border-b border-border bg-page pr-3 pl-2 lg:hidden">
+      <Button variant="ghost" size="icon" aria-label="Меню" onClick={onOpenMenu}>
+        <IconMenu2 />
+      </Button>
       <Logo />
-      <IconButton label="Поиск" variant="outline" onClick={openSearch} className={styles.mobileSearch}>
+      <Button variant="outline" size="icon" aria-label="Поиск" className="ml-auto" onClick={openSearch}>
         <IconSearch />
-      </IconButton>
+      </Button>
     </header>
   );
 }

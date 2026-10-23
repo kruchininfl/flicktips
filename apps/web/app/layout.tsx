@@ -12,11 +12,9 @@ import { parseTheme, SIDEBAR_COOKIE, THEME_COOKIE } from '@/lib/theme';
 import { getViewer } from '@/viewer/server';
 import { ViewerProvider } from '@/viewer/ViewerProvider';
 
-import '@/styles/app.scss';
-import '@/styles/pages.scss';
-// the redesign's tokens and base styles after the legacy sheets, so they win where both style the page
-import '@/styles/legacy-bridge.scss';
-import '@/styles/theme.scss';
+// Tailwind and the tokens first: globals.css declares the cascade layers the legacy sheets go into
+import '@/styles/globals.css';
+import '@/styles/legacy.scss';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -4,20 +4,29 @@ import Fastify, { type FastifyError, type FastifyServerOptions } from 'fastify';
 import { assertSameOrigin } from './auth/csrf.js';
 import { sessionResolver } from './auth/sessions.js';
 import type { ViewerResolver } from './auth/viewer.js';
-import type { AppDeps } from './deps.js';
+import type { AppDeps, ResolvedDeps } from './deps.js';
+import { MemoryEventBus } from './events/bus.js';
 import { HttpError } from './lib/errors.js';
 import { authRoutes } from './routes/auth.js';
+import { eventRoutes, type EventStreamOptions } from './routes/events.js';
 import { healthRoutes } from './routes/health.js';
+import { sitemapRoutes } from './routes/sitemap.js';
 import { telegramRoutes } from './routes/telegram.js';
 import { userRoutes } from './routes/users.js';
 import { indexControllerRoutes } from './routes/index-controller.js';
 
 export interface BuildAppOptions extends FastifyServerOptions {
   resolveViewer?: ViewerResolver;
+  // GET /api/events timings and limits (tests shorten them)
+  eventStream?: Partial<EventStreamOptions>;
 }
 
-export function buildApp(deps: AppDeps, { resolveViewer, ...options }: BuildAppOptions = {}) {
+export function buildApp(appDeps: AppDeps, { resolveViewer, eventStream, ...options }: BuildAppOptions = {}) {
   const app = Fastify(options);
+  const deps: ResolvedDeps = {
+    ...appDeps,
+    events: appDeps.events ?? new MemoryEventBus((error) => app.log.error({ err: error }, 'event listener failed')),
+  };
   const viewerOf = resolveViewer ?? sessionResolver(deps);
 
   app.register(cookie);
@@ -46,6 +55,8 @@ export function buildApp(deps: AppDeps, { resolveViewer, ...options }: BuildAppO
   app.register(telegramRoutes(deps), { prefix: '/api' });
   app.register(userRoutes(deps), { prefix: '/api' });
   app.register(indexControllerRoutes(deps), { prefix: '/api' });
+  app.register(sitemapRoutes(deps), { prefix: '/api' });
+  app.register(eventRoutes(deps, eventStream), { prefix: '/api' });
 
   return app;
 }

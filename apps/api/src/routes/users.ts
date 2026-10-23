@@ -4,7 +4,7 @@ import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 
 import { requireViewer } from '../auth/viewer.js';
-import type { AppDeps } from '../deps.js';
+import type { ResolvedDeps } from '../deps.js';
 import { badRequest, HttpError, notFound } from '../lib/errors.js';
 import {
   BOOKMARKS_LIST_SIZE,
@@ -65,9 +65,9 @@ function phpTrim(s: string): string {
 }
 
 export const userRoutes =
-  (deps: AppDeps): FastifyPluginAsync =>
+  (deps: ResolvedDeps): FastifyPluginAsync =>
   async (app) => {
-    const { db } = deps;
+    const { db, events } = deps;
 
     // UserController::searchUsers — GET /api/users/search/?q=
     app.get('/users/search', async (request) => {
@@ -162,6 +162,15 @@ export const userRoutes =
       } catch (error) {
         request.log.error(error, 'telegram vote_event');
       }
+
+      // open pages update their counters live (GET /api/events); the voter's own tabs also get the flags
+      const { id: movieId, super: superCount, likes, neutral, dislikes, ...flags } = outcome.result;
+      events.publish({
+        type: 'vote',
+        userId: viewer.id,
+        movie: { id: movieId, super: superCount, likes, neutral, dislikes },
+        flags,
+      });
       return { success: true, data: outcome.result };
     });
 

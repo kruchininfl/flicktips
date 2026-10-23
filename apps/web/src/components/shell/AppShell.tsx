@@ -14,6 +14,7 @@ import { useViewer, useViewerActions } from '@/viewer/ViewerProvider';
 
 import { HeaderProfile } from './HeaderProfile';
 import { HeaderSearch } from './HeaderSearch';
+import { LiveUpdates } from './LiveUpdates';
 import { LoadingBar } from './LoadingBar';
 import { Metrika } from './Metrika';
 import { PendingActions } from './PendingActions';
@@ -103,6 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SignInModal />
       </Suspense>
       <PendingActions />
+      <LiveUpdates />
       <Metrika />
     </div>
   );

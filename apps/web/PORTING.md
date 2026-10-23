@@ -143,7 +143,8 @@ pass `noindex: true`. Copy the texts from the legacy Helmet calls exactly.
 
 Movie votes and bookmarks: `useVote()` / `useToggleBookmark()` (guests get the sign-in popup) write the new
 counters into `lib/movie-store`, and `useMovieState(movie)` reads them, so every copy of a movie on the page
-updates at once. Server-sent vote updates (the legacy socket `vote-changed`) should feed `updateMovie()` too.
+updates at once. Server-sent vote updates (the legacy socket `vote-changed`) feed `updateMovie()` too:
+`shell/LiveUpdates` keeps an `EventSource` on `/api/events` while a viewer is signed in (`apps/api/docs/events.md`).
 
 Relative times (`timeAgo`, `formatVoteTime`) depend on "now": render them in a client component with
 `suppressHydrationWarning` on the element, as `MovieVotes` and `MoviePreview` do.

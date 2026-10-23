@@ -4,7 +4,7 @@ import { schema } from '@flicktips/db';
 import { createTestDatabase, testDbServer, type TestDatabase } from '@flicktips/db/testing';
 import { afterAll, beforeAll } from 'vitest';
 
-import { buildApp } from '../src/app.js';
+import { buildApp, type BuildAppOptions } from '../src/app.js';
 import {
   LOGIN_SERVICES,
   OAuthError,
@@ -71,17 +71,22 @@ export interface TestContext {
 export function useTestApp(
   kp: AppDeps['kp'] = fakeKp(),
   configure?: (app: ReturnType<typeof buildApp>) => void,
+  extra: { deps?: Partial<AppDeps>; options?: BuildAppOptions } = {},
 ): TestContext {
   const ctx = { kp, oauth: fakeOAuth() } as TestContext;
   beforeAll(async () => {
     ctx.t = await createTestDatabase();
-    ctx.app = buildApp({
-      db: ctx.t.db,
-      kp: ctx.kp,
-      oauth: ctx.oauth,
-      config: { env: 'dev', telegramBotUsername: 'FlickTipsBot', siteUrl: TEST_SITE_URL, authSecret: 'test-secret' },
-      pingDb: async () => true,
-    });
+    ctx.app = buildApp(
+      {
+        db: ctx.t.db,
+        kp: ctx.kp,
+        oauth: ctx.oauth,
+        config: { env: 'dev', telegramBotUsername: 'FlickTipsBot', siteUrl: TEST_SITE_URL, authSecret: 'test-secret' },
+        pingDb: async () => true,
+        ...extra.deps,
+      },
+      extra.options,
+    );
     configure?.(ctx.app);
     await ctx.app.ready();
   });

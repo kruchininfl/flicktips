@@ -5,6 +5,7 @@ import { buildApp } from './app.js';
 import { VkIdProvider } from './auth/providers/vk-id.js';
 import { YandexProvider } from './auth/providers/yandex.js';
 import { loadConfig } from './config.js';
+import { WebPushSender } from './push/sender.js';
 
 const config = loadConfig();
 const { db, pool } = createDb(config.db);
@@ -18,6 +19,7 @@ const app = buildApp(
       yandex: new YandexProvider(config.oauth.yandex),
     },
     config,
+    pushSender: config.webPush ? new WebPushSender(config.webPush) : undefined,
     pingDb: async () => {
       await pool.query('SELECT 1');
       return true;

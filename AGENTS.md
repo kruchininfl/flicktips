@@ -32,7 +32,8 @@ in PRs to `master_v2`; `master` keeps running production until the switch.
 - `apps/api` — Fastify 5 API replacing PHP `api/` (`src/app.ts` builds the app with injected
   deps, `src/main.ts` wires the DB; `pnpm --filter @flicktips/api dev`, port 3002).
 - `apps/web` — Next.js 16 (App Router, SSR) replacing `web/` (port 3001, `output: standalone`); porting
-  conventions and the primitives map in `apps/web/PORTING.md`.
+  conventions and the primitives map in `apps/web/PORTING.md`. It is also the PWA replacing the Cordova app
+  (manifest, Serwist service worker, Web Push: PORTING.md "PWA", `apps/api/docs/push.md`).
 - `apps/tg-bot` — `@flicktips/tg-bot`, the Telegram bot (entry `src/app.ts`; `pnpm --filter @flicktips/tg-bot
   build && pnpm --filter @flicktips/tg-bot start`, needs `TELEGRAM_BOT_TOKEN` and DB vars, `APP_ENV=dev`
   selects `flicktips_test`). It reads and writes MySQL directly with its raw SQL over the pool from

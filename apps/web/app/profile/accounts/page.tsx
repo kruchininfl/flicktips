@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { serverApi } from '@/api/server';
 import { AccountsPanel } from '@/components/profile/AccountsPanel';
 import { ProfileLayout } from '@/components/profile/ProfileLayout';
+import { PushToggle } from '@/components/pwa/PushToggle';
 import { requireViewer } from '@/viewer/server';
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -23,6 +24,7 @@ export default async function ProfileAccountsPage({ searchParams }: PageProps<'/
         linkProof={first(query.link_proof)}
         linkError={first(query.link_error)}
       />
+      <PushToggle />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 // Component styles first, then the global sheets: the legacy bundle had the partitions' CSS before App.scss and
 // the pages' CSS after it, and some equal-specificity rules rely on that order.
+import { PwaProvider } from '@/components/pwa/PwaProvider';
 import { AppShell } from '@/components/shell/AppShell';
 import { UiProvider } from '@/components/shell/UiProvider';
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/config';
@@ -30,7 +31,8 @@ export const metadata: Metadata = {
     apple: { url: '/public/apple-touch-icon.png', sizes: '180x180' },
     other: [{ rel: 'mask-icon', url: '/public/safari-pinned-tab.svg', color: '#5bbad5' }],
   },
-  manifest: '/public/site.webmanifest',
+  // app/manifest.ts adds <link rel="manifest" href="/manifest.webmanifest"> itself
+  appleWebApp: { capable: true, title: 'FlickTips', statusBarStyle: 'black' },
   other: { 'msapplication-TileColor': '#333b41' },
 };
 
@@ -59,11 +61,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body>
         <div className="react-view" id="react-view">
-          <ViewerProvider initialViewer={viewer}>
-            <UiProvider>
-              <AppShell>{children}</AppShell>
-            </UiProvider>
-          </ViewerProvider>
+          <PwaProvider>
+            <ViewerProvider initialViewer={viewer}>
+              <UiProvider>
+                <AppShell>{children}</AppShell>
+              </UiProvider>
+            </ViewerProvider>
+          </PwaProvider>
         </div>
       </body>
     </html>

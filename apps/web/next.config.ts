@@ -1,3 +1,4 @@
+import { withSerwist } from '@serwist/turbopack';
 import type { NextConfig } from 'next';
 
 // The Fastify API (apps/api). In production nginx sends /api, /auth and /poster to their upstreams before
@@ -15,6 +16,11 @@ const nextConfig: NextConfig = {
     // `@use 'base' as *;` from any file (src/styles/_base.scss)
     loadPaths: [new URL('./src/styles', import.meta.url).pathname],
   },
+  // The service worker is a prerendered route, which Next.js would send with `s-maxage=31536000`: a proxy cache
+  // could then keep an old worker for a year. Browsers check it for updates on every navigation anyway.
+  async headers() {
+    return [{ source: '/serwist/:path*', headers: [{ key: 'Cache-Control', value: 'no-cache' }] }];
+  },
   async rewrites() {
     return [
       { source: '/api/:path*', destination: `${apiUrl}/api/:path*` },
@@ -28,4 +34,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withSerwist keeps esbuild (bundles the service worker at build time, app/serwist) out of the server bundle
+export default withSerwist(nextConfig);

@@ -32,6 +32,7 @@ const REDESIGNED = [
   '/profile/friends',
   '/telegram',
   '/about',
+  '/person/*',
 ];
 
 // Full-screen pages without the sidebar and the header (Figma «Вход», «Инвайт»)

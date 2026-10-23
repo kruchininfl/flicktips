@@ -5,9 +5,11 @@ import type { PersonMovie } from '@flicktips/shared';
 
 import { orNotFound, serverApi } from '@/api/server';
 import { JsonLd } from '@/components/JsonLd';
-import { MoviePreview } from '@/components/movie/MoviePreview';
+import { UserAvatar } from '@/components/brand/UserAvatar';
+import { PersonFilmography } from '@/components/person/PersonFilmography';
 import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/config';
 import { pageMetadata } from '@/lib/metadata';
+import { plural } from '@/lib/plural';
 import { withShareTags } from '@/lib/share-metadata';
 
 // shared by generateMetadata and the page: one API call per request
@@ -26,14 +28,14 @@ async function load(id: string) {
 
   // one list per role group, in the order of first appearance for the career line
   const career: string[] = [];
-  const groups = new Map<number, { type: string | null; movies: PersonMovie[] }>();
+  const groups = new Map<number, { title: string | null; movies: PersonMovie[] }>();
   for (const movie of movies) {
     const group = groups.get(movie.group_id);
     if (group) {
       group.movies.push(movie);
     } else {
       if (movie.group_title) career.push(movie.group_title);
-      groups.set(movie.group_id, { type: movie.group_title, movies: [movie] });
+      groups.set(movie.group_id, { title: movie.group_title, movies: [movie] });
     }
   }
   // the legacy sort() compared the stringified [id, group] pairs
@@ -59,12 +61,35 @@ export async function generateMetadata({ params }: PageProps<'/person/[id]'>): P
   );
 }
 
+// what the viewer's friends thought of the person's movies: how many movies they voted on, the share of likes
+function friendsStats(groups: { movies: PersonMovie[] }[]) {
+  const seen = new Set<number>();
+  let watched = 0;
+  let votes = 0;
+  let liked = 0;
+  for (const group of groups) {
+    for (const movie of group.movies) {
+      if (seen.has(movie.id)) continue;
+      seen.add(movie.id);
+      if (movie.votes?.length) watched++;
+      for (const vote of movie.votes ?? []) {
+        votes++;
+        if (vote.value >= 2) liked++;
+      }
+    }
+  }
+  return { movies: seen.size, watched, liked: votes ? Math.round((100 * liked) / votes) : null };
+}
+
+// /person/:id — Figma «Персона»: the name, the career, the counts and the filmography by role
 export default async function PersonPage({ params }: PageProps<'/person/[id]'>) {
   const { id } = await params;
   const person = await load(id);
+  const stats = friendsStats(person.groups);
+  const title = person.name || person.originalName || person.metaName || '';
 
   return (
-    <div className="person">
+    <div className="flex flex-col gap-6 sm:gap-8">
       <JsonLd
         data={{
           '@type': 'Person',
@@ -76,46 +101,35 @@ export default async function PersonPage({ params }: PageProps<'/person/[id]'>) 
         }}
       />
 
-      <div className="person__head">
-        <div className="person__head-photo-wrap">
-          <div className="person__head-photo">
-            {person.photo ? (
-              <div style={{ backgroundImage: `url(${person.photo})` }} className="person__head-photo-inn">
-                {/* eslint-disable-next-line @next/next/no-img-element -- the legacy markup: an invisible img for SEO */}
-                <img src={person.photo} alt={person.metaName ?? ''} />
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="person__head-data">
-          {person.name ? <h1 className="person__title">{person.name}</h1> : null}
-
-          {person.name ? (
-            <h2 className="person__subtitle">{person.originalName}</h2>
-          ) : (
-            <h1 className="person__title">{person.originalName}</h1>
-          )}
-
-          {person.career.length ? (
-            <dl className="person__dl">
-              <dt>Карьера</dt>
-              <dd>{person.career.join(', ')}</dd>
-            </dl>
+      <section className="flex flex-col items-start gap-4 rounded-card border border-ring bg-card p-5 shadow-card sm:flex-row sm:items-center sm:gap-6 sm:p-6">
+        <UserAvatar src={person.photo} name={title} size={96} className="max-sm:size-20" />
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <h1 className="type-h1-mobile break-words sm:type-h1">{title}</h1>
+          {(person.name && person.originalName) || person.career.length ? (
+            <p className="text-muted-foreground">
+              {[person.name ? person.originalName : null, person.career.join(', ').toLowerCase()]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
           ) : null}
-        </div>
-      </div>
-
-      {person.groups.map((group, key) => (
-        <div key={key} className="person__group">
-          <div className="person__group-title">{group.type}</div>
-          <div className="person__group-list movie-prev-list">
-            {group.movies.map((movie, index) => (
-              <MoviePreview key={index} movie={movie} />
-            ))}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <Stat value={stats.movies} label={plural(stats.movies, ['фильм', 'фильма', 'фильмов'])} />
+            {stats.watched > 0 && <Stat value={stats.watched} label="смотрели друзья" />}
+            {stats.liked !== null && <Stat value={`${stats.liked}%`} label="понравилось" />}
           </div>
         </div>
-      ))}
+      </section>
+
+      <PersonFilmography groups={person.groups} />
     </div>
+  );
+}
+
+function Stat({ value, label }: { value: number | string; label: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      <span className="font-semibold text-foreground">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+    </span>
   );
 }

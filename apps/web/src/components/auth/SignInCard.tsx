@@ -32,7 +32,7 @@ export function SignInCard({ next, top, title, text, extra, error, actions, clas
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-5 rounded-card border border-ring bg-card/85 p-6 text-center shadow-[0_2px_6px_#0000000f,0_16px_40px_#1c1a142e] backdrop-blur-md sm:p-8',
+        'flex flex-col items-center gap-5 rounded-card border border-ring bg-card/85 p-6 text-center shadow-[0_2px_6px_#0000000f,0_16px_40px_#1c1a142e] backdrop-blur-xl sm:p-8',
         className,
       )}
     >
